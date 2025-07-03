@@ -11,25 +11,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { EmailComponent } from "@/components/email-component"; // Import EmailComponent
+import { EmailComponent } from "@/components/email-component";
+import { ColumnComponentManager } from "@/components/email-components/column-component-manager";
 
 export function SingleColumn({ data, onUpdate }) {
   const { width, backgroundColor, padding, components = [] } = data;
-  const [dragOver, setDragOver] = useState(false);
 
-  const handleDragOver = (e) => {
+  const handleColumnDrop = (e) => {
     e.preventDefault();
-    setDragOver(true);
-  };
+    e.stopPropagation();
 
-  const handleDragLeave = (e) => {
-    e.preventDefault();
-    setDragOver(false);
-  };
+    if (!onUpdate) {
+      console.error("onUpdate function is not available");
+      return;
+    }
 
-  const handleDrop = (e) => {
-    e.preventDefault();
-    setDragOver(false);
     try {
       const componentData = JSON.parse(
         e.dataTransfer.getData("application/json")
@@ -45,6 +41,24 @@ export function SingleColumn({ data, onUpdate }) {
     }
   };
 
+  const handleComponentUpdate = (index, updatedData) => {
+    const newComponents = [...components];
+    newComponents[index] = { ...newComponents[index], data: updatedData };
+    onUpdate({ ...data, components: newComponents });
+  };
+
+  const handleComponentDelete = (index) => {
+    const newComponents = components.filter((_, i) => i !== index);
+    onUpdate({ ...data, components: newComponents });
+  };
+
+  const handleComponentMove = (fromIndex, toIndex) => {
+    const newComponents = [...components];
+    const [movedComponent] = newComponents.splice(fromIndex, 1);
+    newComponents.splice(toIndex, 0, movedComponent);
+    onUpdate({ ...data, components: newComponents });
+  };
+
   return (
     <div
       style={{
@@ -52,31 +66,31 @@ export function SingleColumn({ data, onUpdate }) {
         backgroundColor,
         padding,
       }}
-      className={`border border-border rounded-lg ${
-        dragOver ? "border-primary border-dashed" : ""
-      }`}
-      onDragOver={handleDragOver}
-      onDragLeave={handleDragLeave}
-      onDrop={handleDrop}
+      className="border border-border rounded-lg flex flex-col transition-colors hover:border-primary/50"
+      data-column-id="single"
+      onDrop={handleColumnDrop}
+      onDragOver={(e) => e.preventDefault()}
     >
       {components.length === 0 ? (
-        <div className="p-4 text-center text-muted-foreground border-2 border-dashed border-border rounded">
+        <div className="flex flex-col items-center justify-center py-8 text-center text-muted-foreground border-2 border-dashed border-border rounded">
           <div className="text-2xl mb-2">📄</div>
           <div>Single Column Layout</div>
           <div className="text-sm">Drop content here</div>
         </div>
       ) : (
-        <div className="p-4">
+        <div className="space-y-3">
           {components.map((component, index) => (
-            <EmailComponent
+            <ColumnComponentManager
               key={`${component.type}-${index}`}
-              type={component.type}
-              data={component.data}
-              onUpdate={(updatedData) => {
-                const newComponents = [...components];
-                newComponents[index] = { ...newComponents[index], data: updatedData };
-                onUpdate({ ...data, components: newComponents });
-              }}
+              component={component}
+              index={index}
+              totalComponents={components.length}
+              onUpdate={(updatedData) =>
+                handleComponentUpdate(index, updatedData)
+              }
+              onDelete={(index) => handleComponentDelete(index)}
+              onMoveUp={(index) => handleComponentMove(index, index - 1)}
+              onMoveDown={(index) => handleComponentMove(index, index + 1)}
             />
           ))}
         </div>

@@ -12,6 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { EmailComponent } from "@/components/email-component";
+import { ColumnComponentManager } from "@/components/email-components/column-component-manager";
 
 export function TwoColumns({ data, onUpdate }) {
   const {
@@ -24,21 +25,15 @@ export function TwoColumns({ data, onUpdate }) {
     rightComponents = [],
   } = data;
 
-  const [dragOver, setDragOver] = useState(null); // null, 'left', or 'right'
-
-  const handleDragOver = (e, column) => {
+  const handleColumnDrop = (e, columnId) => {
     e.preventDefault();
-    setDragOver(column);
-  };
+    e.stopPropagation();
 
-  const handleDragLeave = (e) => {
-    e.preventDefault();
-    setDragOver(null);
-  };
+    if (!onUpdate) {
+      console.error("onUpdate function is not available");
+      return;
+    }
 
-  const handleDrop = (e, column) => {
-    e.preventDefault();
-    setDragOver(null);
     try {
       const componentData = JSON.parse(
         e.dataTransfer.getData("application/json")
@@ -48,15 +43,51 @@ export function TwoColumns({ data, onUpdate }) {
         data: componentData.defaultData,
       };
 
-      if (column === "left") {
+      if (columnId === "left") {
         const newComponents = [...leftComponents, newComponent];
         onUpdate({ ...data, leftComponents: newComponents });
-      } else {
+      } else if (columnId === "right") {
         const newComponents = [...rightComponents, newComponent];
         onUpdate({ ...data, rightComponents: newComponents });
       }
     } catch (error) {
       console.error("Error parsing dropped component:", error);
+    }
+  };
+
+  const handleComponentUpdate = (columnId, index, updatedData) => {
+    if (columnId === "left") {
+      const newComponents = [...leftComponents];
+      newComponents[index] = { ...newComponents[index], data: updatedData };
+      onUpdate({ ...data, leftComponents: newComponents });
+    } else if (columnId === "right") {
+      const newComponents = [...rightComponents];
+      newComponents[index] = { ...newComponents[index], data: updatedData };
+      onUpdate({ ...data, rightComponents: newComponents });
+    }
+  };
+
+  const handleComponentDelete = (columnId, index) => {
+    if (columnId === "left") {
+      const newComponents = leftComponents.filter((_, i) => i !== index);
+      onUpdate({ ...data, leftComponents: newComponents });
+    } else if (columnId === "right") {
+      const newComponents = rightComponents.filter((_, i) => i !== index);
+      onUpdate({ ...data, rightComponents: newComponents });
+    }
+  };
+
+  const handleComponentMove = (columnId, fromIndex, toIndex) => {
+    if (columnId === "left") {
+      const newComponents = [...leftComponents];
+      const [movedComponent] = newComponents.splice(fromIndex, 1);
+      newComponents.splice(toIndex, 0, movedComponent);
+      onUpdate({ ...data, leftComponents: newComponents });
+    } else if (columnId === "right") {
+      const newComponents = [...rightComponents];
+      const [movedComponent] = newComponents.splice(fromIndex, 1);
+      newComponents.splice(toIndex, 0, movedComponent);
+      onUpdate({ ...data, rightComponents: newComponents });
     }
   };
 
@@ -71,58 +102,74 @@ export function TwoColumns({ data, onUpdate }) {
       <div className="flex" style={{ gap: gap || "20px" }}>
         <div
           style={{ width: leftWidth }}
-          className={`border-2 border-dashed rounded p-4 text-center text-muted-foreground ${
-            dragOver === "left" ? "border-primary" : "border-border"
-          }`}
+          className="border-2 border-dashed border-border rounded p-4 text-center text-muted-foreground flex flex-col transition-colors hover:border-primary/50"
           data-column-id="left"
+          onDrop={(e) => handleColumnDrop(e, "left")}
+          onDragOver={(e) => e.preventDefault()}
         >
           {leftComponents.length === 0 ? (
-            <>
+            <div className="flex flex-col items-center justify-center py-8">
               <div className="text-xl mb-2">📄</div>
               <div>Left Column</div>
               <div className="text-sm">Drop content here</div>
-            </>
+            </div>
           ) : (
-            leftComponents.map((component, index) => (
-              <EmailComponent
-                key={`${component.type}-${index}`}
-                type={component.type}
-                data={component.data}
-                onUpdate={(updatedData) => {
-                  const newComponents = [...leftComponents];
-                  newComponents[index] = { ...newComponents[index], data: updatedData };
-                  onUpdate({ ...data, leftComponents: newComponents });
-                }}
-              />
-            ))
+            <div className="space-y-3">
+              {leftComponents.map((component, index) => (
+                <ColumnComponentManager
+                  key={`${component.type}-${index}`}
+                  component={component}
+                  index={index}
+                  totalComponents={leftComponents.length}
+                  onUpdate={(updatedData) =>
+                    handleComponentUpdate("left", index, updatedData)
+                  }
+                  onDelete={(index) => handleComponentDelete("left", index)}
+                  onMoveUp={(index) =>
+                    handleComponentMove("left", index, index - 1)
+                  }
+                  onMoveDown={(index) =>
+                    handleComponentMove("left", index, index + 1)
+                  }
+                />
+              ))}
+            </div>
           )}
         </div>
         <div
           style={{ width: rightWidth }}
-          className={`border-2 border-dashed rounded p-4 text-center text-muted-foreground ${
-            dragOver === "right" ? "border-primary" : "border-border"
-          }`}
+          className="border-2 border-dashed border-border rounded p-4 text-center text-muted-foreground flex flex-col transition-colors hover:border-primary/50"
           data-column-id="right"
+          onDrop={(e) => handleColumnDrop(e, "right")}
+          onDragOver={(e) => e.preventDefault()}
         >
           {rightComponents.length === 0 ? (
-            <>
+            <div className="flex flex-col items-center justify-center py-8">
               <div className="text-xl mb-2">📄</div>
               <div>Right Column</div>
               <div className="text-sm">Drop content here</div>
-            </>
+            </div>
           ) : (
-            rightComponents.map((component, index) => (
-              <EmailComponent
-                key={`${component.type}-${index}`}
-                type={component.type}
-                data={component.data}
-                onUpdate={(updatedData) => {
-                  const newComponents = [...rightComponents];
-                  newComponents[index] = { ...newComponents[index], data: updatedData };
-                  onUpdate({ ...data, rightComponents: newComponents });
-                }}
-              />
-            ))
+            <div className="space-y-3">
+              {rightComponents.map((component, index) => (
+                <ColumnComponentManager
+                  key={`${component.type}-${index}`}
+                  component={component}
+                  index={index}
+                  totalComponents={rightComponents.length}
+                  onUpdate={(updatedData) =>
+                    handleComponentUpdate("right", index, updatedData)
+                  }
+                  onDelete={(index) => handleComponentDelete("right", index)}
+                  onMoveUp={(index) =>
+                    handleComponentMove("right", index, index - 1)
+                  }
+                  onMoveDown={(index) =>
+                    handleComponentMove("right", index, index + 1)
+                  }
+                />
+              ))}
+            </div>
           )}
         </div>
       </div>

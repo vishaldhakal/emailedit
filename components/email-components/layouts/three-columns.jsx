@@ -12,6 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { EmailComponent } from "@/components/email-component";
+import { ColumnComponentManager } from "@/components/email-components/column-component-manager";
 
 export function ThreeColumns({ data, onUpdate }) {
   const {
@@ -24,21 +25,15 @@ export function ThreeColumns({ data, onUpdate }) {
     column3Components = [],
   } = data;
 
-  const [dragOver, setDragOver] = useState(null);
-
-  const handleDragOver = (e, column) => {
+  const handleColumnDrop = (e, columnId) => {
     e.preventDefault();
-    setDragOver(column);
-  };
+    e.stopPropagation();
 
-  const handleDragLeave = (e) => {
-    e.preventDefault();
-    setDragOver(null);
-  };
+    if (!onUpdate) {
+      console.error("onUpdate function is not available");
+      return;
+    }
 
-  const handleDrop = (e, column) => {
-    e.preventDefault();
-    setDragOver(null);
     try {
       const componentData = JSON.parse(
         e.dataTransfer.getData("application/json")
@@ -48,18 +43,66 @@ export function ThreeColumns({ data, onUpdate }) {
         data: componentData.defaultData,
       };
 
-      if (column === 1) {
+      if (columnId === "1") {
         const newComponents = [...column1Components, newComponent];
         onUpdate({ ...data, column1Components: newComponents });
-      } else if (column === 2) {
+      } else if (columnId === "2") {
         const newComponents = [...column2Components, newComponent];
         onUpdate({ ...data, column2Components: newComponents });
-      } else {
+      } else if (columnId === "3") {
         const newComponents = [...column3Components, newComponent];
         onUpdate({ ...data, column3Components: newComponents });
       }
     } catch (error) {
       console.error("Error parsing dropped component:", error);
+    }
+  };
+
+  const handleComponentUpdate = (columnId, index, updatedData) => {
+    if (columnId === "1") {
+      const newComponents = [...column1Components];
+      newComponents[index] = { ...newComponents[index], data: updatedData };
+      onUpdate({ ...data, column1Components: newComponents });
+    } else if (columnId === "2") {
+      const newComponents = [...column2Components];
+      newComponents[index] = { ...newComponents[index], data: updatedData };
+      onUpdate({ ...data, column2Components: newComponents });
+    } else if (columnId === "3") {
+      const newComponents = [...column3Components];
+      newComponents[index] = { ...newComponents[index], data: updatedData };
+      onUpdate({ ...data, column3Components: newComponents });
+    }
+  };
+
+  const handleComponentDelete = (columnId, index) => {
+    if (columnId === "1") {
+      const newComponents = column1Components.filter((_, i) => i !== index);
+      onUpdate({ ...data, column1Components: newComponents });
+    } else if (columnId === "2") {
+      const newComponents = column2Components.filter((_, i) => i !== index);
+      onUpdate({ ...data, column2Components: newComponents });
+    } else if (columnId === "3") {
+      const newComponents = column3Components.filter((_, i) => i !== index);
+      onUpdate({ ...data, column3Components: newComponents });
+    }
+  };
+
+  const handleComponentMove = (columnId, fromIndex, toIndex) => {
+    if (columnId === "1") {
+      const newComponents = [...column1Components];
+      const [movedComponent] = newComponents.splice(fromIndex, 1);
+      newComponents.splice(toIndex, 0, movedComponent);
+      onUpdate({ ...data, column1Components: newComponents });
+    } else if (columnId === "2") {
+      const newComponents = [...column2Components];
+      const [movedComponent] = newComponents.splice(fromIndex, 1);
+      newComponents.splice(toIndex, 0, movedComponent);
+      onUpdate({ ...data, column2Components: newComponents });
+    } else if (columnId === "3") {
+      const newComponents = [...column3Components];
+      const [movedComponent] = newComponents.splice(fromIndex, 1);
+      newComponents.splice(toIndex, 0, movedComponent);
+      onUpdate({ ...data, column3Components: newComponents });
     }
   };
 
@@ -74,95 +117,110 @@ export function ThreeColumns({ data, onUpdate }) {
       <div className="flex" style={{ gap: gap || "20px" }}>
         <div
           style={{ width: columnWidth }}
-          className={`border-2 border-dashed rounded p-4 text-center text-muted-foreground ${
-            dragOver === 1 ? "border-primary" : "border-border"
-          }`}
+          className="border-2 border-dashed border-border rounded p-4 text-center text-muted-foreground flex flex-col transition-colors hover:border-primary/50"
           data-column-id="1"
+          onDrop={(e) => handleColumnDrop(e, "1")}
+          onDragOver={(e) => e.preventDefault()}
         >
           {column1Components.length === 0 ? (
-            <>
+            <div className="flex flex-col items-center justify-center py-8">
               <div className="text-xl mb-2">📄</div>
               <div>Column 1</div>
               <div className="text-sm">Drop content here</div>
-            </>
+            </div>
           ) : (
-            column1Components.map((component, index) => (
-              <EmailComponent
-                key={`${component.type}-${index}`}
-                type={component.type}
-                data={component.data}
-                onUpdate={(updatedData) => {
-                  const newComponents = [...column1Components];
-                  newComponents[index] = {
-                    ...newComponents[index],
-                    data: updatedData,
-                  };
-                  onUpdate({ ...data, column1Components: newComponents });
-                }}
-              />
-            ))
+            <div className="space-y-3">
+              {column1Components.map((component, index) => (
+                <ColumnComponentManager
+                  key={`${component.type}-${index}`}
+                  component={component}
+                  index={index}
+                  totalComponents={column1Components.length}
+                  onUpdate={(updatedData) =>
+                    handleComponentUpdate("1", index, updatedData)
+                  }
+                  onDelete={(index) => handleComponentDelete("1", index)}
+                  onMoveUp={(index) =>
+                    handleComponentMove("1", index, index - 1)
+                  }
+                  onMoveDown={(index) =>
+                    handleComponentMove("1", index, index + 1)
+                  }
+                />
+              ))}
+            </div>
           )}
         </div>
         <div
           style={{ width: columnWidth }}
-          className={`border-2 border-dashed rounded p-4 text-center text-muted-foreground ${
-            dragOver === 2 ? "border-primary" : "border-border"
-          }`}
+          className="border-2 border-dashed border-border rounded p-4 text-center text-muted-foreground flex flex-col transition-colors hover:border-primary/50"
           data-column-id="2"
+          onDrop={(e) => handleColumnDrop(e, "2")}
+          onDragOver={(e) => e.preventDefault()}
         >
           {column2Components.length === 0 ? (
-            <>
+            <div className="flex flex-col items-center justify-center py-8">
               <div className="text-xl mb-2">📄</div>
               <div>Column 2</div>
               <div className="text-sm">Drop content here</div>
-            </>
+            </div>
           ) : (
-            column2Components.map((component, index) => (
-              <EmailComponent
-                key={`${component.type}-${index}`}
-                type={component.type}
-                data={component.data}
-                onUpdate={(updatedData) => {
-                  const newComponents = [...column2Components];
-                  newComponents[index] = {
-                    ...newComponents[index],
-                    data: updatedData,
-                  };
-                  onUpdate({ ...data, column2Components: newComponents });
-                }}
-              />
-            ))
+            <div className="space-y-3">
+              {column2Components.map((component, index) => (
+                <ColumnComponentManager
+                  key={`${component.type}-${index}`}
+                  component={component}
+                  index={index}
+                  totalComponents={column2Components.length}
+                  onUpdate={(updatedData) =>
+                    handleComponentUpdate("2", index, updatedData)
+                  }
+                  onDelete={(index) => handleComponentDelete("2", index)}
+                  onMoveUp={(index) =>
+                    handleComponentMove("2", index, index - 1)
+                  }
+                  onMoveDown={(index) =>
+                    handleComponentMove("2", index, index + 1)
+                  }
+                />
+              ))}
+            </div>
           )}
         </div>
         <div
           style={{ width: columnWidth }}
-          className={`border-2 border-dashed rounded p-4 text-center text-muted-foreground ${
-            dragOver === 3 ? "border-primary" : "border-border"
-          }`}
+          className="border-2 border-dashed border-border rounded p-4 text-center text-muted-foreground flex flex-col transition-colors hover:border-primary/50"
           data-column-id="3"
+          onDrop={(e) => handleColumnDrop(e, "3")}
+          onDragOver={(e) => e.preventDefault()}
         >
           {column3Components.length === 0 ? (
-            <>
+            <div className="flex flex-col items-center justify-center py-8">
               <div className="text-xl mb-2">📄</div>
               <div>Column 3</div>
               <div className="text-sm">Drop content here</div>
-            </>
+            </div>
           ) : (
-            column3Components.map((component, index) => (
-              <EmailComponent
-                key={`${component.type}-${index}`}
-                type={component.type}
-                data={component.data}
-                onUpdate={(updatedData) => {
-                  const newComponents = [...column3Components];
-                  newComponents[index] = {
-                    ...newComponents[index],
-                    data: updatedData,
-                  };
-                  onUpdate({ ...data, column3Components: newComponents });
-                }}
-              />
-            ))
+            <div className="space-y-3">
+              {column3Components.map((component, index) => (
+                <ColumnComponentManager
+                  key={`${component.type}-${index}`}
+                  component={component}
+                  index={index}
+                  totalComponents={column3Components.length}
+                  onUpdate={(updatedData) =>
+                    handleComponentUpdate("3", index, updatedData)
+                  }
+                  onDelete={(index) => handleComponentDelete("3", index)}
+                  onMoveUp={(index) =>
+                    handleComponentMove("3", index, index - 1)
+                  }
+                  onMoveDown={(index) =>
+                    handleComponentMove("3", index, index + 1)
+                  }
+                />
+              ))}
+            </div>
           )}
         </div>
       </div>

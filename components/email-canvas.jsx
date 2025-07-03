@@ -19,6 +19,8 @@ export function EmailCanvas({
   const [editingComponent, setEditingComponent] = useState(null);
   const [lastSaved, setLastSaved] = useState(Date.now());
   const [dragOverIndex, setDragOverIndex] = useState(null);
+  const [dragOverColumn, setDragOverColumn] = useState(null);
+  const [formattedTime, setFormattedTime] = useState("");
 
   // Auto-save function
   const autoSave = useCallback(() => {
@@ -48,15 +50,66 @@ export function EmailCanvas({
     }
   }, []); // Empty dependency array - only run once
 
+  // Format timestamp for display (client-side only)
+  useEffect(() => {
+    setFormattedTime(new Date(lastSaved).toLocaleTimeString());
+  }, [lastSaved]);
+
+  // Add visual feedback for column drag over
+  useEffect(() => {
+    const columnElements = document.querySelectorAll("[data-column-id]");
+
+    columnElements.forEach((element) => {
+      if (dragOverColumn && element.dataset.columnId === dragOverColumn) {
+        element.classList.add(
+          "border-primary",
+          "bg-primary/10",
+          "scale-[1.02]"
+        );
+        element.style.transform = "scale(1.02)";
+        element.style.transition = "all 0.2s ease";
+      } else {
+        element.classList.remove(
+          "border-primary",
+          "bg-primary/10",
+          "scale-[1.02]"
+        );
+        element.style.transform = "scale(1)";
+      }
+    });
+  }, [dragOverColumn]);
+
   const handleDragOver = (e) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = "copy";
+
+    // Check if we're dragging over a column area
+    const columnElement = e.target.closest("[data-column-id]");
+    if (columnElement) {
+      const columnId = columnElement.dataset.columnId;
+      setDragOverColumn(columnId);
+    } else {
+      setDragOverColumn(null);
+    }
   };
 
   const handleDrop = (e) => {
     e.preventDefault();
-    const target = findTarget(e.target);
 
+    // First check if we're dropping into a column area
+    const columnElement = e.target.closest("[data-column-id]");
+    if (columnElement) {
+      const columnId = columnElement.dataset.columnId;
+      const componentIndex = findComponentIndexFromElement(columnElement);
+      if (componentIndex !== null) {
+        handleComponentDrop(e, componentIndex, columnId);
+        setDragOverColumn(null);
+        return;
+      }
+    }
+
+    // If not dropping into a column, check for regular component drops
+    const target = findTarget(e.target);
     if (target) {
       handleComponentDrop(e, target.index, target.columnId);
     } else {
@@ -69,6 +122,19 @@ export function EmailCanvas({
         console.error("Error parsing dropped component:", error);
       }
     }
+    setDragOverColumn(null);
+  };
+
+  const findComponentIndexFromElement = (element) => {
+    // Find the closest component container
+    let currentElement = element;
+    while (currentElement) {
+      if (currentElement.dataset.componentIndex) {
+        return parseInt(currentElement.dataset.componentIndex, 10);
+      }
+      currentElement = currentElement.parentElement;
+    }
+    return null;
   };
 
   const handleComponentDrop = (e, targetIndex, columnId) => {
@@ -84,20 +150,37 @@ export function EmailCanvas({
       };
 
       if (columnId) {
+        // Dropping into a column
         const newComponents = [...components];
         const layoutComponent = newComponents[targetIndex];
 
-        if (layoutComponent) {
+        if (layoutComponent && layoutComponent.type.includes("columns")) {
           const newLayoutData = { ...layoutComponent.data };
           const targetArray = `${columnId}Components`;
-          newLayoutData[targetArray] = [
-            ...(newLayoutData[targetArray] || []),
+
+          if (newLayoutData[targetArray]) {
+            newLayoutData[targetArray] = [
+              ...newLayoutData[targetArray],
+              newComponent,
+            ];
+            layoutComponent.data = newLayoutData;
+            onUpdateComponents(newComponents);
+          }
+        } else if (
+          layoutComponent &&
+          layoutComponent.type === "single-column"
+        ) {
+          // Handle single column layout
+          const newLayoutData = { ...layoutComponent.data };
+          newLayoutData.components = [
+            ...(newLayoutData.components || []),
             newComponent,
           ];
           layoutComponent.data = newLayoutData;
           onUpdateComponents(newComponents);
         }
       } else {
+        // Dropping between components
         const newComponents = [...components];
         newComponents.splice(targetIndex, 0, newComponent);
         onUpdateComponents(newComponents);
@@ -106,6 +189,7 @@ export function EmailCanvas({
       console.error("Error parsing dropped component:", error);
     }
     setDragOverIndex(null);
+    setDragOverColumn(null);
   };
 
   const findTarget = (element) => {
@@ -128,6 +212,7 @@ export function EmailCanvas({
 
   const handleDragLeave = () => {
     setDragOverIndex(null);
+    setDragOverColumn(null);
   };
 
   const handleComponentUpdate = (index, updatedData) => {
@@ -177,11 +262,14 @@ export function EmailCanvas({
       className="flex-1 bg-background border-l border-border overflow-y-auto"
       onDragOver={handleDragOver}
       onDrop={handleDrop}
+      onDragLeave={handleDragLeave}
     >
       <div className="p-6 max-w-4xl mx-auto">
-        <div className="mb-4 text-sm text-muted-foreground">
-          Last saved: {new Date(lastSaved).toLocaleTimeString()}
-        </div>
+        {formattedTime && (
+          <div className="mb-4 text-sm text-muted-foreground">
+            Last saved: {formattedTime}
+          </div>
+        )}
 
         {components.map((component, index) => (
           <div
@@ -194,7 +282,9 @@ export function EmailCanvas({
             }`}
             onDragOver={(e) => handleDragOverComponent(e, index)}
             onDragLeave={handleDragLeave}
-            onDrop={(e) => handleComponentDrop(e, index, e.target.dataset.columnId)}
+            onDrop={(e) =>
+              handleComponentDrop(e, index, e.target.dataset.columnId)
+            }
           >
             <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
               <div className="flex gap-1">
@@ -243,6 +333,9 @@ export function EmailCanvas({
               type={component.type}
               data={component.data}
               isEditing={false}
+              onUpdate={(updatedData) =>
+                handleComponentUpdate(index, updatedData)
+              }
             />
 
             {/* Drag handles for reordering */}

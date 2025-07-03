@@ -52,5 +52,5 @@ export function EmailComponent({ type, data, isEditing, onUpdate, onCancel }) {
     );
   }
 
-  return <ComponentRenderer data={data} />;
+  return <ComponentRenderer data={data} onUpdate={onUpdate} />;
 }

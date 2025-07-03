@@ -1,11 +1,20 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { Button } from "./ui/button";
 import { Download, Save } from "lucide-react";
 import AIEmailGenerator from "./ai-email-generator";
 import { generateHtml } from "@/lib/export-html";
 
 export function Header({ components, onSave, lastSaved, onGenerateEmail }) {
+  const [formattedTime, setFormattedTime] = useState("");
+
+  useEffect(() => {
+    if (lastSaved) {
+      setFormattedTime(new Date(lastSaved).toLocaleTimeString());
+    }
+  }, [lastSaved]);
+
   const handleSave = () => {
     onSave();
   };
@@ -32,9 +41,9 @@ export function Header({ components, onSave, lastSaved, onGenerateEmail }) {
         </div>
 
         <div className="flex items-center gap-3">
-          {lastSaved && (
+          {lastSaved && formattedTime && (
             <div className="text-sm text-gray-500">
-              Last saved: {new Date(lastSaved).toLocaleTimeString()}
+              Last saved: {formattedTime}
             </div>
           )}
 
