@@ -34,8 +34,9 @@ export function EmailEditor() {
   }, [components]);
 
   return (
-    <div className="h-screen flex flex-col bg-gray-50">
+    <div className="h-screen flex flex-col bg-background">
       <Header
+        components={components}
         onSave={handleSave}
         lastSaved={lastSaved}
         onGenerateEmail={handleGenerateEmail}

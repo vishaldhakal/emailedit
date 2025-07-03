@@ -4,6 +4,12 @@ import { useState, useCallback, useEffect } from "react";
 import { EmailComponent } from "./email-component";
 import { Button } from "./ui/button";
 import { Trash2 } from "lucide-react";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 export function EmailCanvas({
   components,
@@ -49,34 +55,70 @@ export function EmailCanvas({
 
   const handleDrop = (e) => {
     e.preventDefault();
-    try {
-      const componentData = JSON.parse(
-        e.dataTransfer.getData("application/json")
-      );
-      onAddComponent(componentData.type, componentData.defaultData);
-    } catch (error) {
-      console.error("Error parsing dropped component:", error);
+    const target = findTarget(e.target);
+
+    if (target) {
+      handleComponentDrop(e, target.index, target.columnId);
+    } else {
+      try {
+        const componentData = JSON.parse(
+          e.dataTransfer.getData("application/json")
+        );
+        onAddComponent(componentData.type, componentData.defaultData);
+      } catch (error) {
+        console.error("Error parsing dropped component:", error);
+      }
     }
   };
 
-  const handleComponentDrop = (e, targetIndex) => {
+  const handleComponentDrop = (e, targetIndex, columnId) => {
     e.preventDefault();
+    e.stopPropagation();
     try {
       const componentData = JSON.parse(
         e.dataTransfer.getData("application/json")
       );
-      // Insert the component at the target index
       const newComponent = {
         type: componentData.type,
         data: componentData.defaultData,
       };
-      const newComponents = [...components];
-      newComponents.splice(targetIndex, 0, newComponent);
-      onUpdateComponents(newComponents);
+
+      if (columnId) {
+        const newComponents = [...components];
+        const layoutComponent = newComponents[targetIndex];
+
+        if (layoutComponent) {
+          const newLayoutData = { ...layoutComponent.data };
+          const targetArray = `${columnId}Components`;
+          newLayoutData[targetArray] = [
+            ...(newLayoutData[targetArray] || []),
+            newComponent,
+          ];
+          layoutComponent.data = newLayoutData;
+          onUpdateComponents(newComponents);
+        }
+      } else {
+        const newComponents = [...components];
+        newComponents.splice(targetIndex, 0, newComponent);
+        onUpdateComponents(newComponents);
+      }
     } catch (error) {
       console.error("Error parsing dropped component:", error);
     }
     setDragOverIndex(null);
+  };
+
+  const findTarget = (element) => {
+    while (element) {
+      if (element.dataset.componentIndex) {
+        return {
+          index: parseInt(element.dataset.componentIndex, 10),
+          columnId: element.dataset.columnId,
+        };
+      }
+      element = element.parentElement;
+    }
+    return null;
   };
 
   const handleDragOverComponent = (e, index) => {
@@ -95,7 +137,6 @@ export function EmailCanvas({
       data: updatedData,
     };
     onUpdateComponents(newComponents);
-    setEditingComponent(null);
   };
 
   const handleComponentDelete = (index) => {
@@ -114,11 +155,11 @@ export function EmailCanvas({
   if (components.length === 0) {
     return (
       <div
-        className="flex-1 flex items-center justify-center bg-gray-50 border-l"
+        className="flex-1 flex items-center justify-center bg-background border-l border-border"
         onDragOver={handleDragOver}
         onDrop={handleDrop}
       >
-        <div className="text-center text-gray-500">
+        <div className="text-center text-muted-foreground">
           <div className="text-6xl mb-4">📧</div>
           <h3 className="text-lg font-medium mb-2">
             Start Building Your Email
@@ -133,42 +174,65 @@ export function EmailCanvas({
 
   return (
     <div
-      className="flex-1 bg-white border-l overflow-y-auto"
+      className="flex-1 bg-background border-l border-border overflow-y-auto"
       onDragOver={handleDragOver}
       onDrop={handleDrop}
     >
       <div className="p-6 max-w-4xl mx-auto">
-        <div className="mb-4 text-sm text-gray-500">
+        <div className="mb-4 text-sm text-muted-foreground">
           Last saved: {new Date(lastSaved).toLocaleTimeString()}
         </div>
 
         {components.map((component, index) => (
           <div
             key={`${component.type}-${index}`}
-            className={`relative group mb-4 border-2 border-transparent hover:border-blue-300 rounded-lg transition-colors ${
+            data-component-index={index}
+            className={`relative group mb-4 border-2 border-transparent hover:border-primary rounded-lg transition-colors ${
               dragOverIndex === index
-                ? "border-2 border-blue-300 border-dashed"
+                ? "border-2 border-primary border-dashed"
                 : ""
             }`}
             onDragOver={(e) => handleDragOverComponent(e, index)}
             onDragLeave={handleDragLeave}
-            onDrop={(e) => handleComponentDrop(e, index)}
+            onDrop={(e) => handleComponentDrop(e, index, e.target.dataset.columnId)}
           >
             <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
               <div className="flex gap-1">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setEditingComponent(index)}
-                  className="bg-white hover:bg-gray-50"
+                <Popover
+                  open={editingComponent === index}
+                  onOpenChange={(isOpen) =>
+                    setEditingComponent(isOpen ? index : null)
+                  }
                 >
-                  Edit
-                </Button>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="bg-card hover:bg-accent"
+                    >
+                      Edit
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-80 p-4 bg-card border border-border rounded-lg shadow-lg">
+                    <ScrollArea className="h-96">
+                      <EmailComponent
+                        type={component.type}
+                        data={component.data}
+                        isEditing={true}
+                        onUpdate={(updatedData) =>
+                          handleComponentUpdate(index, updatedData)
+                        }
+                        onCancel={() => setEditingComponent(null)}
+                      />
+                    </ScrollArea>
+                  </PopoverContent>
+                </Popover>
+
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => handleComponentDelete(index)}
-                  className="bg-white hover:bg-red-50 text-red-600 hover:text-red-700"
+                  className="bg-card hover:bg-destructive/10 text-destructive hover:text-destructive"
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>
@@ -178,11 +242,7 @@ export function EmailCanvas({
             <EmailComponent
               type={component.type}
               data={component.data}
-              isEditing={editingComponent === index}
-              onUpdate={(updatedData) =>
-                handleComponentUpdate(index, updatedData)
-              }
-              onCancel={() => setEditingComponent(null)}
+              isEditing={false}
             />
 
             {/* Drag handles for reordering */}
@@ -192,7 +252,7 @@ export function EmailCanvas({
                   variant="outline"
                   size="sm"
                   onClick={() => handleComponentMove(index, index - 1)}
-                  className="bg-white hover:bg-gray-50 text-xs"
+                  className="bg-card hover:bg-accent text-xs"
                 >
                   ↑ Move Up
                 </Button>
@@ -205,7 +265,7 @@ export function EmailCanvas({
                   variant="outline"
                   size="sm"
                   onClick={() => handleComponentMove(index, index + 1)}
-                  className="bg-white hover:bg-gray-50 text-xs"
+                  className="bg-card hover:bg-accent text-xs"
                 >
                   ↓ Move Down
                 </Button>

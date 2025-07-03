@@ -11,9 +11,61 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { EmailComponent } from "@/components/email-component";
 
-export function FourColumns({ data }) {
-  const { columnWidth, backgroundColor, padding, gap } = data;
+export function FourColumns({ data, onUpdate }) {
+  const {
+    columnWidth,
+    backgroundColor,
+    padding,
+    gap,
+    column1Components = [],
+    column2Components = [],
+    column3Components = [],
+    column4Components = [],
+  } = data;
+
+  const [dragOver, setDragOver] = useState(null);
+
+  const handleDragOver = (e, column) => {
+    e.preventDefault();
+    setDragOver(column);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    setDragOver(null);
+  };
+
+  const handleDrop = (e, column) => {
+    e.preventDefault();
+    setDragOver(null);
+    try {
+      const componentData = JSON.parse(
+        e.dataTransfer.getData("application/json")
+      );
+      const newComponent = {
+        type: componentData.type,
+        data: componentData.defaultData,
+      };
+
+      if (column === 1) {
+        const newComponents = [...column1Components, newComponent];
+        onUpdate({ ...data, column1Components: newComponents });
+      } else if (column === 2) {
+        const newComponents = [...column2Components, newComponent];
+        onUpdate({ ...data, column2Components: newComponents });
+      } else if (column === 3) {
+        const newComponents = [...column3Components, newComponent];
+        onUpdate({ ...data, column3Components: newComponents });
+      } else {
+        const newComponents = [...column4Components, newComponent];
+        onUpdate({ ...data, column4Components: newComponents });
+      }
+    } catch (error) {
+      console.error("Error parsing dropped component:", error);
+    }
+  };
 
   return (
     <div
@@ -21,40 +73,132 @@ export function FourColumns({ data }) {
         backgroundColor,
         padding,
       }}
-      className="border border-gray-200 rounded-lg"
+      className="border border-border rounded-lg"
     >
       <div className="flex" style={{ gap: gap || "20px" }}>
         <div
           style={{ width: columnWidth }}
-          className="border-2 border-dashed border-gray-300 rounded p-4 text-center text-gray-500"
+          className={`border-2 border-dashed rounded p-4 text-center text-muted-foreground ${
+            dragOver === 1 ? "border-primary" : "border-border"
+          }`}
+          data-column-id="1"
         >
-          <div className="text-xl mb-2">📄</div>
-          <div>Column 1</div>
-          <div className="text-sm">Drop content here</div>
+          {column1Components.length === 0 ? (
+            <>
+              <div className="text-xl mb-2">📄</div>
+              <div>Column 1</div>
+              <div className="text-sm">Drop content here</div>
+            </>
+          ) : (
+            column1Components.map((component, index) => (
+              <EmailComponent
+                key={`${component.type}-${index}`}
+                type={component.type}
+                data={component.data}
+                onUpdate={(updatedData) => {
+                  const newComponents = [...column1Components];
+                  newComponents[index] = {
+                    ...newComponents[index],
+                    data: updatedData,
+                  };
+                  onUpdate({ ...data, column1Components: newComponents });
+                }}
+              />
+            ))
+          )}
         </div>
         <div
           style={{ width: columnWidth }}
-          className="border-2 border-dashed border-gray-300 rounded p-4 text-center text-gray-500"
+          className={`border-2 border-dashed rounded p-4 text-center text-muted-foreground ${
+            dragOver === 2 ? "border-primary" : "border-border"
+          }`}
+          data-column-id="2"
         >
-          <div className="text-xl mb-2">📄</div>
-          <div>Column 2</div>
-          <div className="text-sm">Drop content here</div>
+          {column2Components.length === 0 ? (
+            <>
+              <div className="text-xl mb-2">📄</div>
+              <div>Column 2</div>
+              <div className="text-sm">Drop content here</div>
+            </>
+          ) : (
+            column2Components.map((component, index) => (
+              <EmailComponent
+                key={`${component.type}-${index}`}
+                type={component.type}
+                data={component.data}
+                onUpdate={(updatedData) => {
+                  const newComponents = [...column2Components];
+                  newComponents[index] = {
+                    ...newComponents[index],
+                    data: updatedData,
+                  };
+                  onUpdate({ ...data, column2Components: newComponents });
+                }}
+              />
+            ))
+          )}
         </div>
         <div
           style={{ width: columnWidth }}
-          className="border-2 border-dashed border-gray-300 rounded p-4 text-center text-gray-500"
+          className={`border-2 border-dashed rounded p-4 text-center text-muted-foreground ${
+            dragOver === 3 ? "border-primary" : "border-border"
+          }`}
+          data-column-id="3"
         >
-          <div className="text-xl mb-2">📄</div>
-          <div>Column 3</div>
-          <div className="text-sm">Drop content here</div>
+          {column3Components.length === 0 ? (
+            <>
+              <div className="text-xl mb-2">📄</div>
+              <div>Column 3</div>
+              <div className="text-sm">Drop content here</div>
+            </>
+          ) : (
+            column3Components.map((component, index) => (
+              <EmailComponent
+                key={`${component.type}-${index}`}
+                type={component.type}
+                data={component.data}
+                onUpdate={(updatedData) => {
+                  const newComponents = [...column3Components];
+                  newComponents[index] = {
+                    ...newComponents[index],
+                    data: updatedData,
+                  };
+                  onUpdate({ ...data, column3Components: newComponents });
+                }}
+              />
+            ))
+          )}
         </div>
         <div
           style={{ width: columnWidth }}
-          className="border-2 border-dashed border-gray-300 rounded p-4 text-center text-gray-500"
+          className={`border-2 border-dashed rounded p-4 text-center text-muted-foreground ${
+            dragOver === 4 ? "border-primary" : "border-border"
+          }`}
+          data-column-id="4"
         >
-          <div className="text-xl mb-2">📄</div>
-          <div>Column 4</div>
-          <div className="text-sm">Drop content here</div>
+          {column4Components.length === 0 ? (
+            <>
+              <div className="text-xl mb-2">📄</div>
+              <div>Column 4</div>
+              <div className="text-sm">Drop content here</div>
+            </>
+          ) : (
+            column4Components.map((component, index) => (
+              <EmailComponent
+                key={`${component.type}-${index}`}
+                type={component.type}
+                data={component.data}
+                onUpdate={(updatedData) => {
+                  const newComponents = [...column4Components];
+                  newComponents[index] = {
+                    ...newComponents[index],
+                    data: updatedData,
+                  };
+                  onUpdate({ ...data, column4Components: newComponents });
+                }}
+              />
+            ))
+          )}
         </div>
       </div>
     </div>
@@ -147,7 +291,7 @@ FourColumns.Editor = function FourColumnsEditor({ data, onUpdate, onCancel }) {
         </div>
       </div>
 
-      <div className="border rounded-lg p-4 bg-gray-50">
+      <div className="border rounded-lg p-4 bg-card">
         <Label>Preview</Label>
         <div className="mt-2">
           <div
@@ -155,33 +299,33 @@ FourColumns.Editor = function FourColumnsEditor({ data, onUpdate, onCancel }) {
               backgroundColor: formData.backgroundColor,
               padding: formData.padding,
             }}
-            className="border border-gray-200 rounded-lg"
+            className="border border-border rounded-lg"
           >
             <div className="flex" style={{ gap: formData.gap || "20px" }}>
               <div
                 style={{ width: formData.columnWidth }}
-                className="border-2 border-dashed border-gray-300 rounded p-4 text-center text-gray-500"
+                className="border-2 border-dashed border-border rounded p-4 text-center text-muted-foreground"
               >
                 <div className="text-xl mb-2">📄</div>
                 <div>Column 1</div>
               </div>
               <div
                 style={{ width: formData.columnWidth }}
-                className="border-2 border-dashed border-gray-300 rounded p-4 text-center text-gray-500"
+                className="border-2 border-dashed border-border rounded p-4 text-center text-muted-foreground"
               >
                 <div className="text-xl mb-2">📄</div>
                 <div>Column 2</div>
               </div>
               <div
                 style={{ width: formData.columnWidth }}
-                className="border-2 border-dashed border-gray-300 rounded p-4 text-center text-gray-500"
+                className="border-2 border-dashed border-border rounded p-4 text-center text-muted-foreground"
               >
                 <div className="text-xl mb-2">📄</div>
                 <div>Column 3</div>
               </div>
               <div
                 style={{ width: formData.columnWidth }}
-                className="border-2 border-dashed border-gray-300 rounded p-4 text-center text-gray-500"
+                className="border-2 border-dashed border-border rounded p-4 text-center text-muted-foreground"
               >
                 <div className="text-xl mb-2">📄</div>
                 <div>Column 4</div>

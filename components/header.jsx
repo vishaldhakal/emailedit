@@ -3,19 +3,26 @@
 import { Button } from "./ui/button";
 import { Download, Save } from "lucide-react";
 import AIEmailGenerator from "./ai-email-generator";
+import { generateHtml } from "@/lib/export-html";
 
-export function Header({ onSave, lastSaved, onGenerateEmail }) {
+export function Header({ components, onSave, lastSaved, onGenerateEmail }) {
   const handleSave = () => {
     onSave();
   };
 
   const handleExport = () => {
-    // Export functionality can be added here
-    console.log("Exporting email...");
+    const html = generateHtml(components);
+    const blob = new Blob([html], { type: "text/html" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "email.html";
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   return (
-    <header className="bg-white border-b border-gray-200 px-6 py-4">
+    <header className="bg-card border-b border-border px-6 py-4">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl font-semibold text-gray-900">Email Editor</h1>

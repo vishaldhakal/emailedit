@@ -41,7 +41,7 @@ Spacer.Editor = function SpacerEditor({ data, onUpdate, onCancel }) {
           {heightOptions.map((option) => (
             <Button
               key={option.value}
-              variant={formData.height === option.value ? "default" : "outline"}
+              variant={formData.height === option.value ? "default" : "secondary"}
               size="sm"
               onClick={() =>
                 setFormData((prev) => ({ ...prev, height: option.value }))

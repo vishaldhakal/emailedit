@@ -121,7 +121,7 @@ ButtonComponent.Editor = function ButtonEditor({ data, onUpdate, onCancel }) {
             <UIButton
               key={option.value}
               variant={
-                formData.padding === option.value ? "default" : "outline"
+                formData.padding === option.value ? "default" : "secondary"
               }
               size="sm"
               onClick={() =>
@@ -141,7 +141,7 @@ ButtonComponent.Editor = function ButtonEditor({ data, onUpdate, onCancel }) {
             <UIButton
               key={option.value}
               variant={
-                formData.borderRadius === option.value ? "default" : "outline"
+                formData.borderRadius === option.value ? "default" : "secondary"
               }
               size="sm"
               onClick={() =>

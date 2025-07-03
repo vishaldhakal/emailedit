@@ -44,13 +44,11 @@ export function EmailComponent({ type, data, isEditing, onUpdate, onCancel }) {
 
   if (isEditing && ComponentRenderer.Editor) {
     return (
-      <div className="border-2 border-blue-300 bg-blue-50 rounded-lg p-4">
-        <ComponentRenderer.Editor
-          data={data}
-          onUpdate={onUpdate}
-          onCancel={onCancel}
-        />
-      </div>
+      <ComponentRenderer.Editor
+        data={data}
+        onUpdate={onUpdate}
+        onCancel={onCancel}
+      />
     );
   }
 

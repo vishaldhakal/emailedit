@@ -233,10 +233,10 @@ export function ComponentsPanel({ onAddComponent }) {
   };
 
   return (
-    <div className="w-80 bg-white border-r border-gray-200 flex flex-col">
-      <div className="p-4 border-b border-gray-200">
-        <h2 className="text-lg font-semibold text-gray-900">Components</h2>
-        <p className="text-sm text-gray-500 mt-1">
+    <div className="w-80 bg-card border-r border-border flex flex-col">
+      <div className="p-4 border-b border-border">
+        <h2 className="text-lg font-semibold text-foreground">Components</h2>
+        <p className="text-sm text-muted-foreground mt-1">
           Drag components to the canvas or click to add
         </p>
       </div>
@@ -260,8 +260,8 @@ export function ComponentsPanel({ onAddComponent }) {
                         onDragEnd={handleDragEnd}
                         onClick={() => handleComponentClick(component)}
                         className={`
-                          p-3 border border-gray-200 rounded-lg cursor-pointer
-                          hover:border-blue-300 hover:bg-blue-50 transition-colors
+                          p-3 border border-border rounded-lg cursor-pointer
+                          hover:border-primary hover:bg-accent transition-colors
                           ${
                             draggedComponent?.type === component.type
                               ? "opacity-50"
@@ -270,8 +270,8 @@ export function ComponentsPanel({ onAddComponent }) {
                         `}
                       >
                         <div className="flex flex-col items-center text-center">
-                          <component.icon className="h-6 w-6 text-gray-600 mb-2" />
-                          <span className="text-xs font-medium text-gray-700">
+                          <component.icon className="h-6 w-6 text-primary mb-2" />
+                          <span className="text-xs font-medium text-foreground">
                             {component.name}
                           </span>
                         </div>

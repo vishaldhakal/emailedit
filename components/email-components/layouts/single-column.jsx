@@ -11,9 +11,39 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { EmailComponent } from "@/components/email-component"; // Import EmailComponent
 
-export function SingleColumn({ data }) {
-  const { width, backgroundColor, padding } = data;
+export function SingleColumn({ data, onUpdate }) {
+  const { width, backgroundColor, padding, components = [] } = data;
+  const [dragOver, setDragOver] = useState(false);
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    setDragOver(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    setDragOver(false);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setDragOver(false);
+    try {
+      const componentData = JSON.parse(
+        e.dataTransfer.getData("application/json")
+      );
+      const newComponent = {
+        type: componentData.type,
+        data: componentData.defaultData,
+      };
+      const newComponents = [...components, newComponent];
+      onUpdate({ ...data, components: newComponents });
+    } catch (error) {
+      console.error("Error parsing dropped component:", error);
+    }
+  };
 
   return (
     <div
@@ -22,13 +52,35 @@ export function SingleColumn({ data }) {
         backgroundColor,
         padding,
       }}
-      className="border border-gray-200 rounded-lg"
+      className={`border border-border rounded-lg ${
+        dragOver ? "border-primary border-dashed" : ""
+      }`}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
     >
-      <div className="p-4 text-center text-gray-500 border-2 border-dashed border-gray-300 rounded">
-        <div className="text-2xl mb-2">📄</div>
-        <div>Single Column Layout</div>
-        <div className="text-sm">Drop content here</div>
-      </div>
+      {components.length === 0 ? (
+        <div className="p-4 text-center text-muted-foreground border-2 border-dashed border-border rounded">
+          <div className="text-2xl mb-2">📄</div>
+          <div>Single Column Layout</div>
+          <div className="text-sm">Drop content here</div>
+        </div>
+      ) : (
+        <div className="p-4">
+          {components.map((component, index) => (
+            <EmailComponent
+              key={`${component.type}-${index}`}
+              type={component.type}
+              data={component.data}
+              onUpdate={(updatedData) => {
+                const newComponents = [...components];
+                newComponents[index] = { ...newComponents[index], data: updatedData };
+                onUpdate({ ...data, components: newComponents });
+              }}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -103,7 +155,7 @@ SingleColumn.Editor = function SingleColumnEditor({
         />
       </div>
 
-      <div className="border rounded-lg p-4 bg-gray-50">
+      <div className="border rounded-lg p-4 bg-card">
         <Label>Preview</Label>
         <div className="mt-2">
           <div
@@ -112,9 +164,9 @@ SingleColumn.Editor = function SingleColumnEditor({
               backgroundColor: formData.backgroundColor,
               padding: formData.padding,
             }}
-            className="border border-gray-200 rounded-lg"
+            className="border border-border rounded-lg"
           >
-            <div className="p-4 text-center text-gray-500 border-2 border-dashed border-gray-300 rounded">
+            <div className="p-4 text-center text-muted-foreground border-2 border-dashed border-border rounded">
               <div className="text-2xl mb-2">📄</div>
               <div>Single Column Layout</div>
             </div>
@@ -123,7 +175,7 @@ SingleColumn.Editor = function SingleColumnEditor({
       </div>
 
       <div className="flex justify-end space-x-2">
-        <Button variant="outline" onClick={onCancel}>
+        <Button variant="secondary" onClick={onCancel}>
           Cancel
         </Button>
         <Button onClick={handleSave}>Save</Button>

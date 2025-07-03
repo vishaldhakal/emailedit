@@ -98,7 +98,7 @@ export default function AIEmailGenerator({ onEmailGenerated }) {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="gap-2">
+        <Button variant="secondary" className="gap-2">
           <Sparkles className="h-4 w-4" />
           AI Generate Email
         </Button>
@@ -154,7 +154,7 @@ export default function AIEmailGenerator({ onEmailGenerated }) {
 
           <div className="flex justify-end gap-2 pt-4">
             <Button
-              variant="outline"
+              variant="secondary"
               onClick={() => setIsOpen(false)}
               disabled={isGenerating}
             >

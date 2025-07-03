@@ -94,7 +94,7 @@ ImageComponent.Editor = function ImageEditor({ data, onUpdate, onCancel }) {
           {widthOptions.map((option) => (
             <Button
               key={option.value}
-              variant={formData.width === option.value ? "default" : "outline"}
+              variant={formData.width === option.value ? "default" : "secondary"}
               size="sm"
               onClick={() =>
                 setFormData((prev) => ({ ...prev, width: option.value }))
@@ -113,7 +113,7 @@ ImageComponent.Editor = function ImageEditor({ data, onUpdate, onCancel }) {
           {heightOptions.map((option) => (
             <Button
               key={option.value}
-              variant={formData.height === option.value ? "default" : "outline"}
+              variant={formData.height === option.value ? "default" : "secondary"}
               size="sm"
               onClick={() =>
                 setFormData((prev) => ({ ...prev, height: option.value }))

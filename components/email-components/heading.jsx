@@ -80,7 +80,7 @@ Heading.Editor = function HeadingEditor({ data, onUpdate, onCancel }) {
           {levelOptions.map((option) => (
             <Button
               key={option.value}
-              variant={formData.level === option.value ? "default" : "outline"}
+              variant={formData.level === option.value ? "default" : "secondary"}
               size="sm"
               onClick={() =>
                 setFormData((prev) => ({ ...prev, level: option.value }))

@@ -72,7 +72,7 @@ TextBlock.Editor = function TextBlockEditor({ data, onUpdate, onCancel }) {
             <Button
               key={option.value}
               variant={
-                formData.fontSize === option.value ? "default" : "outline"
+                formData.fontSize === option.value ? "default" : "secondary"
               }
               size="sm"
               onClick={() =>

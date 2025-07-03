@@ -116,7 +116,7 @@ SocialMedia.Editor = function SocialMediaEditor({ data, onUpdate, onCancel }) {
                           variant={
                             platform.name === option.value
                               ? "default"
-                              : "outline"
+                              : "secondary"
                           }
                           size="sm"
                           onClick={() =>
