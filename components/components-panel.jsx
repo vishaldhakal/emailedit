@@ -128,7 +128,6 @@ const componentCategories = {
         defaultData: {
           content: "Heading",
           level: "h1",
-          fontSize: "24px",
           color: "#000000",
           alignment: "left",
         },
