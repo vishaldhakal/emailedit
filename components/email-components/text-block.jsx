@@ -6,19 +6,36 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
-export function TextBlock({ data }) {
+export function TextBlock({ data, onUpdate }) {
   const { content, fontSize, color, alignment } = data;
+  const [text, setText] = useState(content);
+
+  //whenever content prop changes we need to update our local state
+  useEffect(() => {
+    setText(content);
+  }, [content]);
+
+  // Auto-save when formData changes
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      onUpdate({ ...data, content: text });
+    }, 500); // Auto-save after 500ms of no changes
+
+    return () => clearTimeout(timeoutId);
+  }, [text]);
 
   return (
-    <div
+    <Textarea
+      className="min-h-0 h-7 p-1 w-full border-none shadow-none outline-none focus-visible:ring-0 resize-none"
+      placeholder="Enter your text here..."
+      value={text}
+      onChange={(e) => setText(e.target.value)}
       style={{
         fontSize,
         color,
         textAlign: alignment,
       }}
-    >
-      {content}
-    </div>
+    />
   );
 }
 

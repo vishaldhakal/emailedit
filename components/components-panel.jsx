@@ -114,7 +114,7 @@ const componentCategories = {
         icon: Type,
         description: "Rich text content",
         defaultData: {
-          content: "Enter your text here...",
+          content: "",
           fontSize: "16px",
           color: "#000000",
           alignment: "left",
