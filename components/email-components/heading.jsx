@@ -6,14 +6,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 export function Heading({ data }) {
-  const { content, level, fontSize, color, alignment } = data;
+  const { content, level, color, alignment } = data;
 
   const Tag = level || "h1";
 
   return (
     <Tag
       style={{
-        fontSize,
         color,
         textAlign: alignment,
         margin: 0,
@@ -45,15 +44,6 @@ Heading.Editor = function HeadingEditor({ data, onUpdate, onCancel }) {
     { value: "h6", label: "H6" },
   ];
 
-  const fontSizeOptions = [
-    { value: "20px", label: "20px" },
-    { value: "24px", label: "24px" },
-    { value: "28px", label: "28px" },
-    { value: "32px", label: "32px" },
-    { value: "36px", label: "36px" },
-    { value: "40px", label: "40px" },
-  ];
-
   const alignmentOptions = [
     { value: "left", label: "Left" },
     { value: "center", label: "Center" },
@@ -80,32 +70,13 @@ Heading.Editor = function HeadingEditor({ data, onUpdate, onCancel }) {
           {levelOptions.map((option) => (
             <Button
               key={option.value}
-              variant={formData.level === option.value ? "default" : "secondary"}
+              variant={
+                formData.level === option.value ? "default" : "secondary"
+              }
               size="sm"
               onClick={() =>
                 setFormData((prev) => ({ ...prev, level: option.value }))
               }
-            >
-              {option.label}
-            </Button>
-          ))}
-        </div>
-      </div>
-
-      <div>
-        <Label>Font Size</Label>
-        <div className="grid grid-cols-3 gap-2 mt-2">
-          {fontSizeOptions.map((option) => (
-            <Button
-              key={option.value}
-              variant={
-                formData.fontSize === option.value ? "default" : "outline"
-              }
-              size="sm"
-              onClick={() =>
-                setFormData((prev) => ({ ...prev, fontSize: option.value }))
-              }
-              className="text-xs"
             >
               {option.label}
             </Button>
