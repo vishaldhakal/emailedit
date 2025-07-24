@@ -114,7 +114,7 @@ const componentCategories = {
         icon: Type,
         description: "Rich text content",
         defaultData: {
-          content: "",
+          content: "Text",
           fontSize: "16px",
           color: "#000000",
           alignment: "left",
@@ -127,7 +127,7 @@ const componentCategories = {
         description: "Section headings",
         defaultData: {
           content: "Heading",
-          level: "h1",
+          level: "h3",
           color: "#000000",
           alignment: "left",
         },

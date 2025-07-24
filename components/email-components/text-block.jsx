@@ -5,36 +5,38 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { useRef } from "react";
 
 export function TextBlock({ data, onUpdate }) {
   const { content, fontSize, color, alignment } = data;
-  const [text, setText] = useState(content);
+  const ref = useRef(null);
 
-  //whenever content prop changes we need to update our local state
+  //update ui on the basis of content prop and level
   useEffect(() => {
-    setText(content);
+    if (ref.current && ref.current.textContent !== content) {
+      ref.current.textContent = content;
+    }
   }, [content]);
 
-  // Auto-save when formData changes
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      onUpdate({ ...data, content: text });
-    }, 500); // Auto-save after 500ms of no changes
-
-    return () => clearTimeout(timeoutId);
-  }, [text]);
+  const handleBlur = () => {
+    const newText = ref.current?.textContent || "";
+    if (newText !== content) {
+      onUpdate({ ...data, content: newText });
+    }
+  };
 
   return (
-    <Textarea
-      className="min-h-0 h-7 p-1 w-full border-none shadow-none outline-none focus-visible:ring-0 resize-none"
-      placeholder="Enter your text here..."
-      value={text}
-      onChange={(e) => setText(e.target.value)}
+    <div
+      ref={ref}
+      className=" pl-2 pb-1 w-full border-none outline-none"
+      onBlur={handleBlur}
       style={{
         fontSize,
         color,
         textAlign: alignment,
       }}
+      contentEditable
+      suppressContentEditableWarning
     />
   );
 }

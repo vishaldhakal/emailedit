@@ -4,22 +4,41 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useRef } from "react";
 
-export function Heading({ data }) {
+export function Heading({ data, onUpdate }) {
   const { content, level, color, alignment } = data;
+  const Tag = level || "h3";
+  const ref = useRef(null);
 
-  const Tag = level || "h1";
+  //update ui on the basis of content prop and level
+  useEffect(() => {
+    if (ref.current && ref.current.textContent !== content) {
+      ref.current.textContent = content;
+    }
+  }, [content, level]);
+
+  const handleBlur = () => {
+    const newText = ref.current?.textContent || "";
+    if (newText !== content) {
+      onUpdate({ ...data, content: newText });
+    }
+  };
 
   return (
     <Tag
+      className=" border-none outline-none pl-1"
+      ref={ref}
+      key={level}
+      onBlur={handleBlur}
       style={{
         color,
         textAlign: alignment,
         margin: 0,
       }}
-    >
-      {content}
-    </Tag>
+      contentEditable
+      suppressContentEditableWarning
+    />
   );
 }
 
