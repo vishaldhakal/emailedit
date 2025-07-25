@@ -204,12 +204,6 @@ Navigation.Editor = function NavigationEditor({ data, onUpdate, onCancel }) {
           </nav>
         </div>
       </div>
-
-      <div className="flex justify-end">
-        <Button variant="outline" onClick={onCancel}>
-          Close
-        </Button>
-      </div>
     </div>
   );
 };

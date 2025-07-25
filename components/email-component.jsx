@@ -14,7 +14,7 @@ import { TwoColumns } from "./email-components/layouts/two-columns";
 import { ThreeColumns } from "./email-components/layouts/three-columns";
 import { FourColumns } from "./email-components/layouts/four-columns";
 
-const componentMap = {
+export const componentMap = {
   "text-block": TextBlock,
   heading: Heading,
   image: ImageComponent,
@@ -31,7 +31,7 @@ const componentMap = {
   "four-columns": FourColumns,
 };
 
-export function EmailComponent({ type, data, isEditing, onUpdate, onCancel }) {
+export function EmailComponent({ type, data, onUpdate, setSelectedComponent }) {
   const ComponentRenderer = componentMap[type];
 
   if (!ComponentRenderer) {
@@ -42,15 +42,11 @@ export function EmailComponent({ type, data, isEditing, onUpdate, onCancel }) {
     );
   }
 
-  if (isEditing && ComponentRenderer.Editor) {
-    return (
-      <ComponentRenderer.Editor
-        data={data}
-        onUpdate={onUpdate}
-        onCancel={onCancel}
-      />
-    );
-  }
-
-  return <ComponentRenderer data={data} onUpdate={onUpdate} />;
+  return (
+    <ComponentRenderer
+      setSelectedComponent={setSelectedComponent}
+      data={data}
+      onUpdate={onUpdate}
+    />
+  );
 }

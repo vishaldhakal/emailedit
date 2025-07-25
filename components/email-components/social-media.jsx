@@ -236,12 +236,6 @@ SocialMedia.Editor = function SocialMediaEditor({ data, onUpdate, onCancel }) {
           </div>
         </div>
       </div>
-
-      <div className="flex justify-end">
-        <Button variant="outline" onClick={onCancel}>
-          Close
-        </Button>
-      </div>
     </div>
   );
 };

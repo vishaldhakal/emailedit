@@ -18,7 +18,7 @@ export function Heading({ data, onUpdate }) {
     }
   }, [content, level]);
 
-  const handleBlur = () => {
+  const handleInput = () => {
     const newText = ref.current?.textContent || "";
     if (newText !== content) {
       onUpdate({ ...data, content: newText });
@@ -26,11 +26,11 @@ export function Heading({ data, onUpdate }) {
   };
 
   return (
-    <Tag
+    <div
       className=" border-none outline-none pl-1"
       ref={ref}
       key={level}
-      onBlur={handleBlur}
+      onInput={handleInput}
       style={{
         color,
         textAlign: alignment,
@@ -42,7 +42,7 @@ export function Heading({ data, onUpdate }) {
   );
 }
 
-Heading.Editor = function HeadingEditor({ data, onUpdate, onCancel }) {
+Heading.Editor = function HeadingEditor({ data, onUpdate }) {
   const [formData, setFormData] = useState(data);
 
   // Auto-save when formData changes
@@ -52,7 +52,7 @@ Heading.Editor = function HeadingEditor({ data, onUpdate, onCancel }) {
     }, 500); // Auto-save after 500ms of no changes
 
     return () => clearTimeout(timeoutId);
-  }, [formData, onUpdate]);
+  }, [formData]);
 
   const levelOptions = [
     { value: "h1", label: "H1" },
@@ -71,18 +71,6 @@ Heading.Editor = function HeadingEditor({ data, onUpdate, onCancel }) {
 
   return (
     <div className="space-y-4">
-      <div>
-        <Label htmlFor="content">Heading Text</Label>
-        <Input
-          id="content"
-          value={formData.content}
-          onChange={(e) =>
-            setFormData((prev) => ({ ...prev, content: e.target.value }))
-          }
-          placeholder="Enter heading text..."
-        />
-      </div>
-
       <div>
         <Label>Heading Level</Label>
         <div className="grid grid-cols-3 gap-2 mt-2">
@@ -135,12 +123,6 @@ Heading.Editor = function HeadingEditor({ data, onUpdate, onCancel }) {
             ))}
           </div>
         </div>
-      </div>
-
-      <div className="flex justify-end">
-        <Button variant="outline" onClick={onCancel}>
-          Close
-        </Button>
       </div>
     </div>
   );

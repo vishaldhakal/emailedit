@@ -19,6 +19,7 @@ export function ColumnComponentManager({
   onMoveUp,
   onMoveDown,
   totalComponents,
+  setSelectedComponent,
 }) {
   const [isEditing, setIsEditing] = useState(false);
 
@@ -55,7 +56,7 @@ export function ColumnComponentManager({
   return (
     <div className="relative group border-2 border-transparent hover:border-primary/30 rounded-lg transition-colors">
       {/* Management Controls */}
-      <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+      {/* <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
         <div className="flex gap-1">
           <Popover
             open={isEditing}
@@ -118,11 +119,18 @@ export function ColumnComponentManager({
             <Trash2 className="h-3 w-3" />
           </Button>
         </div>
-      </div>
+      </div> */}
 
       {/* Component Content */}
-      <div className="p-2">
+      <div
+        className="p-2"
+        onClick={(e) => {
+          e.stopPropagation();
+          setSelectedComponent({ component, index });
+        }}
+      >
         <EmailComponent
+          setSelectedComponent={setSelectedComponent}
           type={component.type}
           data={component.data}
           isEditing={false}

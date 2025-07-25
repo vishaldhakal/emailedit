@@ -174,12 +174,6 @@ ButtonComponent.Editor = function ButtonEditor({ data, onUpdate, onCancel }) {
           </a>
         </div>
       </div>
-
-      <div className="flex justify-end">
-        <UIButton variant="outline" onClick={onCancel}>
-          Close
-        </UIButton>
-      </div>
     </div>
   );
 };

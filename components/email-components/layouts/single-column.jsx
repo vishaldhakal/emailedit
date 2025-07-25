@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { use, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,7 +14,7 @@ import {
 import { EmailComponent } from "@/components/email-component";
 import { ColumnComponentManager } from "@/components/email-components/column-component-manager";
 
-export function SingleColumn({ data, onUpdate }) {
+export function SingleColumn({ data, onUpdate, setSelectedComponent }) {
   const { width, backgroundColor, padding, components = [] } = data;
 
   const handleColumnDrop = (e) => {
@@ -81,6 +81,7 @@ export function SingleColumn({ data, onUpdate }) {
         <div className="space-y-3">
           {components.map((component, index) => (
             <ColumnComponentManager
+              setSelectedComponent={setSelectedComponent}
               key={`${component.type}-${index}`}
               component={component}
               index={index}
@@ -99,16 +100,12 @@ export function SingleColumn({ data, onUpdate }) {
   );
 }
 
-SingleColumn.Editor = function SingleColumnEditor({
-  data,
-  onUpdate,
-  onCancel,
-}) {
+SingleColumn.Editor = function SingleColumnEditor({ data, onUpdate }) {
   const [formData, setFormData] = useState(data);
 
-  const handleSave = () => {
+  useEffect(() => {
     onUpdate(formData);
-  };
+  }, [formData]);
 
   return (
     <div className="space-y-4">
@@ -167,32 +164,6 @@ SingleColumn.Editor = function SingleColumnEditor({
             }))
           }
         />
-      </div>
-
-      <div className="border rounded-lg p-4 bg-card">
-        <Label>Preview</Label>
-        <div className="mt-2">
-          <div
-            style={{
-              width: formData.width,
-              backgroundColor: formData.backgroundColor,
-              padding: formData.padding,
-            }}
-            className="border border-border rounded-lg"
-          >
-            <div className="p-4 text-center text-muted-foreground border-2 border-dashed border-border rounded">
-              <div className="text-2xl mb-2">📄</div>
-              <div>Single Column Layout</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="flex justify-end space-x-2">
-        <Button variant="secondary" onClick={onCancel}>
-          Cancel
-        </Button>
-        <Button onClick={handleSave}>Save</Button>
       </div>
     </div>
   );

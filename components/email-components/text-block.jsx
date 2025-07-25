@@ -4,21 +4,20 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { useRef } from "react";
 
 export function TextBlock({ data, onUpdate }) {
   const { content, fontSize, color, alignment } = data;
   const ref = useRef(null);
 
-  //update ui on the basis of content prop and level
+  // update ui on the basis of content prop
   useEffect(() => {
     if (ref.current && ref.current.textContent !== content) {
       ref.current.textContent = content;
     }
   }, [content]);
 
-  const handleBlur = () => {
+  const handleInput = () => {
     const newText = ref.current?.textContent || "";
     if (newText !== content) {
       onUpdate({ ...data, content: newText });
@@ -29,7 +28,7 @@ export function TextBlock({ data, onUpdate }) {
     <div
       ref={ref}
       className=" pl-2 pb-1 w-full border-none outline-none"
-      onBlur={handleBlur}
+      onInput={handleInput}
       style={{
         fontSize,
         color,
@@ -41,7 +40,7 @@ export function TextBlock({ data, onUpdate }) {
   );
 }
 
-TextBlock.Editor = function TextBlockEditor({ data, onUpdate, onCancel }) {
+TextBlock.Editor = function TextBlockEditor({ data, onUpdate }) {
   const [formData, setFormData] = useState(data);
 
   // Auto-save when formData changes
@@ -51,7 +50,7 @@ TextBlock.Editor = function TextBlockEditor({ data, onUpdate, onCancel }) {
     }, 500); // Auto-save after 500ms of no changes
 
     return () => clearTimeout(timeoutId);
-  }, [formData, onUpdate]);
+  }, [formData]);
 
   const fontSizeOptions = [
     { value: "12px", label: "12px" },
@@ -71,19 +70,6 @@ TextBlock.Editor = function TextBlockEditor({ data, onUpdate, onCancel }) {
 
   return (
     <div className="space-y-4">
-      <div>
-        <Label htmlFor="content">Text Content</Label>
-        <Textarea
-          id="content"
-          value={formData.content}
-          onChange={(e) =>
-            setFormData((prev) => ({ ...prev, content: e.target.value }))
-          }
-          placeholder="Enter your text here..."
-          rows={4}
-        />
-      </div>
-
       <div>
         <Label>Font Size</Label>
         <div className="grid grid-cols-3 gap-2 mt-2">
@@ -135,12 +121,6 @@ TextBlock.Editor = function TextBlockEditor({ data, onUpdate, onCancel }) {
             </Button>
           ))}
         </div>
-      </div>
-
-      <div className="flex justify-end">
-        <Button variant="outline" onClick={onCancel}>
-          Close
-        </Button>
       </div>
     </div>
   );

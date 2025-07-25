@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,7 +14,7 @@ import {
 import { EmailComponent } from "@/components/email-component";
 import { ColumnComponentManager } from "@/components/email-components/column-component-manager";
 
-export function ThreeColumns({ data, onUpdate }) {
+export function ThreeColumns({ data, onUpdate, setSelectedComponent }) {
   const {
     columnWidth,
     backgroundColor,
@@ -132,6 +132,7 @@ export function ThreeColumns({ data, onUpdate }) {
             <div className="space-y-3">
               {column1Components.map((component, index) => (
                 <ColumnComponentManager
+                  setSelectedComponent={setSelectedComponent}
                   key={`${component.type}-${index}`}
                   component={component}
                   index={index}
@@ -235,9 +236,9 @@ ThreeColumns.Editor = function ThreeColumnsEditor({
 }) {
   const [formData, setFormData] = useState(data);
 
-  const handleSave = () => {
+  useEffect(() => {
     onUpdate(formData);
-  };
+  }, [formData]);
 
   return (
     <div className="space-y-4">
@@ -317,50 +318,6 @@ ThreeColumns.Editor = function ThreeColumnsEditor({
             }
           />
         </div>
-      </div>
-
-      <div className="border rounded-lg p-4 bg-card">
-        <Label>Preview</Label>
-        <div className="mt-2">
-          <div
-            style={{
-              backgroundColor: formData.backgroundColor,
-              padding: formData.padding,
-            }}
-            className="border border-border rounded-lg"
-          >
-            <div className="flex" style={{ gap: formData.gap || "20px" }}>
-              <div
-                style={{ width: formData.columnWidth }}
-                className="border-2 border-dashed border-border rounded p-4 text-center text-muted-foreground"
-              >
-                <div className="text-xl mb-2">📄</div>
-                <div>Column 1</div>
-              </div>
-              <div
-                style={{ width: formData.columnWidth }}
-                className="border-2 border-dashed border-border rounded p-4 text-center text-muted-foreground"
-              >
-                <div className="text-xl mb-2">📄</div>
-                <div>Column 2</div>
-              </div>
-              <div
-                style={{ width: formData.columnWidth }}
-                className="border-2 border-dashed border-border rounded p-4 text-center text-muted-foreground"
-              >
-                <div className="text-xl mb-2">📄</div>
-                <div>Column 3</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="flex justify-end space-x-2">
-        <Button variant="outline" onClick={onCancel}>
-          Cancel
-        </Button>
-        <Button onClick={handleSave}>Save</Button>
       </div>
     </div>
   );

@@ -13,8 +13,11 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 
 export function EmailCanvas({
   components,
+  handleComponentUpdate,
   onUpdateComponents,
   onAddComponent,
+  selectedComponent,
+  setSelectedComponent,
 }) {
   const [editingComponent, setEditingComponent] = useState(null);
   const [lastSaved, setLastSaved] = useState(Date.now());
@@ -29,6 +32,19 @@ export function EmailCanvas({
     setLastSaved(Date.now());
     console.log("Auto-saved at:", new Date().toLocaleTimeString());
   }, [components]);
+
+  //for using keys to manipulate components
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "Delete") {
+        if (!selectedComponent) return;
+
+        handleComponentDelete(selectedComponent.index);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [components, selectedComponent]);
 
   // Auto-save when components change (debounced)
   useEffect(() => {
@@ -215,18 +231,10 @@ export function EmailCanvas({
     setDragOverColumn(null);
   };
 
-  const handleComponentUpdate = (index, updatedData) => {
-    const newComponents = [...components];
-    newComponents[index] = {
-      ...newComponents[index],
-      data: updatedData,
-    };
-    onUpdateComponents(newComponents);
-  };
-
   const handleComponentDelete = (index) => {
     const newComponents = components.filter((_, i) => i !== index);
     onUpdateComponents(newComponents);
+    setSelectedComponent({ component: null, index: null });
     setEditingComponent(null);
   };
 
@@ -280,13 +288,17 @@ export function EmailCanvas({
                 ? "border-2 border-primary border-dashed"
                 : ""
             }`}
+            onClick={(e) => {
+              e.stopPropagation();
+              setSelectedComponent({ component, index });
+            }}
             onDragOver={(e) => handleDragOverComponent(e, index)}
             onDragLeave={handleDragLeave}
             onDrop={(e) =>
               handleComponentDrop(e, index, e.target.dataset.columnId)
             }
           >
-            <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+            {/* <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
               <div className="flex gap-1">
                 <Popover
                   open={editingComponent === index}
@@ -321,20 +333,20 @@ export function EmailCanvas({
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => handleComponentDelete(index)}
+                  onClick={() => handleComponentDelete(component.id)}
                   className="bg-card hover:bg-destructive/10 text-destructive hover:text-destructive"
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>
               </div>
-            </div>
+            </div> */}
 
             <EmailComponent
+              setSelectedComponent={setSelectedComponent}
               type={component.type}
               data={component.data}
-              isEditing={false}
               onUpdate={(updatedData) =>
-                handleComponentUpdate(index, updatedData)
+                handleComponentUpdate(component.id, updatedData)
               }
             />
 
