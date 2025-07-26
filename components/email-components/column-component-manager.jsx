@@ -4,12 +4,6 @@ import { useState, useCallback } from "react";
 import { EmailComponent } from "@/components/email-component";
 import { Button } from "@/components/ui/button";
 import { Trash2, ChevronUp, ChevronDown } from "lucide-react";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { ScrollArea } from "@/components/ui/scroll-area";
 
 export function ColumnComponentManager({
   component,
@@ -19,9 +13,8 @@ export function ColumnComponentManager({
   onMoveUp,
   onMoveDown,
   totalComponents,
+  setSelectedComponent,
 }) {
-  const [isEditing, setIsEditing] = useState(false);
-
   const handleUpdate = useCallback(
     (updatedData) => {
       onUpdate(updatedData);
@@ -29,10 +22,6 @@ export function ColumnComponentManager({
     },
     [onUpdate]
   );
-
-  const handleCancel = useCallback(() => {
-    setIsEditing(false);
-  }, []);
 
   const handleDelete = (e) => {
     e.preventDefault();
@@ -53,11 +42,17 @@ export function ColumnComponentManager({
   };
 
   return (
-    <div className="relative group border-2 border-transparent hover:border-primary/30 rounded-lg transition-colors">
+    <div
+      className="relative group border-2 border-transparent hover:border-primary/30 rounded-lg transition-colors"
+      onClick={(e) => {
+        e.stopPropagation();
+        setSelectedComponent({ component, index });
+      }}
+    >
       {/* Management Controls */}
       <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
         <div className="flex gap-1">
-          <Popover
+          {/* <Popover
             open={isEditing}
             onOpenChange={(isOpen) => setIsEditing(isOpen)}
             modal={true}
@@ -107,7 +102,7 @@ export function ColumnComponentManager({
                 </div>
               </ScrollArea>
             </PopoverContent>
-          </Popover>
+          </Popover> */}
 
           <Button
             variant="outline"
@@ -123,9 +118,9 @@ export function ColumnComponentManager({
       {/* Component Content */}
       <div className="p-2">
         <EmailComponent
+          setSelectedComponent={setSelectedComponent}
           type={component.type}
           data={component.data}
-          isEditing={false}
           onUpdate={onUpdate}
         />
       </div>

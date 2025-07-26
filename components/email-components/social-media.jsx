@@ -216,32 +216,6 @@ SocialMedia.Editor = function SocialMediaEditor({ data, onUpdate, onCancel }) {
           </div>
         </div>
       </div>
-
-      <div className="border rounded-lg p-4 bg-gray-50">
-        <Label>Preview</Label>
-        <div className="mt-2" style={{ textAlign: formData.alignment }}>
-          <div className="flex gap-4 justify-center">
-            {formData.platforms.map((platform, index) => (
-              <span
-                key={index}
-                style={{
-                  fontSize: formData.iconSize,
-                  color: formData.color,
-                }}
-              >
-                {platformOptions.find((p) => p.value === platform.name)?.icon ||
-                  "🔗"}
-              </span>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      <div className="flex justify-end">
-        <Button variant="outline" onClick={onCancel}>
-          Close
-        </Button>
-      </div>
     </div>
   );
 };

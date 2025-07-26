@@ -153,33 +153,6 @@ ButtonComponent.Editor = function ButtonEditor({ data, onUpdate, onCancel }) {
           ))}
         </div>
       </div>
-
-      <div className="border rounded-lg p-4 bg-gray-50">
-        <Label>Preview</Label>
-        <div className="mt-2 text-center">
-          <a
-            href={formData.url}
-            style={{
-              backgroundColor: formData.backgroundColor,
-              color: formData.color,
-              padding: formData.padding,
-              borderRadius: formData.borderRadius || "4px",
-              textDecoration: "none",
-              display: "inline-block",
-              fontSize: "16px",
-              fontWeight: "500",
-            }}
-          >
-            {formData.text}
-          </a>
-        </div>
-      </div>
-
-      <div className="flex justify-end">
-        <UIButton variant="outline" onClick={onCancel}>
-          Close
-        </UIButton>
-      </div>
     </div>
   );
 };

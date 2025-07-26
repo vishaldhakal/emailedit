@@ -41,7 +41,9 @@ Spacer.Editor = function SpacerEditor({ data, onUpdate, onCancel }) {
           {heightOptions.map((option) => (
             <Button
               key={option.value}
-              variant={formData.height === option.value ? "default" : "secondary"}
+              variant={
+                formData.height === option.value ? "default" : "secondary"
+              }
               size="sm"
               onClick={() =>
                 setFormData((prev) => ({ ...prev, height: option.value }))
@@ -52,28 +54,6 @@ Spacer.Editor = function SpacerEditor({ data, onUpdate, onCancel }) {
             </Button>
           ))}
         </div>
-      </div>
-
-      <div className="border rounded-lg p-4 bg-gray-50">
-        <Label>Preview</Label>
-        <div className="mt-2">
-          <div
-            style={{
-              height: formData.height,
-              backgroundColor: "#e5e7eb",
-              border: "1px dashed #9ca3af",
-            }}
-            className="flex items-center justify-center text-gray-500 text-xs"
-          >
-            {formData.height} spacing
-          </div>
-        </div>
-      </div>
-
-      <div className="flex justify-end">
-        <Button variant="outline" onClick={onCancel}>
-          Close
-        </Button>
       </div>
     </div>
   );

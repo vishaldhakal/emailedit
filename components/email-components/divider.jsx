@@ -52,7 +52,9 @@ Divider.Editor = function DividerEditor({ data, onUpdate, onCancel }) {
           {styleOptions.map((option) => (
             <Button
               key={option.value}
-              variant={formData.style === option.value ? "default" : "secondary"}
+              variant={
+                formData.style === option.value ? "default" : "secondary"
+              }
               size="sm"
               onClick={() =>
                 setFormData((prev) => ({ ...prev, style: option.value }))
@@ -70,7 +72,9 @@ Divider.Editor = function DividerEditor({ data, onUpdate, onCancel }) {
           {heightOptions.map((option) => (
             <Button
               key={option.value}
-              variant={formData.height === option.value ? "default" : "secondary"}
+              variant={
+                formData.height === option.value ? "default" : "secondary"
+              }
               size="sm"
               onClick={() =>
                 setFormData((prev) => ({ ...prev, height: option.value }))
@@ -92,25 +96,6 @@ Divider.Editor = function DividerEditor({ data, onUpdate, onCancel }) {
             setFormData((prev) => ({ ...prev, color: e.target.value }))
           }
         />
-      </div>
-
-      <div className="border rounded-lg p-4 bg-gray-50">
-        <Label>Preview</Label>
-        <div className="mt-2">
-          <hr
-            style={{
-              border: "none",
-              borderTop: `${formData.height} ${formData.style} ${formData.color}`,
-              margin: 0,
-            }}
-          />
-        </div>
-      </div>
-
-      <div className="flex justify-end">
-        <Button variant="outline" onClick={onCancel}>
-          Close
-        </Button>
       </div>
     </div>
   );

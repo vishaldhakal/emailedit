@@ -4,19 +4,15 @@ import { useState, useCallback, useEffect } from "react";
 import { EmailComponent } from "./email-component";
 import { Button } from "./ui/button";
 import { Trash2 } from "lucide-react";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { ScrollArea } from "@/components/ui/scroll-area";
 
 export function EmailCanvas({
   components,
+  handleComponentUpdate,
   onUpdateComponents,
   onAddComponent,
+  selectedComponent,
+  setSelectedComponent,
 }) {
-  const [editingComponent, setEditingComponent] = useState(null);
   const [lastSaved, setLastSaved] = useState(Date.now());
   const [dragOverIndex, setDragOverIndex] = useState(null);
   const [dragOverColumn, setDragOverColumn] = useState(null);
@@ -215,19 +211,10 @@ export function EmailCanvas({
     setDragOverColumn(null);
   };
 
-  const handleComponentUpdate = (index, updatedData) => {
-    const newComponents = [...components];
-    newComponents[index] = {
-      ...newComponents[index],
-      data: updatedData,
-    };
-    onUpdateComponents(newComponents);
-  };
-
   const handleComponentDelete = (index) => {
     const newComponents = components.filter((_, i) => i !== index);
     onUpdateComponents(newComponents);
-    setEditingComponent(null);
+    setSelectedComponent({ component: null, index: null });
   };
 
   const handleComponentMove = (fromIndex, toIndex) => {
@@ -280,6 +267,14 @@ export function EmailCanvas({
                 ? "border-2 border-primary border-dashed"
                 : ""
             }`}
+            onClick={(e) => {
+              e.stopPropagation();
+              setSelectedComponent((prev) => {
+                if (prev?.index === index && prev?.component === component)
+                  return prev;
+                return { component, index };
+              });
+            }}
             onDragOver={(e) => handleDragOverComponent(e, index)}
             onDragLeave={handleDragLeave}
             onDrop={(e) =>
@@ -288,7 +283,7 @@ export function EmailCanvas({
           >
             <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
               <div className="flex gap-1">
-                <Popover
+                {/* <Popover
                   open={editingComponent === index}
                   onOpenChange={(isOpen) =>
                     setEditingComponent(isOpen ? index : null)
@@ -316,12 +311,15 @@ export function EmailCanvas({
                       />
                     </ScrollArea>
                   </PopoverContent>
-                </Popover>
+                </Popover> */}
 
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => handleComponentDelete(index)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleComponentDelete(index);
+                  }}
                   className="bg-card hover:bg-destructive/10 text-destructive hover:text-destructive"
                 >
                   <Trash2 className="h-4 w-4" />
@@ -330,9 +328,9 @@ export function EmailCanvas({
             </div>
 
             <EmailComponent
+              setSelectedComponent={setSelectedComponent}
               type={component.type}
               data={component.data}
-              isEditing={false}
               onUpdate={(updatedData) =>
                 handleComponentUpdate(index, updatedData)
               }

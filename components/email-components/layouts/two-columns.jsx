@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,7 +14,7 @@ import {
 import { EmailComponent } from "@/components/email-component";
 import { ColumnComponentManager } from "@/components/email-components/column-component-manager";
 
-export function TwoColumns({ data, onUpdate }) {
+export function TwoColumns({ data, onUpdate, setSelectedComponent }) {
   const {
     leftWidth,
     rightWidth,
@@ -117,6 +117,7 @@ export function TwoColumns({ data, onUpdate }) {
             <div className="space-y-3">
               {leftComponents.map((component, index) => (
                 <ColumnComponentManager
+                  setSelectedComponent={setSelectedComponent}
                   key={`${component.type}-${index}`}
                   component={component}
                   index={index}
@@ -153,6 +154,7 @@ export function TwoColumns({ data, onUpdate }) {
             <div className="space-y-3">
               {rightComponents.map((component, index) => (
                 <ColumnComponentManager
+                  setSelectedComponent={setSelectedComponent}
                   key={`${component.type}-${index}`}
                   component={component}
                   index={index}
@@ -180,9 +182,9 @@ export function TwoColumns({ data, onUpdate }) {
 TwoColumns.Editor = function TwoColumnsEditor({ data, onUpdate, onCancel }) {
   const [formData, setFormData] = useState(data);
 
-  const handleSave = () => {
+  useEffect(() => {
     onUpdate(formData);
-  };
+  }, [formData]);
 
   return (
     <div className="space-y-4">
@@ -289,43 +291,6 @@ TwoColumns.Editor = function TwoColumnsEditor({ data, onUpdate, onCancel }) {
             }))
           }
         />
-      </div>
-
-      <div className="border rounded-lg p-4 bg-card">
-        <Label>Preview</Label>
-        <div className="mt-2">
-          <div
-            style={{
-              backgroundColor: formData.backgroundColor,
-              padding: formData.padding,
-            }}
-            className="border border-border rounded-lg"
-          >
-            <div className="flex" style={{ gap: formData.gap || "20px" }}>
-              <div
-                style={{ width: formData.leftWidth }}
-                className="border-2 border-dashed border-border rounded p-4 text-center text-muted-foreground"
-              >
-                <div className="text-xl mb-2">📄</div>
-                <div>Left Column</div>
-              </div>
-              <div
-                style={{ width: formData.rightWidth }}
-                className="border-2 border-dashed border-border rounded p-4 text-center text-muted-foreground"
-              >
-                <div className="text-xl mb-2">📄</div>
-                <div>Right Column</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="flex justify-end space-x-2">
-        <Button variant="outline" onClick={onCancel}>
-          Cancel
-        </Button>
-        <Button onClick={handleSave}>Save</Button>
       </div>
     </div>
   );
