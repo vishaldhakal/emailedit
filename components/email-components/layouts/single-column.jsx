@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { EmailComponent } from "@/components/email-component";
+
 import { ColumnComponentManager } from "@/components/email-components/column-component-manager";
 
 export function SingleColumn({ data, onUpdate, setSelectedComponent }) {

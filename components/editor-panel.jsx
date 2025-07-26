@@ -8,7 +8,7 @@ export function EditorPanel({ selectedComponent, handleComponentUpdate }) {
       </div>
     );
   }
-  const Editor = componentMap[selectedComponent.component.type]?.Editor;
+  const Editor = componentMap[selectedComponent?.component.type]?.Editor;
 
   if (!Editor) {
     return (

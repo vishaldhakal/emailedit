@@ -11,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { EmailComponent } from "@/components/email-component";
+
 import { ColumnComponentManager } from "@/components/email-components/column-component-manager";
 
 export function ThreeColumns({ data, onUpdate, setSelectedComponent }) {
@@ -169,6 +169,7 @@ export function ThreeColumns({ data, onUpdate, setSelectedComponent }) {
             <div className="space-y-3">
               {column2Components.map((component, index) => (
                 <ColumnComponentManager
+                  setSelectedComponent={setSelectedComponent}
                   key={`${component.type}-${index}`}
                   component={component}
                   index={index}
@@ -205,6 +206,7 @@ export function ThreeColumns({ data, onUpdate, setSelectedComponent }) {
             <div className="space-y-3">
               {column3Components.map((component, index) => (
                 <ColumnComponentManager
+                  setSelectedComponent={setSelectedComponent}
                   key={`${component.type}-${index}`}
                   component={component}
                   index={index}

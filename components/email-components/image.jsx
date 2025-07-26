@@ -129,25 +129,6 @@ ImageComponent.Editor = function ImageEditor({ data, onUpdate, onCancel }) {
           ))}
         </div>
       </div>
-
-      {formData.src && (
-        <div className="border rounded-lg p-2">
-          <Label>Preview</Label>
-          <img
-            src={formData.src}
-            alt={formData.alt}
-            style={{
-              width: formData.width,
-              height: formData.height,
-              maxWidth: "100%",
-            }}
-            className="mt-2 rounded"
-            onError={(e) => {
-              e.target.style.display = "none";
-            }}
-          />
-        </div>
-      )}
     </div>
   );
 };

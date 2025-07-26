@@ -97,19 +97,6 @@ Divider.Editor = function DividerEditor({ data, onUpdate, onCancel }) {
           }
         />
       </div>
-
-      <div className="border rounded-lg p-4 bg-gray-50">
-        <Label>Preview</Label>
-        <div className="mt-2">
-          <hr
-            style={{
-              border: "none",
-              borderTop: `${formData.height} ${formData.style} ${formData.color}`,
-              margin: 0,
-            }}
-          />
-        </div>
-      </div>
     </div>
   );
 };

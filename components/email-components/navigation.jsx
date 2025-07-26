@@ -182,28 +182,6 @@ Navigation.Editor = function NavigationEditor({ data, onUpdate, onCancel }) {
           </div>
         </div>
       </div>
-
-      <div className="border rounded-lg p-4 bg-gray-50">
-        <Label>Preview</Label>
-        <div className="mt-2" style={{ textAlign: formData.alignment }}>
-          <nav>
-            <ul className="flex gap-6 justify-center list-none m-0 p-0">
-              {formData.items.map((item, index) => (
-                <li key={index}>
-                  <span
-                    style={{
-                      fontSize: formData.fontSize,
-                      color: formData.color,
-                    }}
-                  >
-                    {item.text}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </nav>
-        </div>
-      </div>
     </div>
   );
 };

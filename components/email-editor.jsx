@@ -5,12 +5,12 @@ import { Header } from "./header";
 import { ComponentsPanel } from "./components-panel";
 import { EmailCanvas } from "./email-canvas";
 import { EditorPanel } from "./editor-panel";
-import { nanoid } from "nanoid";
 
 export function EmailEditor() {
   const [components, setComponents] = useState([]);
   const [lastSaved, setLastSaved] = useState(Date.now());
 
+  console.log(components);
   const [selectedComponent, setSelectedComponent] = useState({
     component: null,
     index: null,

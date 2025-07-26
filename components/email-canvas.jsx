@@ -4,12 +4,6 @@ import { useState, useCallback, useEffect } from "react";
 import { EmailComponent } from "./email-component";
 import { Button } from "./ui/button";
 import { Trash2 } from "lucide-react";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { ScrollArea } from "@/components/ui/scroll-area";
 
 export function EmailCanvas({
   components,
@@ -19,7 +13,6 @@ export function EmailCanvas({
   selectedComponent,
   setSelectedComponent,
 }) {
-  const [editingComponent, setEditingComponent] = useState(null);
   const [lastSaved, setLastSaved] = useState(Date.now());
   const [dragOverIndex, setDragOverIndex] = useState(null);
   const [dragOverColumn, setDragOverColumn] = useState(null);
@@ -32,19 +25,6 @@ export function EmailCanvas({
     setLastSaved(Date.now());
     console.log("Auto-saved at:", new Date().toLocaleTimeString());
   }, [components]);
-
-  //for using keys to manipulate components
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (e.key === "Delete") {
-        if (!selectedComponent) return;
-
-        handleComponentDelete(selectedComponent.index);
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [components, selectedComponent]);
 
   // Auto-save when components change (debounced)
   useEffect(() => {
@@ -235,7 +215,6 @@ export function EmailCanvas({
     const newComponents = components.filter((_, i) => i !== index);
     onUpdateComponents(newComponents);
     setSelectedComponent({ component: null, index: null });
-    setEditingComponent(null);
   };
 
   const handleComponentMove = (fromIndex, toIndex) => {
@@ -290,7 +269,11 @@ export function EmailCanvas({
             }`}
             onClick={(e) => {
               e.stopPropagation();
-              setSelectedComponent({ component, index });
+              setSelectedComponent((prev) => {
+                if (prev?.index === index && prev?.component === component)
+                  return prev;
+                return { component, index };
+              });
             }}
             onDragOver={(e) => handleDragOverComponent(e, index)}
             onDragLeave={handleDragLeave}
@@ -298,9 +281,9 @@ export function EmailCanvas({
               handleComponentDrop(e, index, e.target.dataset.columnId)
             }
           >
-            {/* <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+            <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
               <div className="flex gap-1">
-                <Popover
+                {/* <Popover
                   open={editingComponent === index}
                   onOpenChange={(isOpen) =>
                     setEditingComponent(isOpen ? index : null)
@@ -328,25 +311,28 @@ export function EmailCanvas({
                       />
                     </ScrollArea>
                   </PopoverContent>
-                </Popover>
+                </Popover> */}
 
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => handleComponentDelete(component.id)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleComponentDelete(index);
+                  }}
                   className="bg-card hover:bg-destructive/10 text-destructive hover:text-destructive"
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>
               </div>
-            </div> */}
+            </div>
 
             <EmailComponent
               setSelectedComponent={setSelectedComponent}
               type={component.type}
               data={component.data}
               onUpdate={(updatedData) =>
-                handleComponentUpdate(component.id, updatedData)
+                handleComponentUpdate(index, updatedData)
               }
             />
 

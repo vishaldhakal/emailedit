@@ -154,6 +154,7 @@ export function TwoColumns({ data, onUpdate, setSelectedComponent }) {
             <div className="space-y-3">
               {rightComponents.map((component, index) => (
                 <ColumnComponentManager
+                  setSelectedComponent={setSelectedComponent}
                   key={`${component.type}-${index}`}
                   component={component}
                   index={index}
