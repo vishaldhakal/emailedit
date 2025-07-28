@@ -11,10 +11,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
+import { nanoid } from "nanoid";
 import { ColumnComponentManager } from "@/components/email-components/column-component-manager";
 
-export function ThreeColumns({ data, onUpdate, setSelectedComponent }) {
+export function ThreeColumns({ data, onUpdate, setSelectedComponentId }) {
   const {
     columnWidth,
     backgroundColor,
@@ -39,6 +39,7 @@ export function ThreeColumns({ data, onUpdate, setSelectedComponent }) {
         e.dataTransfer.getData("application/json")
       );
       const newComponent = {
+        id: nanoid(),
         type: componentData.type,
         data: componentData.defaultData,
       };
@@ -132,8 +133,8 @@ export function ThreeColumns({ data, onUpdate, setSelectedComponent }) {
             <div className="space-y-3">
               {column1Components.map((component, index) => (
                 <ColumnComponentManager
-                  setSelectedComponent={setSelectedComponent}
-                  key={`${component.type}-${index}`}
+                  setSelectedComponentId={setSelectedComponentId}
+                  key={component.id}
                   component={component}
                   index={index}
                   totalComponents={column1Components.length}
@@ -169,8 +170,8 @@ export function ThreeColumns({ data, onUpdate, setSelectedComponent }) {
             <div className="space-y-3">
               {column2Components.map((component, index) => (
                 <ColumnComponentManager
-                  setSelectedComponent={setSelectedComponent}
-                  key={`${component.type}-${index}`}
+                  setSelectedComponentId={setSelectedComponentId}
+                  key={component.id}
                   component={component}
                   index={index}
                   totalComponents={column2Components.length}
@@ -206,8 +207,8 @@ export function ThreeColumns({ data, onUpdate, setSelectedComponent }) {
             <div className="space-y-3">
               {column3Components.map((component, index) => (
                 <ColumnComponentManager
-                  setSelectedComponent={setSelectedComponent}
-                  key={`${component.type}-${index}`}
+                  setSelectedComponentId={setSelectedComponentId}
+                  key={component.id}
                   component={component}
                   index={index}
                   totalComponents={column3Components.length}

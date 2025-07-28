@@ -5,19 +5,18 @@ import { Header } from "./header";
 import { ComponentsPanel } from "./components-panel";
 import { EmailCanvas } from "./email-canvas";
 import { EditorPanel } from "./editor-panel";
+import { nanoid } from "nanoid";
 
 export function EmailEditor() {
   const [components, setComponents] = useState([]);
   const [lastSaved, setLastSaved] = useState(Date.now());
 
   console.log(components);
-  const [selectedComponent, setSelectedComponent] = useState({
-    component: null,
-    index: null,
-  });
+  const [selectedComponentId, setSelectedComponentId] = useState(null);
 
   const handleAddComponent = (type, defaultData) => {
     const newComponent = {
+      id: nanoid(),
       type,
       data: defaultData,
     };
@@ -25,18 +24,60 @@ export function EmailEditor() {
   };
 
   //updates individual components
-  const handleComponentUpdate = (index, updatedData) => {
-    const newComponents = [...components];
-    newComponents[index] = {
-      ...newComponents[index],
-      data: updatedData,
-    };
-    handleUpdateComponents(newComponents);
+  const handleComponentUpdate = (id, updatedData) => {
+    const newComponents = updateComponentById(components, id, updatedData);
+    setComponents(newComponents);
+  };
 
-    // Update selectedComponent if it’s the one updated
-    if (selectedComponent?.index === index) {
-      setSelectedComponent({ ...selectedComponent, data: updatedData });
-    }
+  //keys for nested component search
+  const NESTED_KEYS = [
+    "components",
+    "leftComponents",
+    "rightComponents",
+    "column1Components",
+    "column2Components",
+    "column3Components",
+    "column4Components",
+  ];
+
+  //recursivly search nested component by id and update
+  const updateComponentById = (components, id, updatedData) => {
+    return components.map((component) => {
+      if (component.id === id) {
+        return {
+          ...component,
+          data: updatedData,
+        };
+      }
+
+      // Check and update nested component arrays
+      let updated = false;
+      const newComponent = { ...component };
+
+      for (const key of NESTED_KEYS) {
+        if (Array.isArray(component.data?.[key])) {
+          const updatedChildren = updateComponentById(
+            component.data[key],
+            id,
+            updatedData
+          );
+
+          // Check if children changed
+          if (
+            JSON.stringify(updatedChildren) !==
+            JSON.stringify(component.data[key])
+          ) {
+            newComponent.data = {
+              ...component.data,
+              [key]: updatedChildren,
+            };
+            updated = true;
+          }
+        }
+      }
+
+      return updated ? newComponent : component;
+    });
   };
 
   //updates entire components list
@@ -72,12 +113,13 @@ export function EmailEditor() {
           onUpdateComponents={handleUpdateComponents}
           handleComponentUpdate={handleComponentUpdate}
           onAddComponent={handleAddComponent}
-          selectedComponent={selectedComponent}
-          setSelectedComponent={setSelectedComponent}
+          selectedComponentId={selectedComponentId}
+          setSelectedComponentId={setSelectedComponentId}
         />
         <EditorPanel
-          selectedComponent={selectedComponent}
+          selectedComponentId={selectedComponentId}
           handleComponentUpdate={handleComponentUpdate}
+          components={components}
         />
       </div>
     </div>

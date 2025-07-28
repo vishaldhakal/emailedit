@@ -11,10 +11,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { nanoid } from "nanoid";
 
 import { ColumnComponentManager } from "@/components/email-components/column-component-manager";
 
-export function SingleColumn({ data, onUpdate, setSelectedComponent }) {
+export function SingleColumn({ data, onUpdate, setSelectedComponentId }) {
   const { width, backgroundColor, padding, components = [] } = data;
 
   const handleColumnDrop = (e) => {
@@ -31,6 +32,7 @@ export function SingleColumn({ data, onUpdate, setSelectedComponent }) {
         e.dataTransfer.getData("application/json")
       );
       const newComponent = {
+        id: nanoid(),
         type: componentData.type,
         data: componentData.defaultData,
       };
@@ -81,8 +83,8 @@ export function SingleColumn({ data, onUpdate, setSelectedComponent }) {
         <div className="space-y-3">
           {components.map((component, index) => (
             <ColumnComponentManager
-              setSelectedComponent={setSelectedComponent}
-              key={`${component.type}-${index}`}
+              setSelectedComponentId={setSelectedComponentId}
+              key={component.id}
               component={component}
               index={index}
               totalComponents={components.length}

@@ -10,8 +10,7 @@ export function EmailCanvas({
   handleComponentUpdate,
   onUpdateComponents,
   onAddComponent,
-  selectedComponent,
-  setSelectedComponent,
+  setSelectedComponentId,
 }) {
   const [lastSaved, setLastSaved] = useState(Date.now());
   const [dragOverIndex, setDragOverIndex] = useState(null);
@@ -211,10 +210,10 @@ export function EmailCanvas({
     setDragOverColumn(null);
   };
 
-  const handleComponentDelete = (index) => {
-    const newComponents = components.filter((_, i) => i !== index);
+  const handleComponentDelete = (id) => {
+    const newComponents = components.filter((component) => component.id !== id);
     onUpdateComponents(newComponents);
-    setSelectedComponent({ component: null, index: null });
+    setSelectedComponentId(null);
   };
 
   const handleComponentMove = (fromIndex, toIndex) => {
@@ -260,7 +259,7 @@ export function EmailCanvas({
 
         {components.map((component, index) => (
           <div
-            key={`${component.type}-${index}`}
+            key={component.id}
             data-component-index={index}
             className={`relative group mb-4 border-2 border-transparent hover:border-primary rounded-lg transition-colors ${
               dragOverIndex === index
@@ -269,11 +268,7 @@ export function EmailCanvas({
             }`}
             onClick={(e) => {
               e.stopPropagation();
-              setSelectedComponent((prev) => {
-                if (prev?.index === index && prev?.component === component)
-                  return prev;
-                return { component, index };
-              });
+              setSelectedComponentId(component.id);
             }}
             onDragOver={(e) => handleDragOverComponent(e, index)}
             onDragLeave={handleDragLeave}
@@ -283,42 +278,12 @@ export function EmailCanvas({
           >
             <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
               <div className="flex gap-1">
-                {/* <Popover
-                  open={editingComponent === index}
-                  onOpenChange={(isOpen) =>
-                    setEditingComponent(isOpen ? index : null)
-                  }
-                >
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="bg-card hover:bg-accent"
-                    >
-                      Edit
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-80 p-4 bg-card border border-border rounded-lg shadow-lg">
-                    <ScrollArea className="h-96">
-                      <EmailComponent
-                        type={component.type}
-                        data={component.data}
-                        isEditing={true}
-                        onUpdate={(updatedData) =>
-                          handleComponentUpdate(index, updatedData)
-                        }
-                        onCancel={() => setEditingComponent(null)}
-                      />
-                    </ScrollArea>
-                  </PopoverContent>
-                </Popover> */}
-
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={(e) => {
                     e.stopPropagation();
-                    handleComponentDelete(index);
+                    handleComponentDelete(component.id);
                   }}
                   className="bg-card hover:bg-destructive/10 text-destructive hover:text-destructive"
                 >
@@ -328,11 +293,12 @@ export function EmailCanvas({
             </div>
 
             <EmailComponent
-              setSelectedComponent={setSelectedComponent}
+              key={component.id}
+              setSelectedComponentId={setSelectedComponentId}
               type={component.type}
               data={component.data}
               onUpdate={(updatedData) =>
-                handleComponentUpdate(index, updatedData)
+                handleComponentUpdate(component.id, updatedData)
               }
             />
 

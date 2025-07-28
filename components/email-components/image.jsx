@@ -42,7 +42,7 @@ ImageComponent.Editor = function ImageEditor({ data, onUpdate, onCancel }) {
     }, 500); // Auto-save after 500ms of no changes
 
     return () => clearTimeout(timeoutId);
-  }, [formData, onUpdate]);
+  }, [formData]);
 
   const widthOptions = [
     { value: "100%", label: "Full Width" },

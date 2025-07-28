@@ -31,7 +31,12 @@ export const componentMap = {
   "four-columns": FourColumns,
 };
 
-export function EmailComponent({ type, data, onUpdate, setSelectedComponent }) {
+export function EmailComponent({
+  type,
+  data,
+  onUpdate,
+  setSelectedComponentId,
+}) {
   const ComponentRenderer = componentMap[type];
 
   if (!ComponentRenderer) {
@@ -44,7 +49,7 @@ export function EmailComponent({ type, data, onUpdate, setSelectedComponent }) {
 
   return (
     <ComponentRenderer
-      setSelectedComponent={setSelectedComponent}
+      setSelectedComponentId={setSelectedComponentId}
       data={data}
       onUpdate={onUpdate}
     />

@@ -10,13 +10,12 @@ export function TextBlock({ data, onUpdate }) {
   const { content, fontSize, color, alignment } = data;
   const ref = useRef(null);
 
-  // update ui on the basis of content prop
+  //update ui on the basis of content prop
   useEffect(() => {
     if (ref.current && ref.current.textContent !== content) {
       ref.current.textContent = content;
     }
   }, [content]);
-
   const handleInput = () => {
     const newText = ref.current?.textContent || "";
     if (newText !== content) {
@@ -41,16 +40,17 @@ export function TextBlock({ data, onUpdate }) {
 }
 
 TextBlock.Editor = function TextBlockEditor({ data, onUpdate }) {
-  const [formData, setFormData] = useState(data);
+  const { fontSize, color, alignment } = data;
+  const [formData, setFormData] = useState({ fontSize, color, alignment });
 
   // Auto-save when formData changes
   useEffect(() => {
     const timeoutId = setTimeout(() => {
-      onUpdate(formData);
-    }, 500); // Auto-save after 500ms of no changes
+      onUpdate({ content: data.content, ...formData });
+    }, 500);
 
     return () => clearTimeout(timeoutId);
-  }, [formData]);
+  }, [formData, data.content]);
 
   const fontSizeOptions = [
     { value: "12px", label: "12px" },
