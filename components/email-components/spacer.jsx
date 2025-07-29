@@ -10,7 +10,7 @@ export function Spacer({ data }) {
   return <div style={{ height }} />;
 }
 
-Spacer.Editor = function SpacerEditor({ data, onUpdate, onCancel }) {
+Spacer.Editor = function SpacerEditor({ data, onUpdate }) {
   const [formData, setFormData] = useState(data);
 
   // Auto-save when formData changes
@@ -20,7 +20,7 @@ Spacer.Editor = function SpacerEditor({ data, onUpdate, onCancel }) {
     }, 500); // Auto-save after 500ms of no changes
 
     return () => clearTimeout(timeoutId);
-  }, [formData, onUpdate]);
+  }, [formData]);
 
   const heightOptions = [
     { value: "10px", label: "10px" },

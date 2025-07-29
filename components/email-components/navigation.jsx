@@ -41,7 +41,7 @@ Navigation.Editor = function NavigationEditor({ data, onUpdate, onCancel }) {
     }, 500); // Auto-save after 500ms of no changes
 
     return () => clearTimeout(timeoutId);
-  }, [formData, onUpdate]);
+  }, [formData]);
 
   const fontSizeOptions = [
     { value: "12px", label: "12px" },

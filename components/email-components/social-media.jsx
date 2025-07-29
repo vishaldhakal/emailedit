@@ -51,7 +51,7 @@ SocialMedia.Editor = function SocialMediaEditor({ data, onUpdate, onCancel }) {
     }, 500); // Auto-save after 500ms of no changes
 
     return () => clearTimeout(timeoutId);
-  }, [formData, onUpdate]);
+  }, [formData]);
 
   const platformOptions = [
     { value: "facebook", label: "Facebook", icon: "📘" },

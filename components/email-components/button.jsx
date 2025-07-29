@@ -42,7 +42,7 @@ ButtonComponent.Editor = function ButtonEditor({ data, onUpdate, onCancel }) {
     }, 500); // Auto-save after 500ms of no changes
 
     return () => clearTimeout(timeoutId);
-  }, [formData, onUpdate]);
+  }, [formData]);
 
   const paddingOptions = [
     { value: "8px 16px", label: "Small" },

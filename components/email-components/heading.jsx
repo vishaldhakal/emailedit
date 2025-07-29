@@ -26,7 +26,7 @@ export function Heading({ data, onUpdate }) {
   };
 
   return (
-    <div
+    <Tag
       className=" border-none outline-none pl-1"
       ref={ref}
       key={level}
@@ -43,16 +43,17 @@ export function Heading({ data, onUpdate }) {
 }
 
 Heading.Editor = function HeadingEditor({ data, onUpdate }) {
-  const [formData, setFormData] = useState(data);
+  const { level, color, alignment } = data;
+  const [formData, setFormData] = useState({ level, color, alignment });
 
   // Auto-save when formData changes
   useEffect(() => {
     const timeoutId = setTimeout(() => {
-      onUpdate(formData);
+      onUpdate({ content: data.content, ...formData });
     }, 500); // Auto-save after 500ms of no changes
 
     return () => clearTimeout(timeoutId);
-  }, [formData]);
+  }, [formData, data.content]);
 
   const levelOptions = [
     { value: "h1", label: "H1" },

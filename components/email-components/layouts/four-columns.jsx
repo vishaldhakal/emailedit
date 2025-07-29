@@ -11,10 +11,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
+import { nanoid } from "nanoid";
 import { ColumnComponentManager } from "@/components/email-components/column-component-manager";
 
-export function FourColumns({ data, onUpdate, setSelectedComponent }) {
+export function FourColumns({ data, onUpdate, setSelectedComponentId }) {
   const {
     columnWidth,
     backgroundColor,
@@ -40,6 +40,7 @@ export function FourColumns({ data, onUpdate, setSelectedComponent }) {
         e.dataTransfer.getData("application/json")
       );
       const newComponent = {
+        id: nanoid(),
         type: componentData.type,
         data: componentData.defaultData,
       };
@@ -148,8 +149,8 @@ export function FourColumns({ data, onUpdate, setSelectedComponent }) {
             <div className="space-y-3">
               {column1Components.map((component, index) => (
                 <ColumnComponentManager
-                  setSelectedComponent={setSelectedComponent}
-                  key={`${component.type}-${index}`}
+                  setSelectedComponentId={setSelectedComponentId}
+                  key={component.id}
                   component={component}
                   index={index}
                   totalComponents={column1Components.length}
@@ -185,8 +186,8 @@ export function FourColumns({ data, onUpdate, setSelectedComponent }) {
             <div className="space-y-3">
               {column2Components.map((component, index) => (
                 <ColumnComponentManager
-                  setSelectedComponent={setSelectedComponent}
-                  key={`${component.type}-${index}`}
+                  setSelectedComponentId={setSelectedComponentId}
+                  key={component.id}
                   component={component}
                   index={index}
                   totalComponents={column2Components.length}
@@ -222,8 +223,8 @@ export function FourColumns({ data, onUpdate, setSelectedComponent }) {
             <div className="space-y-3">
               {column3Components.map((component, index) => (
                 <ColumnComponentManager
-                  setSelectedComponent={setSelectedComponent}
-                  key={`${component.type}-${index}`}
+                  setSelectedComponentId={setSelectedComponentId}
+                  key={component.id}
                   component={component}
                   index={index}
                   totalComponents={column3Components.length}
@@ -259,8 +260,8 @@ export function FourColumns({ data, onUpdate, setSelectedComponent }) {
             <div className="space-y-3">
               {column4Components.map((component, index) => (
                 <ColumnComponentManager
-                  setSelectedComponent={setSelectedComponent}
-                  key={`${component.type}-${index}`}
+                  setSelectedComponentId={setSelectedComponentId}
+                  key={component.id}
                   component={component}
                   index={index}
                   totalComponents={column4Components.length}

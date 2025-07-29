@@ -11,10 +11,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { EmailComponent } from "@/components/email-component";
+import { nanoid } from "nanoid";
 import { ColumnComponentManager } from "@/components/email-components/column-component-manager";
 
-export function TwoColumns({ data, onUpdate, setSelectedComponent }) {
+export function TwoColumns({ data, onUpdate, setSelectedComponentId }) {
   const {
     leftWidth,
     rightWidth,
@@ -39,6 +39,7 @@ export function TwoColumns({ data, onUpdate, setSelectedComponent }) {
         e.dataTransfer.getData("application/json")
       );
       const newComponent = {
+        id: nanoid(),
         type: componentData.type,
         data: componentData.defaultData,
       };
@@ -117,8 +118,8 @@ export function TwoColumns({ data, onUpdate, setSelectedComponent }) {
             <div className="space-y-3">
               {leftComponents.map((component, index) => (
                 <ColumnComponentManager
-                  setSelectedComponent={setSelectedComponent}
-                  key={`${component.type}-${index}`}
+                  setSelectedComponentId={setSelectedComponentId}
+                  key={component.id}
                   component={component}
                   index={index}
                   totalComponents={leftComponents.length}
@@ -154,8 +155,8 @@ export function TwoColumns({ data, onUpdate, setSelectedComponent }) {
             <div className="space-y-3">
               {rightComponents.map((component, index) => (
                 <ColumnComponentManager
-                  setSelectedComponent={setSelectedComponent}
-                  key={`${component.type}-${index}`}
+                  setSelectedComponentId={setSelectedComponentId}
+                  key={component.id}
                   component={component}
                   index={index}
                   totalComponents={rightComponents.length}
