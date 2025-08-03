@@ -53,28 +53,28 @@ export function EmailCanvas({
   }, [lastSaved]);
 
   // Add visual feedback for column drag over
-  useEffect(() => {
-    const columnElements = document.querySelectorAll("[data-column-id]");
+  // useEffect(() => {
+  //   const columnElements = document.querySelectorAll("[data-column-id]");
 
-    columnElements.forEach((element) => {
-      if (dragOverColumn && element.dataset.columnId === dragOverColumn) {
-        element.classList.add(
-          "border-primary",
-          "bg-primary/10",
-          "scale-[1.02]"
-        );
-        element.style.transform = "scale(1.02)";
-        element.style.transition = "all 0.2s ease";
-      } else {
-        element.classList.remove(
-          "border-primary",
-          "bg-primary/10",
-          "scale-[1.02]"
-        );
-        element.style.transform = "scale(1)";
-      }
-    });
-  }, [dragOverColumn]);
+  //   columnElements.forEach((element) => {
+  //     if (dragOverColumn && element.dataset.columnId === dragOverColumn) {
+  //       element.classList.add(
+  //         "border-primary",
+  //         "bg-primary/10",
+  //         "scale-[1.02]"
+  //       );
+  //       element.style.transform = "scale(1.02)";
+  //       element.style.transition = "all 0.2s ease";
+  //     } else {
+  //       element.classList.remove(
+  //         "border-primary",
+  //         "bg-primary/10",
+  //         "scale-[1.02]"
+  //       );
+  //       element.style.transform = "scale(1)";
+  //     }
+  //   });
+  // }, [dragOverColumn]);
 
   const handleDragOver = (e) => {
     e.preventDefault();
@@ -212,7 +212,6 @@ export function EmailCanvas({
   };
 
   const handleDragLeave = (e) => {
-    e.currentTarget.classList.remove("bg-blue-400/30");
     setDragOverIndex(null);
     setDragOverColumn(null);
   };
@@ -232,6 +231,7 @@ export function EmailCanvas({
 
   const handleDragOverBetween = (e, index) => {
     e.preventDefault();
+    e.stopPropagation();
     setDragOverColumn(null);
     setDragOverIndex(index);
   };
@@ -297,12 +297,10 @@ export function EmailCanvas({
           <React.Fragment key={component.id}>
             {/* Drop zone before each component */}
             <div
-              className={`h-2   transition-colors rounded-sm `}
+              className={`h-2 transition-all duration-200 rounded-sm ${
+                dragOverIndex === index ? "bg-blue-400/30 h-6 my-1" : "h-2"
+              }`}
               onDragOver={(e) => handleDragOverBetween(e, index)}
-              onDragEnter={(e) => {
-                e.preventDefault();
-                e.currentTarget.classList.add("bg-blue-400/30");
-              }}
               onDrop={(e) => handleDropBetween(e, index)}
               onDragLeave={handleDragLeave}
             />
@@ -380,6 +378,17 @@ export function EmailCanvas({
             </div>
           </React.Fragment>
         ))}
+        {/* Drop zone at the end (after last component) */}
+        <div
+          className={`h-2 transition-all duration-200 rounded-sm ${
+            dragOverIndex === components.length
+              ? "bg-blue-400/30 h-6 my-1"
+              : "h-2"
+          }`}
+          onDragOver={(e) => handleDragOverBetween(e, components.length)}
+          onDrop={(e) => handleDropBetween(e, components.length)}
+          onDragLeave={handleDragLeave}
+        />
       </div>
     </div>
   );
