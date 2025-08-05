@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
+import React, { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -24,7 +23,8 @@ export function TwoColumns({ data, onUpdate, setSelectedComponentId }) {
     leftComponents = [],
     rightComponents = [],
   } = data;
-
+  const [dragOverColumn, setDragOverColumn] = useState(null);
+  const [dragOverIndex, setDragOverIndex] = useState(null);
   const handleColumnDrop = (e, columnId) => {
     e.preventDefault();
     e.stopPropagation();
@@ -54,8 +54,49 @@ export function TwoColumns({ data, onUpdate, setSelectedComponentId }) {
     } catch (error) {
       console.error("Error parsing dropped component:", error);
     }
+    setDragOverIndex(null);
+    setDragOverColumn(null);
+  };
+  const handleDropBetween = (e, columnId, index) => {
+    e.preventDefault();
+    e.stopPropagation();
+    try {
+      const componentData = JSON.parse(
+        e.dataTransfer.getData("application/json")
+      );
+      const newComponent = {
+        id: nanoid(),
+        type: componentData.type,
+        data: componentData.defaultData,
+      };
+      if (columnId === "left") {
+        const newLeft = [...leftComponents];
+        newLeft.splice(index, 0, newComponent);
+        onUpdate({ ...data, leftComponents: newLeft });
+      } else if (columnId === "right") {
+        const newRight = [...rightComponents];
+        newRight.splice(index, 0, newComponent);
+        onUpdate({ ...data, rightComponents: newRight });
+      }
+    } catch (error) {
+      console.error("Error parsing dropped component:", error);
+    }
+    setDragOverIndex(null);
+    setDragOverColumn(null);
   };
 
+  const handleDragOverBetween = (e, columnId, index) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragOverIndex(index);
+    setDragOverColumn(columnId);
+  };
+  const handleDragLeaveBetween = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragOverIndex(null);
+    setDragOverColumn(null);
+  };
   const handleComponentUpdate = (columnId, index, updatedData) => {
     if (columnId === "left") {
       const newComponents = [...leftComponents];
@@ -106,7 +147,10 @@ export function TwoColumns({ data, onUpdate, setSelectedComponentId }) {
           className="border-2 border-dashed border-border rounded p-4 text-center text-muted-foreground flex flex-col transition-colors hover:border-primary/50"
           data-column-id="left"
           onDrop={(e) => handleColumnDrop(e, "left")}
-          onDragOver={(e) => e.preventDefault()}
+          onDragOver={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+          }}
         >
           {leftComponents.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-8">
@@ -115,26 +159,56 @@ export function TwoColumns({ data, onUpdate, setSelectedComponentId }) {
               <div className="text-sm">Drop content here</div>
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-1">
               {leftComponents.map((component, index) => (
-                <ColumnComponentManager
-                  setSelectedComponentId={setSelectedComponentId}
-                  key={component.id}
-                  component={component}
-                  index={index}
-                  totalComponents={leftComponents.length}
-                  onUpdate={(updatedData) =>
-                    handleComponentUpdate("left", index, updatedData)
-                  }
-                  onDelete={(index) => handleComponentDelete("left", index)}
-                  onMoveUp={(index) =>
-                    handleComponentMove("left", index, index - 1)
-                  }
-                  onMoveDown={(index) =>
-                    handleComponentMove("left", index, index + 1)
-                  }
-                />
+                <React.Fragment key={component.id}>
+                  {/* Drop zone before each component */}
+                  <div
+                    className={`h-2 transition-all duration-200 rounded-sm ${
+                      dragOverIndex === index && dragOverColumn === "left"
+                        ? "bg-blue-400/30 h-6 my-1"
+                        : "h-2"
+                    }`}
+                    onDrop={(e) => handleDropBetween(e, "left", index)}
+                    onDragOver={(e) => handleDragOverBetween(e, "left", index)}
+                    onDragLeave={handleDragLeaveBetween}
+                  />
+                  {/* main component */}
+                  <ColumnComponentManager
+                    setSelectedComponentId={setSelectedComponentId}
+                    key={component.id}
+                    component={component}
+                    index={index}
+                    totalComponents={leftComponents.length}
+                    onUpdate={(updatedData) =>
+                      handleComponentUpdate("left", index, updatedData)
+                    }
+                    onDelete={(index) => handleComponentDelete("left", index)}
+                    onMoveUp={(index) =>
+                      handleComponentMove("left", index, index - 1)
+                    }
+                    onMoveDown={(index) =>
+                      handleComponentMove("left", index, index + 1)
+                    }
+                  />
+                </React.Fragment>
               ))}
+              {/* Drop zone at end */}
+              <div
+                className={`h-2 transition-colors rounded-sm ${
+                  dragOverIndex === leftComponents.length &&
+                  dragOverColumn === "left"
+                    ? "bg-blue-400/30 h-4 my-1"
+                    : "h-2"
+                }`}
+                onDragOver={(e) =>
+                  handleDragOverBetween(e, "left", leftComponents.length)
+                }
+                onDrop={(e) =>
+                  handleDropBetween(e, "left", leftComponents.length)
+                }
+                onDragLeave={handleDragLeaveBetween}
+              />
             </div>
           )}
         </div>
@@ -143,7 +217,10 @@ export function TwoColumns({ data, onUpdate, setSelectedComponentId }) {
           className="border-2 border-dashed border-border rounded p-4 text-center text-muted-foreground flex flex-col transition-colors hover:border-primary/50"
           data-column-id="right"
           onDrop={(e) => handleColumnDrop(e, "right")}
-          onDragOver={(e) => e.preventDefault()}
+          onDragOver={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+          }}
         >
           {rightComponents.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-8">
@@ -152,26 +229,56 @@ export function TwoColumns({ data, onUpdate, setSelectedComponentId }) {
               <div className="text-sm">Drop content here</div>
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-1">
               {rightComponents.map((component, index) => (
-                <ColumnComponentManager
-                  setSelectedComponentId={setSelectedComponentId}
-                  key={component.id}
-                  component={component}
-                  index={index}
-                  totalComponents={rightComponents.length}
-                  onUpdate={(updatedData) =>
-                    handleComponentUpdate("right", index, updatedData)
-                  }
-                  onDelete={(index) => handleComponentDelete("right", index)}
-                  onMoveUp={(index) =>
-                    handleComponentMove("right", index, index - 1)
-                  }
-                  onMoveDown={(index) =>
-                    handleComponentMove("right", index, index + 1)
-                  }
-                />
+                <React.Fragment key={component.id}>
+                  {/* Drop zone before each component */}
+                  <div
+                    className={`h-2 transition-all duration-200 rounded-sm ${
+                      dragOverIndex === index && dragOverColumn === "right"
+                        ? "bg-blue-400/30 h-6 my-1"
+                        : "h-2"
+                    }`}
+                    onDrop={(e) => handleDropBetween(e, "right", index)}
+                    onDragOver={(e) => handleDragOverBetween(e, "right", index)}
+                    onDragLeave={handleDragLeaveBetween}
+                  />
+                  {/* main component */}
+                  <ColumnComponentManager
+                    setSelectedComponentId={setSelectedComponentId}
+                    key={component.id}
+                    component={component}
+                    index={index}
+                    totalComponents={rightComponents.length}
+                    onUpdate={(updatedData) =>
+                      handleComponentUpdate("right", index, updatedData)
+                    }
+                    onDelete={(index) => handleComponentDelete("right", index)}
+                    onMoveUp={(index) =>
+                      handleComponentMove("right", index, index - 1)
+                    }
+                    onMoveDown={(index) =>
+                      handleComponentMove("right", index, index + 1)
+                    }
+                  />
+                </React.Fragment>
               ))}
+              {/* Drop zone at end */}
+              <div
+                className={`h-2 transition-colors rounded-sm ${
+                  dragOverIndex === rightComponents.length &&
+                  dragOverColumn === "right"
+                    ? "bg-blue-400/30 h-4 my-1"
+                    : "h-2"
+                }`}
+                onDragOver={(e) =>
+                  handleDragOverBetween(e, "right", rightComponents.length)
+                }
+                onDrop={(e) =>
+                  handleDropBetween(e, "right", rightComponents.length)
+                }
+                onDragLeave={handleDragLeaveBetween}
+              />
             </div>
           )}
         </div>

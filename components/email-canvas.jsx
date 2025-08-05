@@ -4,6 +4,8 @@ import { useState, useCallback, useEffect } from "react";
 import { EmailComponent } from "./email-component";
 import { Button } from "./ui/button";
 import { Trash2 } from "lucide-react";
+import { nanoid } from "nanoid";
+import React from "react";
 
 export function EmailCanvas({
   components,
@@ -16,7 +18,7 @@ export function EmailCanvas({
   const [dragOverIndex, setDragOverIndex] = useState(null);
   const [dragOverColumn, setDragOverColumn] = useState(null);
   const [formattedTime, setFormattedTime] = useState("");
-
+  console.log(dragOverColumn);
   // Auto-save function
   const autoSave = useCallback(() => {
     // Save to localStorage
@@ -51,28 +53,28 @@ export function EmailCanvas({
   }, [lastSaved]);
 
   // Add visual feedback for column drag over
-  useEffect(() => {
-    const columnElements = document.querySelectorAll("[data-column-id]");
+  // useEffect(() => {
+  //   const columnElements = document.querySelectorAll("[data-column-id]");
 
-    columnElements.forEach((element) => {
-      if (dragOverColumn && element.dataset.columnId === dragOverColumn) {
-        element.classList.add(
-          "border-primary",
-          "bg-primary/10",
-          "scale-[1.02]"
-        );
-        element.style.transform = "scale(1.02)";
-        element.style.transition = "all 0.2s ease";
-      } else {
-        element.classList.remove(
-          "border-primary",
-          "bg-primary/10",
-          "scale-[1.02]"
-        );
-        element.style.transform = "scale(1)";
-      }
-    });
-  }, [dragOverColumn]);
+  //   columnElements.forEach((element) => {
+  //     if (dragOverColumn && element.dataset.columnId === dragOverColumn) {
+  //       element.classList.add(
+  //         "border-primary",
+  //         "bg-primary/10",
+  //         "scale-[1.02]"
+  //       );
+  //       element.style.transform = "scale(1.02)";
+  //       element.style.transition = "all 0.2s ease";
+  //     } else {
+  //       element.classList.remove(
+  //         "border-primary",
+  //         "bg-primary/10",
+  //         "scale-[1.02]"
+  //       );
+  //       element.style.transform = "scale(1)";
+  //     }
+  //   });
+  // }, [dragOverColumn]);
 
   const handleDragOver = (e) => {
     e.preventDefault();
@@ -99,6 +101,7 @@ export function EmailCanvas({
       if (componentIndex !== null) {
         handleComponentDrop(e, componentIndex, columnId);
         setDragOverColumn(null);
+        setDragOverIndex(null);
         return;
       }
     }
@@ -117,7 +120,9 @@ export function EmailCanvas({
         console.error("Error parsing dropped component:", error);
       }
     }
+
     setDragOverColumn(null);
+    setDragOverIndex(null);
   };
 
   const findComponentIndexFromElement = (element) => {
@@ -140,6 +145,7 @@ export function EmailCanvas({
         e.dataTransfer.getData("application/json")
       );
       const newComponent = {
+        id: nanoid(),
         type: componentData.type,
         data: componentData.defaultData,
       };
@@ -183,8 +189,8 @@ export function EmailCanvas({
     } catch (error) {
       console.error("Error parsing dropped component:", error);
     }
-    setDragOverIndex(null);
     setDragOverColumn(null);
+    setDragOverIndex(null);
   };
 
   const findTarget = (element) => {
@@ -205,7 +211,7 @@ export function EmailCanvas({
     setDragOverIndex(index);
   };
 
-  const handleDragLeave = () => {
+  const handleDragLeave = (e) => {
     setDragOverIndex(null);
     setDragOverColumn(null);
   };
@@ -221,6 +227,36 @@ export function EmailCanvas({
     const [movedComponent] = newComponents.splice(fromIndex, 1);
     newComponents.splice(toIndex, 0, movedComponent);
     onUpdateComponents(newComponents);
+  };
+
+  const handleDragOverBetween = (e, index) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragOverColumn(null);
+    setDragOverIndex(index);
+  };
+
+  const handleDropBetween = (e, index) => {
+    e.currentTarget.classList.remove("bg-blue-400/30");
+    e.preventDefault();
+    e.stopPropagation();
+    try {
+      const componentData = JSON.parse(
+        e.dataTransfer.getData("application/json")
+      );
+      const newComponent = {
+        id: nanoid(),
+        type: componentData.type,
+        data: componentData.defaultData,
+      };
+      const newComponents = [...components];
+      newComponents.splice(index, 0, newComponent);
+      onUpdateComponents(newComponents);
+    } catch (error) {
+      console.error("Error parsing dropped component:", error);
+    }
+    setDragOverIndex(null);
+    setDragOverColumn(null);
   };
 
   if (components.length === 0) {
@@ -258,78 +294,101 @@ export function EmailCanvas({
         )}
 
         {components.map((component, index) => (
-          <div
-            key={component.id}
-            data-component-index={index}
-            className={`relative group mb-4 border-2 border-transparent hover:border-primary rounded-lg transition-colors ${
-              dragOverIndex === index
-                ? "border-2 border-primary border-dashed"
-                : ""
-            }`}
-            onClick={(e) => {
-              e.stopPropagation();
-              setSelectedComponentId(component.id);
-            }}
-            onDragOver={(e) => handleDragOverComponent(e, index)}
-            onDragLeave={handleDragLeave}
-            onDrop={(e) =>
-              handleComponentDrop(e, index, e.target.dataset.columnId)
-            }
-          >
-            <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-              <div className="flex gap-1">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleComponentDelete(component.id);
-                  }}
-                  className="bg-card hover:bg-destructive/10 text-destructive hover:text-destructive"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-
-            <EmailComponent
-              key={component.id}
-              setSelectedComponentId={setSelectedComponentId}
-              type={component.type}
-              data={component.data}
-              onUpdate={(updatedData) =>
-                handleComponentUpdate(component.id, updatedData)
-              }
+          <React.Fragment key={component.id}>
+            {/* Drop zone before each component */}
+            <div
+              className={`h-2 transition-all duration-200 rounded-sm ${
+                dragOverIndex === index ? "bg-blue-400/30 h-6 my-1" : "h-2"
+              }`}
+              onDragOver={(e) => handleDragOverBetween(e, index)}
+              onDrop={(e) => handleDropBetween(e, index)}
+              onDragLeave={handleDragLeave}
             />
 
-            {/* Drag handles for reordering */}
-            {index > 0 && (
-              <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleComponentMove(index, index - 1)}
-                  className="bg-card hover:bg-accent text-xs"
-                >
-                  ↑ Move Up
-                </Button>
+            {/* main component */}
+            <div
+              data-component-index={index}
+              className={`relative group mb-2 border-2 border-transparent hover:border-primary rounded-lg transition-colors ${
+                dragOverIndex === index
+                  ? "border-2 border-primary border-dashed"
+                  : ""
+              }`}
+              onClick={(e) => {
+                e.stopPropagation();
+                setSelectedComponentId(component.id);
+              }}
+              onDragOver={(e) => handleDragOverComponent(e, index)}
+              onDragLeave={handleDragLeave}
+              onDrop={(e) =>
+                handleComponentDrop(e, index, e.target.dataset.columnId)
+              }
+            >
+              <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                <div className="flex gap-1">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleComponentDelete(component.id);
+                    }}
+                    className="bg-card hover:bg-destructive/10 text-destructive hover:text-destructive"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
-            )}
 
-            {index < components.length - 1 && (
-              <div className="absolute -bottom-3 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleComponentMove(index, index + 1)}
-                  className="bg-card hover:bg-accent text-xs"
-                >
-                  ↓ Move Down
-                </Button>
-              </div>
-            )}
-          </div>
+              <EmailComponent
+                key={component.id}
+                setSelectedComponentId={setSelectedComponentId}
+                type={component.type}
+                data={component.data}
+                onUpdate={(updatedData) =>
+                  handleComponentUpdate(component.id, updatedData)
+                }
+              />
+
+              {/* Drag handles for reordering */}
+              {index > 0 && (
+                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleComponentMove(index, index - 1)}
+                    className="bg-card hover:bg-accent text-xs"
+                  >
+                    ↑ Move Up
+                  </Button>
+                </div>
+              )}
+
+              {index < components.length - 1 && (
+                <div className="absolute -bottom-3 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleComponentMove(index, index + 1)}
+                    className="bg-card hover:bg-accent text-xs"
+                  >
+                    ↓ Move Down
+                  </Button>
+                </div>
+              )}
+            </div>
+          </React.Fragment>
         ))}
+        {/* Drop zone at the end (after last component) */}
+        <div
+          className={`h-2 transition-all duration-200 rounded-sm ${
+            dragOverIndex === components.length
+              ? "bg-blue-400/30 h-6 my-1"
+              : "h-2"
+          }`}
+          onDragOver={(e) => handleDragOverBetween(e, components.length)}
+          onDrop={(e) => handleDropBetween(e, components.length)}
+          onDragLeave={handleDragLeave}
+        />
       </div>
     </div>
   );

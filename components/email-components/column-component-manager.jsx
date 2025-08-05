@@ -3,6 +3,7 @@
 import { EmailComponent } from "@/components/email-component";
 import { Button } from "@/components/ui/button";
 import { Trash2, ChevronUp, ChevronDown } from "lucide-react";
+import React from "react";
 
 export function ColumnComponentManager({
   component,
