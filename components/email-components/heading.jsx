@@ -2,12 +2,26 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useRef } from "react";
+import { Palette } from "lucide-react";
+import {
+  Bold,
+  Italic,
+  Underline,
+  AlignLeft,
+  AlignCenter,
+  AlignRight,
+} from "lucide-react";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
 
 export function Heading({ data, onUpdate }) {
-  const { content, level, color, alignment } = data;
+  const { content, level, color, alignment, font, italic, underline } = data;
   const Tag = level || "h3";
   const ref = useRef(null);
 
@@ -34,7 +48,9 @@ export function Heading({ data, onUpdate }) {
       style={{
         color,
         textAlign: alignment,
-        margin: 0,
+        fontFamily: font,
+        fontStyle: italic ? "italic" : "normal",
+        textDecoration: underline ? "underline" : "none",
       }}
       contentEditable
       suppressContentEditableWarning
@@ -43,8 +59,14 @@ export function Heading({ data, onUpdate }) {
 }
 
 Heading.Editor = function HeadingEditor({ data, onUpdate }) {
-  const { level, color, alignment } = data;
-  const [formData, setFormData] = useState({ level, color, alignment });
+  const [formData, setFormData] = useState({
+    level: data.level,
+    color: data.color,
+    alignment: data.alignment,
+    font: data.font,
+    italic: data.italic || false,
+    underline: data.underline || false,
+  });
 
   // Auto-save when formData changes
   useEffect(() => {
@@ -55,75 +77,103 @@ Heading.Editor = function HeadingEditor({ data, onUpdate }) {
     return () => clearTimeout(timeoutId);
   }, [formData, data.content]);
 
-  const levelOptions = [
-    { value: "h1", label: "H1" },
-    { value: "h2", label: "H2" },
-    { value: "h3", label: "H3" },
-    { value: "h4", label: "H4" },
-    { value: "h5", label: "H5" },
-    { value: "h6", label: "H6" },
-  ];
-
-  const alignmentOptions = [
-    { value: "left", label: "Left" },
-    { value: "center", label: "Center" },
-    { value: "right", label: "Right" },
-  ];
-
   return (
-    <div className="space-y-4">
-      <div>
-        <Label>Heading Level</Label>
-        <div className="grid grid-cols-3 gap-2 mt-2">
-          {levelOptions.map((option) => (
-            <Button
-              key={option.value}
-              variant={
-                formData.level === option.value ? "default" : "secondary"
-              }
-              size="sm"
-              onClick={() =>
-                setFormData((prev) => ({ ...prev, level: option.value }))
-              }
-            >
-              {option.label}
-            </Button>
-          ))}
-        </div>
+    <div className="flex items-center h-full justify-center gap-5 bg-muted px-4 py-2 shadow-sm border-b w-full overflow-x-auto">
+      {/* Font Family */}
+      <Select
+        value={formData.font}
+        onValueChange={(value) =>
+          setFormData((prev) => ({ ...prev, font: value }))
+        }
+      >
+        <SelectTrigger className="w-[140px] h-8">
+          <SelectValue placeholder="Font" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="Arial">Arial</SelectItem>
+          <SelectItem value="Georgia">Georgia</SelectItem>
+          <SelectItem value="Times New Roman">Times New Roman</SelectItem>
+          <SelectItem value="Verdana">Verdana</SelectItem>
+        </SelectContent>
+      </Select>
+
+      {/* Level*/}
+      <Select
+        value={formData.level}
+        onValueChange={(value) =>
+          setFormData((prev) => ({ ...prev, level: value }))
+        }
+      >
+        <SelectTrigger className="w-[80px] h-8">
+          <SelectValue placeholder="level" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="h1">H1</SelectItem>
+          <SelectItem value="h2">H2</SelectItem>
+          <SelectItem value="h3">H3</SelectItem>
+          <SelectItem value="h4">H4</SelectItem>
+          <SelectItem value="h5">H5</SelectItem>
+          <SelectItem value="h6">H6</SelectItem>
+        </SelectContent>
+      </Select>
+
+      {/* Formatting */}
+      <div className="flex items-center gap-1">
+        <Button
+          variant={formData.italic ? "default" : "ghost"}
+          size="icon"
+          onClick={() =>
+            setFormData((prev) => ({ ...prev, italic: !prev.italic }))
+          }
+        >
+          <Italic className="w-4 h-4" />
+        </Button>
+        <Button
+          variant={formData.underline ? "default" : "ghost"}
+          size="icon"
+          onClick={() =>
+            setFormData((prev) => ({ ...prev, underline: !prev.underline }))
+          }
+        >
+          <Underline className="w-4 h-4" />
+        </Button>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="color">Text Color</Label>
-          <Input
-            id="color"
+      {/* Alignment Buttons */}
+      <div className="flex items-center gap-1 border-l pl-2 ml-2">
+        {["left", "center", "right"].map((align) => {
+          const Icon =
+            align === "left"
+              ? AlignLeft
+              : align === "center"
+              ? AlignCenter
+              : AlignRight;
+          return (
+            <Button
+              key={align}
+              variant={formData.alignment === align ? "default" : "ghost"}
+              size="icon"
+              onClick={() =>
+                setFormData((prev) => ({ ...prev, alignment: align }))
+              }
+            >
+              <Icon className="w-4 h-4" />
+            </Button>
+          );
+        })}
+      </div>
+      <div className="relative w-6 h-6">
+        <label className="w-full h-full cursor-pointer inline-flex items-center justify-center">
+          <Palette className="w-4 h-4 text-muted-foreground" />
+          <input
             type="color"
             value={formData.color}
             onChange={(e) =>
               setFormData((prev) => ({ ...prev, color: e.target.value }))
             }
+            className="absolute inset-0 opacity-0 cursor-pointer"
           />
-        </div>
-
-        <div>
-          <Label>Alignment</Label>
-          <div className="grid grid-cols-1 gap-2 mt-2">
-            {alignmentOptions.map((option) => (
-              <Button
-                key={option.value}
-                variant={
-                  formData.alignment === option.value ? "default" : "outline"
-                }
-                size="sm"
-                onClick={() =>
-                  setFormData((prev) => ({ ...prev, alignment: option.value }))
-                }
-              >
-                {option.label}
-              </Button>
-            ))}
-          </div>
-        </div>
+        </label>
       </div>
     </div>
   );

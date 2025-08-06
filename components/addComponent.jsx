@@ -1,6 +1,10 @@
-"use client";
-
-import { useState } from "react";
+import React from "react";
+import { Plus } from "lucide-react";
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from "@/components/ui/popover";
 import {
   Layout,
   Type,
@@ -21,7 +25,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-
+import { PopoverClose } from "@radix-ui/react-popover";
 const componentCategories = {
   layouts: {
     title: "Layouts",
@@ -114,9 +118,13 @@ const componentCategories = {
         description: "Rich text content",
         defaultData: {
           content: "Text",
+          font: "Arial",
           fontSize: "16px",
           color: "#000000",
           alignment: "left",
+          bold: false,
+          italic: false,
+          underline: false,
         },
       },
       {
@@ -129,6 +137,9 @@ const componentCategories = {
           level: "h3",
           color: "#000000",
           alignment: "left",
+          font: "Arial",
+          italic: false,
+          underline: false,
         },
       },
       {
@@ -212,76 +223,57 @@ const componentCategories = {
     ],
   },
 };
-
-export function ComponentsPanel({ onAddComponent }) {
-  const [draggedComponent, setDraggedComponent] = useState(null);
-
-  const handleDragStart = (e, component) => {
-    setDraggedComponent(component);
-    e.dataTransfer.setData("application/json", JSON.stringify(component));
-    e.dataTransfer.effectAllowed = "copy";
-  };
-
-  const handleDragEnd = () => {
-    setDraggedComponent(null);
-  };
-
-  const handleComponentClick = (component) => {
-    onAddComponent(component.type, component.defaultData);
-  };
-
+function AddComponent({ handleComponentClick, columnId }) {
   return (
-    <div className="w-80 bg-card border-r border-border flex flex-col">
-      <div className="p-4 border-b border-border">
-        <h2 className="text-lg font-semibold text-foreground">Components</h2>
-        <p className="text-sm text-muted-foreground mt-1">
-          Drag components to the canvas or click to add
-        </p>
-      </div>
-
-      <ScrollArea className="flex-1">
-        <div className="p-4">
-          <Accordion type="multiple" defaultValue={["layouts", "content"]}>
-            {Object.entries(componentCategories).map(([key, category]) => (
-              <AccordionItem key={key} value={key}>
-                <AccordionTrigger className="text-sm font-medium">
-                  <category.icon className="h-4 w-4 mr-2" />
-                  {category.title}
-                </AccordionTrigger>
-                <AccordionContent>
-                  <div className="grid grid-cols-2 gap-2 pt-2">
-                    {category.components.map((component) => (
-                      <div
-                        key={component.type}
-                        draggable
-                        onDragStart={(e) => handleDragStart(e, component)}
-                        onDragEnd={handleDragEnd}
-                        onClick={() => handleComponentClick(component)}
-                        className={`
-                          p-3 border border-border rounded-lg cursor-pointer
-                          hover:border-primary hover:bg-accent transition-colors
-                          ${
-                            draggedComponent?.type === component.type
-                              ? "opacity-50"
-                              : ""
-                          }
-                        `}
-                      >
-                        <div className="flex flex-col items-center text-center">
-                          <component.icon className="h-6 w-6 text-primary mb-2" />
-                          <span className="text-xs font-medium text-foreground">
-                            {component.name}
-                          </span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
-            ))}
-          </Accordion>
+    <Popover>
+      <PopoverTrigger asChild>
+        <div className="w-full  border rounded-md pl-3 py-1 cursor-pointer border-slate-600 flex  items-center gap-2">
+          <Plus size={18} />
+          Add Component
         </div>
-      </ScrollArea>
-    </div>
+      </PopoverTrigger>
+      <PopoverContent className="w-96 p-0">
+        <ScrollArea className="flex-1 h-[300px]">
+          <div className="p-4">
+            <Accordion type="multiple" defaultValue={["layouts", "content"]}>
+              {Object.entries(componentCategories).map(([key, category]) => (
+                <AccordionItem key={key} value={key}>
+                  <AccordionTrigger className="text-sm font-medium">
+                    <category.icon className="h-4 w-4 mr-2" />
+                    {category.title}
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <div className="grid grid-cols-3 gap-2 pt-2">
+                      {category.components.map((component) => (
+                        <PopoverClose key={component.type} asChild>
+                          <div
+                            key={component.type}
+                            onClick={() =>
+                              handleComponentClick(component, columnId)
+                            }
+                            className={`
+                          p-3 border border-border rounded-lg cursor-pointer
+                          hover:border-primary hover:bg-accent transition-colors `}
+                          >
+                            <div className="flex flex-col items-center text-center">
+                              <component.icon className="h-6 w-6 text-primary mb-2" />
+                              <span className="text-xs font-medium text-foreground">
+                                {component.name}
+                              </span>
+                            </div>
+                          </div>
+                        </PopoverClose>
+                      ))}
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
+          </div>
+        </ScrollArea>
+      </PopoverContent>
+    </Popover>
   );
 }
+
+export default AddComponent;

@@ -36,26 +36,20 @@ export function EditorPanel({
   components,
 }) {
   const selectedComponent = findComponentById(components, selectedComponentId);
-  console.log(selectedComponent);
-
   if (!selectedComponent) {
-    return (
-      <div className="w-80 bg-card border-l p-4 border-border flex flex-col">
-        select a block to see editing properties
-      </div>
-    );
+    return null;
   }
   const Editor = componentMap[selectedComponent.type]?.Editor;
 
   if (!Editor) {
     return (
-      <div className="w-80 border-l border-border bg-muted p-4 text-muted-foreground">
+      <div className=" border-l border-border bg-muted  text-muted-foreground">
         <p>No editor available for: {selectedComponent.type}</p>
       </div>
     );
   }
   return (
-    <div className="w-80 bg-card border-l p-4 border-border flex flex-col overflow-y-auto h-full">
+    <div className=" h-14 bg-red  border-l  border-border flex flex-col ">
       <Editor
         key={selectedComponent.id}
         data={selectedComponent.data}

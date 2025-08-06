@@ -1,8 +1,8 @@
 "use client";
-
 import React, { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Palette } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/select";
 import { nanoid } from "nanoid";
 import { ColumnComponentManager } from "@/components/email-components/column-component-manager";
+import AddComponent from "@/components/addComponent";
 
 export function TwoColumns({ data, onUpdate, setSelectedComponentId }) {
   const {
@@ -23,80 +24,23 @@ export function TwoColumns({ data, onUpdate, setSelectedComponentId }) {
     leftComponents = [],
     rightComponents = [],
   } = data;
-  const [dragOverColumn, setDragOverColumn] = useState(null);
-  const [dragOverIndex, setDragOverIndex] = useState(null);
-  const handleColumnDrop = (e, columnId) => {
-    e.preventDefault();
-    e.stopPropagation();
 
-    if (!onUpdate) {
-      console.error("onUpdate function is not available");
-      return;
+  const handleComponentClick = (component, columnId) => {
+    const newComponent = {
+      id: nanoid(),
+      type: component.type,
+      data: component.defaultData,
+    };
+
+    if (columnId === "left") {
+      const newComponents = [...leftComponents, newComponent];
+      onUpdate({ ...data, leftComponents: newComponents });
+    } else if (columnId === "right") {
+      const newComponents = [...rightComponents, newComponent];
+      onUpdate({ ...data, rightComponents: newComponents });
     }
-
-    try {
-      const componentData = JSON.parse(
-        e.dataTransfer.getData("application/json")
-      );
-      const newComponent = {
-        id: nanoid(),
-        type: componentData.type,
-        data: componentData.defaultData,
-      };
-
-      if (columnId === "left") {
-        const newComponents = [...leftComponents, newComponent];
-        onUpdate({ ...data, leftComponents: newComponents });
-      } else if (columnId === "right") {
-        const newComponents = [...rightComponents, newComponent];
-        onUpdate({ ...data, rightComponents: newComponents });
-      }
-    } catch (error) {
-      console.error("Error parsing dropped component:", error);
-    }
-    setDragOverIndex(null);
-    setDragOverColumn(null);
-  };
-  const handleDropBetween = (e, columnId, index) => {
-    e.preventDefault();
-    e.stopPropagation();
-    try {
-      const componentData = JSON.parse(
-        e.dataTransfer.getData("application/json")
-      );
-      const newComponent = {
-        id: nanoid(),
-        type: componentData.type,
-        data: componentData.defaultData,
-      };
-      if (columnId === "left") {
-        const newLeft = [...leftComponents];
-        newLeft.splice(index, 0, newComponent);
-        onUpdate({ ...data, leftComponents: newLeft });
-      } else if (columnId === "right") {
-        const newRight = [...rightComponents];
-        newRight.splice(index, 0, newComponent);
-        onUpdate({ ...data, rightComponents: newRight });
-      }
-    } catch (error) {
-      console.error("Error parsing dropped component:", error);
-    }
-    setDragOverIndex(null);
-    setDragOverColumn(null);
   };
 
-  const handleDragOverBetween = (e, columnId, index) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragOverIndex(index);
-    setDragOverColumn(columnId);
-  };
-  const handleDragLeaveBetween = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragOverIndex(null);
-    setDragOverColumn(null);
-  };
   const handleComponentUpdate = (columnId, index, updatedData) => {
     if (columnId === "left") {
       const newComponents = [...leftComponents];
@@ -146,148 +90,70 @@ export function TwoColumns({ data, onUpdate, setSelectedComponentId }) {
           style={{ width: leftWidth }}
           className="border-2 border-dashed border-border rounded p-4 text-center text-muted-foreground flex flex-col transition-colors hover:border-primary/50"
           data-column-id="left"
-          onDrop={(e) => handleColumnDrop(e, "left")}
-          onDragOver={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-          }}
         >
-          {leftComponents.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-8">
-              <div className="text-xl mb-2">📄</div>
-              <div>Left Column</div>
-              <div className="text-sm">Drop content here</div>
-            </div>
-          ) : (
-            <div className="space-y-1">
-              {leftComponents.map((component, index) => (
-                <React.Fragment key={component.id}>
-                  {/* Drop zone before each component */}
-                  <div
-                    className={`h-2 transition-all duration-200 rounded-sm ${
-                      dragOverIndex === index && dragOverColumn === "left"
-                        ? "bg-blue-400/30 h-6 my-1"
-                        : "h-2"
-                    }`}
-                    onDrop={(e) => handleDropBetween(e, "left", index)}
-                    onDragOver={(e) => handleDragOverBetween(e, "left", index)}
-                    onDragLeave={handleDragLeaveBetween}
-                  />
-                  {/* main component */}
-                  <ColumnComponentManager
-                    setSelectedComponentId={setSelectedComponentId}
-                    key={component.id}
-                    component={component}
-                    index={index}
-                    totalComponents={leftComponents.length}
-                    onUpdate={(updatedData) =>
-                      handleComponentUpdate("left", index, updatedData)
-                    }
-                    onDelete={(index) => handleComponentDelete("left", index)}
-                    onMoveUp={(index) =>
-                      handleComponentMove("left", index, index - 1)
-                    }
-                    onMoveDown={(index) =>
-                      handleComponentMove("left", index, index + 1)
-                    }
-                  />
-                </React.Fragment>
-              ))}
-              {/* Drop zone at end */}
-              <div
-                className={`h-2 transition-colors rounded-sm ${
-                  dragOverIndex === leftComponents.length &&
-                  dragOverColumn === "left"
-                    ? "bg-blue-400/30 h-4 my-1"
-                    : "h-2"
-                }`}
-                onDragOver={(e) =>
-                  handleDragOverBetween(e, "left", leftComponents.length)
+          <div className="space-y-1">
+            {leftComponents.map((component, index) => (
+              <ColumnComponentManager
+                setSelectedComponentId={setSelectedComponentId}
+                key={component.id}
+                component={component}
+                index={index}
+                totalComponents={leftComponents.length}
+                onUpdate={(updatedData) =>
+                  handleComponentUpdate("left", index, updatedData)
                 }
-                onDrop={(e) =>
-                  handleDropBetween(e, "left", leftComponents.length)
+                onDelete={(index) => handleComponentDelete("left", index)}
+                onMoveUp={(index) =>
+                  handleComponentMove("left", index, index - 1)
                 }
-                onDragLeave={handleDragLeaveBetween}
+                onMoveDown={(index) =>
+                  handleComponentMove("left", index, index + 1)
+                }
               />
-            </div>
-          )}
+            ))}
+            <AddComponent
+              columnId="left"
+              handleComponentClick={handleComponentClick}
+            />
+          </div>
         </div>
         <div
           style={{ width: rightWidth }}
           className="border-2 border-dashed border-border rounded p-4 text-center text-muted-foreground flex flex-col transition-colors hover:border-primary/50"
           data-column-id="right"
-          onDrop={(e) => handleColumnDrop(e, "right")}
-          onDragOver={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-          }}
         >
-          {rightComponents.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-8">
-              <div className="text-xl mb-2">📄</div>
-              <div>Right Column</div>
-              <div className="text-sm">Drop content here</div>
-            </div>
-          ) : (
-            <div className="space-y-1">
-              {rightComponents.map((component, index) => (
-                <React.Fragment key={component.id}>
-                  {/* Drop zone before each component */}
-                  <div
-                    className={`h-2 transition-all duration-200 rounded-sm ${
-                      dragOverIndex === index && dragOverColumn === "right"
-                        ? "bg-blue-400/30 h-6 my-1"
-                        : "h-2"
-                    }`}
-                    onDrop={(e) => handleDropBetween(e, "right", index)}
-                    onDragOver={(e) => handleDragOverBetween(e, "right", index)}
-                    onDragLeave={handleDragLeaveBetween}
-                  />
-                  {/* main component */}
-                  <ColumnComponentManager
-                    setSelectedComponentId={setSelectedComponentId}
-                    key={component.id}
-                    component={component}
-                    index={index}
-                    totalComponents={rightComponents.length}
-                    onUpdate={(updatedData) =>
-                      handleComponentUpdate("right", index, updatedData)
-                    }
-                    onDelete={(index) => handleComponentDelete("right", index)}
-                    onMoveUp={(index) =>
-                      handleComponentMove("right", index, index - 1)
-                    }
-                    onMoveDown={(index) =>
-                      handleComponentMove("right", index, index + 1)
-                    }
-                  />
-                </React.Fragment>
-              ))}
-              {/* Drop zone at end */}
-              <div
-                className={`h-2 transition-colors rounded-sm ${
-                  dragOverIndex === rightComponents.length &&
-                  dragOverColumn === "right"
-                    ? "bg-blue-400/30 h-4 my-1"
-                    : "h-2"
-                }`}
-                onDragOver={(e) =>
-                  handleDragOverBetween(e, "right", rightComponents.length)
+          <div className="space-y-1">
+            {rightComponents.map((component, index) => (
+              <ColumnComponentManager
+                setSelectedComponentId={setSelectedComponentId}
+                key={component.id}
+                component={component}
+                index={index}
+                totalComponents={rightComponents.length}
+                onUpdate={(updatedData) =>
+                  handleComponentUpdate("right", index, updatedData)
                 }
-                onDrop={(e) =>
-                  handleDropBetween(e, "right", rightComponents.length)
+                onDelete={(index) => handleComponentDelete("right", index)}
+                onMoveUp={(index) =>
+                  handleComponentMove("right", index, index - 1)
                 }
-                onDragLeave={handleDragLeaveBetween}
+                onMoveDown={(index) =>
+                  handleComponentMove("right", index, index + 1)
+                }
               />
-            </div>
-          )}
+            ))}
+            <AddComponent
+              columnId="right"
+              handleComponentClick={handleComponentClick}
+            />
+          </div>
         </div>
       </div>
     </div>
   );
 }
 
-TwoColumns.Editor = function TwoColumnsEditor({ data, onUpdate, onCancel }) {
+TwoColumns.Editor = function TwoColumnsEditor({ data, onUpdate }) {
   const [formData, setFormData] = useState(data);
 
   useEffect(() => {
@@ -295,110 +161,113 @@ TwoColumns.Editor = function TwoColumnsEditor({ data, onUpdate, onCancel }) {
   }, [formData]);
 
   return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="leftWidth">Left Column Width</Label>
-          <Select
-            value={formData.leftWidth}
-            onValueChange={(value) =>
-              setFormData((prev) => ({ ...prev, leftWidth: value }))
-            }
-          >
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="25%">25%</SelectItem>
-              <SelectItem value="33%">33%</SelectItem>
-              <SelectItem value="40%">40%</SelectItem>
-              <SelectItem value="50%">50%</SelectItem>
-              <SelectItem value="60%">60%</SelectItem>
-              <SelectItem value="67%">67%</SelectItem>
-              <SelectItem value="75%">75%</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div>
-          <Label htmlFor="rightWidth">Right Column Width</Label>
-          <Select
-            value={formData.rightWidth}
-            onValueChange={(value) =>
-              setFormData((prev) => ({ ...prev, rightWidth: value }))
-            }
-          >
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="75%">75%</SelectItem>
-              <SelectItem value="67%">67%</SelectItem>
-              <SelectItem value="60%">60%</SelectItem>
-              <SelectItem value="50%">50%</SelectItem>
-              <SelectItem value="40%">40%</SelectItem>
-              <SelectItem value="33%">33%</SelectItem>
-              <SelectItem value="25%">25%</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="padding">Padding</Label>
-          <Select
-            value={formData.padding}
-            onValueChange={(value) =>
-              setFormData((prev) => ({ ...prev, padding: value }))
-            }
-          >
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="0px">None</SelectItem>
-              <SelectItem value="10px">Small</SelectItem>
-              <SelectItem value="20px">Medium</SelectItem>
-              <SelectItem value="30px">Large</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div>
-          <Label htmlFor="gap">Column Gap</Label>
-          <Select
-            value={formData.gap || "20px"}
-            onValueChange={(value) =>
-              setFormData((prev) => ({ ...prev, gap: value }))
-            }
-          >
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="10px">Small</SelectItem>
-              <SelectItem value="20px">Medium</SelectItem>
-              <SelectItem value="30px">Large</SelectItem>
-              <SelectItem value="40px">Extra Large</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-
-      <div>
-        <Label htmlFor="backgroundColor">Background Color</Label>
-        <Input
-          id="backgroundColor"
-          type="color"
-          value={formData.backgroundColor}
-          onChange={(e) =>
-            setFormData((prev) => ({
-              ...prev,
-              backgroundColor: e.target.value,
-            }))
+    <div className="flex items-center h-full justify-center gap-4 bg-muted px-4 py-2 shadow-sm border-b w-full overflow-x-auto">
+      <div className="flex items-center gap-2">
+        <Label htmlFor="leftWidth">Left Column Width</Label>
+        <Select
+          value={formData.leftWidth}
+          onValueChange={(value) =>
+            setFormData((prev) => ({ ...prev, leftWidth: value }))
           }
-        />
+        >
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="25%">25%</SelectItem>
+            <SelectItem value="33%">33%</SelectItem>
+            <SelectItem value="40%">40%</SelectItem>
+            <SelectItem value="50%">50%</SelectItem>
+            <SelectItem value="60%">60%</SelectItem>
+            <SelectItem value="67%">67%</SelectItem>
+            <SelectItem value="75%">75%</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="flex items-center gap-1">
+        <Label htmlFor="rightWidth">Right Column Width</Label>
+        <Select
+          value={formData.rightWidth}
+          onValueChange={(value) =>
+            setFormData((prev) => ({ ...prev, rightWidth: value }))
+          }
+        >
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="75%">75%</SelectItem>
+            <SelectItem value="67%">67%</SelectItem>
+            <SelectItem value="60%">60%</SelectItem>
+            <SelectItem value="50%">50%</SelectItem>
+            <SelectItem value="40%">40%</SelectItem>
+            <SelectItem value="33%">33%</SelectItem>
+            <SelectItem value="25%">25%</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="flex items-center gap-1">
+        <Label htmlFor="padding">Padding</Label>
+        <Select
+          value={formData.padding}
+          onValueChange={(value) =>
+            setFormData((prev) => ({ ...prev, padding: value }))
+          }
+        >
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="0px">None</SelectItem>
+            <SelectItem value="10px">Small</SelectItem>
+            <SelectItem value="20px">Medium</SelectItem>
+            <SelectItem value="30px">Large</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="flex items-center gap-1">
+        <Label htmlFor="gap">Column Gap</Label>
+        <Select
+          value={formData.gap || "20px"}
+          onValueChange={(value) =>
+            setFormData((prev) => ({ ...prev, gap: value }))
+          }
+        >
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="10px">Small</SelectItem>
+            <SelectItem value="20px">Medium</SelectItem>
+            <SelectItem value="30px">Large</SelectItem>
+            <SelectItem value="40px">Extra Large</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="flex items-center gap-2 ">
+        <Label htmlFor="backgroundColor" className="text-sm">
+          Background Color
+        </Label>
+        <div className="relative w-6 h-6">
+          <label className="w-full h-full cursor-pointer inline-flex items-center justify-center">
+            <Palette className="w-4 h-4 text-muted-foreground" />
+            <input
+              type="color"
+              value={formData.backgroundColor}
+              onChange={(e) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  backgroundColor: e.target.value,
+                }))
+              }
+              className="absolute inset-0 opacity-0 cursor-pointer"
+            />
+          </label>
+        </div>
       </div>
     </div>
   );

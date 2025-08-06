@@ -2,7 +2,6 @@
 
 import { useState, useCallback } from "react";
 import { Header } from "./header";
-import { ComponentsPanel } from "./components-panel";
 import { EmailCanvas } from "./email-canvas";
 import { EditorPanel } from "./editor-panel";
 import { nanoid } from "nanoid";
@@ -10,8 +9,6 @@ import { nanoid } from "nanoid";
 export function EmailEditor() {
   const [components, setComponents] = useState([]);
   const [lastSaved, setLastSaved] = useState(Date.now());
-
-  console.log(components);
   const [selectedComponentId, setSelectedComponentId] = useState(null);
 
   const handleAddComponent = (type, defaultData) => {
@@ -105,23 +102,20 @@ export function EmailEditor() {
         lastSaved={lastSaved}
         onGenerateEmail={handleGenerateEmail}
       />
+      <EditorPanel
+        selectedComponentId={selectedComponentId}
+        handleComponentUpdate={handleComponentUpdate}
+        components={components}
+      />
 
-      <div className="flex-1 flex overflow-hidden">
-        <ComponentsPanel onAddComponent={handleAddComponent} />
-        <EmailCanvas
-          components={components}
-          onUpdateComponents={handleUpdateComponents}
-          handleComponentUpdate={handleComponentUpdate}
-          onAddComponent={handleAddComponent}
-          selectedComponentId={selectedComponentId}
-          setSelectedComponentId={setSelectedComponentId}
-        />
-        <EditorPanel
-          selectedComponentId={selectedComponentId}
-          handleComponentUpdate={handleComponentUpdate}
-          components={components}
-        />
-      </div>
+      <EmailCanvas
+        components={components}
+        onUpdateComponents={handleUpdateComponents}
+        handleComponentUpdate={handleComponentUpdate}
+        onAddComponent={handleAddComponent}
+        selectedComponentId={selectedComponentId}
+        setSelectedComponentId={setSelectedComponentId}
+      />
     </div>
   );
 }

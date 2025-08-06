@@ -35,27 +35,23 @@ export function ColumnComponentManager({
 
   return (
     <div
-      className="relative group border-2 border-transparent hover:border-primary/30 rounded-lg transition-colors"
+      className="relative group/inner border-2 border-transparent hover:border-primary/30 rounded-lg transition-colors"
       onClick={(e) => {
         e.stopPropagation();
         setSelectedComponentId(component.id);
       }}
     >
-      {/* Management Controls */}
-      <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-        <div className="flex gap-1">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleDelete}
-            className="bg-card hover:bg-destructive/10 text-destructive hover:text-destructive text-xs"
-          >
-            <Trash2 className="h-3 w-3" />
-          </Button>
-        </div>
+      <div className="absolute top-1/2 -translate-y-1/2 -right-8 z-10 opacity-0  group-hover/inner:opacity-100 transition-colors">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={handleDelete}
+          className="text-destructive hover:bg-destructive/20 hover:text-destructive transition-colors"
+        >
+          <Trash2 className="h-2 w-2" />
+        </Button>
       </div>
 
-      {/* Component Content */}
       <div className="p-2">
         <EmailComponent
           key={component.id}
@@ -67,27 +63,25 @@ export function ColumnComponentManager({
       </div>
 
       {/* Move Controls */}
-      <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
-        <div className="flex gap-1">
+      <div className="absolute top-1/2 -left-5 -translate-y-1/2 transform opacity-0 group-hover/inner:opacity-100 transition-opacity z-10">
+        <div className="flex flex-col items-center gap-[2px] bg-muted px-1 py-[2px] rounded-md shadow-sm">
           {index > 0 && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleMoveUp}
-              className="bg-card hover:bg-accent text-xs"
-            >
-              <ChevronUp className="h-3 w-3" />
-            </Button>
+            <ChevronUp
+              className="h-3 w-3 cursor-pointer text-muted-foreground hover:text-foreground"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleMoveUp(e);
+              }}
+            />
           )}
           {index < totalComponents - 1 && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleMoveDown}
-              className="bg-card hover:bg-accent text-xs"
-            >
-              <ChevronDown className="h-3 w-3" />
-            </Button>
+            <ChevronDown
+              className="h-3 w-3 cursor-pointer text-muted-foreground hover:text-foreground"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleMoveDown(e);
+              }}
+            />
           )}
         </div>
       </div>

@@ -3,7 +3,13 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
 export function Spacer({ data }) {
   const { height } = data;
 
@@ -22,38 +28,28 @@ Spacer.Editor = function SpacerEditor({ data, onUpdate }) {
     return () => clearTimeout(timeoutId);
   }, [formData]);
 
-  const heightOptions = [
-    { value: "10px", label: "10px" },
-    { value: "20px", label: "20px" },
-    { value: "30px", label: "30px" },
-    { value: "40px", label: "40px" },
-    { value: "50px", label: "50px" },
-    { value: "60px", label: "60px" },
-    { value: "80px", label: "80px" },
-    { value: "100px", label: "100px" },
-  ];
-
   return (
-    <div className="space-y-4">
-      <div>
+    <div className="flex items-center h-full justify-center gap-3 bg-muted px-4 py-2 shadow-sm border-b w-full overflow-x-auto">
+      <div className="flex items-center gap-2">
         <Label>Spacing Height</Label>
-        <div className="grid grid-cols-4 gap-2 mt-2">
-          {heightOptions.map((option) => (
-            <Button
-              key={option.value}
-              variant={
-                formData.height === option.value ? "default" : "secondary"
-              }
-              size="sm"
-              onClick={() =>
-                setFormData((prev) => ({ ...prev, height: option.value }))
-              }
-              className="text-xs"
-            >
-              {option.label}
-            </Button>
-          ))}
-        </div>
+        <Select
+          value={formData.height}
+          onValueChange={(value) =>
+            setFormData((prev) => ({ ...prev, height: value }))
+          }
+        >
+          <SelectTrigger className="w-[80px] h-8">
+            <SelectValue placeholder="height" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="10px">10px</SelectItem>
+            <SelectItem value="20px">20px</SelectItem>
+            <SelectItem value="30px">30px</SelectItem>
+            <SelectItem value="40px">40px</SelectItem>
+            <SelectItem value="50px">50px</SelectItem>
+            <SelectItem value="60px">60px</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
     </div>
   );
