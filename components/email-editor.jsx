@@ -26,19 +26,8 @@ export function EmailEditor() {
     setComponents(newComponents);
   };
 
-  //keys for nested component search
-  const NESTED_KEYS = [
-    "components",
-    "leftComponents",
-    "rightComponents",
-    "column1Components",
-    "column2Components",
-    "column3Components",
-    "column4Components",
-  ];
-
-  //recursivly search nested component by id and update
-  const updateComponentById = (components, id, updatedData) => {
+  // Recursively search nested components by ID and update
+  function updateComponentById(components, id, updatedData) {
     return components.map((component) => {
       if (component.id === id) {
         return {
@@ -47,35 +36,54 @@ export function EmailEditor() {
         };
       }
 
-      // Check and update nested component arrays
+      const data = component.data;
       let updated = false;
       const newComponent = { ...component };
 
-      for (const key of NESTED_KEYS) {
-        if (Array.isArray(component.data?.[key])) {
-          const updatedChildren = updateComponentById(
-            component.data[key],
-            id,
-            updatedData
-          );
-
-          // Check if children changed
-          if (
-            JSON.stringify(updatedChildren) !==
-            JSON.stringify(component.data[key])
-          ) {
-            newComponent.data = {
-              ...component.data,
-              [key]: updatedChildren,
-            };
-            updated = true;
+      // Handle nested column layout: columnsData (Array of Arrays)
+      if (Array.isArray(data?.columnsData)) {
+        const updatedColumnsData = data.columnsData.map((column) => {
+          if (Array.isArray(column)) {
+            return updateComponentById(column, id, updatedData);
           }
+          return column;
+        });
+
+        // Check if columnsData changed
+        if (
+          JSON.stringify(updatedColumnsData) !==
+          JSON.stringify(data.columnsData)
+        ) {
+          newComponent.data = {
+            ...data,
+            columnsData: updatedColumnsData,
+          };
+          updated = true;
+        }
+      }
+
+      // Optional fallback: Handle if there’s still `components` key used
+      if (Array.isArray(data?.components)) {
+        const updatedComponents = updateComponentById(
+          data.components,
+          id,
+          updatedData
+        );
+
+        if (
+          JSON.stringify(updatedComponents) !== JSON.stringify(data.components)
+        ) {
+          newComponent.data = {
+            ...data,
+            components: updatedComponents,
+          };
+          updated = true;
         }
       }
 
       return updated ? newComponent : component;
     });
-  };
+  }
 
   //updates entire components list
   const handleUpdateComponents = (newComponents) => {

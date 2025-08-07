@@ -1,16 +1,6 @@
 import React from "react";
 import { componentMap } from "./email-component";
 
-const nestedKeys = [
-  "components",
-  "leftComponents",
-  "rightComponents",
-  "column1Components",
-  "column2Components",
-  "column3Components",
-  "column4Components",
-];
-
 export function findComponentById(components, id) {
   if (!Array.isArray(components)) return null;
 
@@ -19,11 +9,22 @@ export function findComponentById(components, id) {
       return component;
     }
 
-    for (const key of nestedKeys) {
-      if (component.data && Array.isArray(component.data[key])) {
-        const found = findComponentById(component.data[key], id);
-        if (found) return found;
+    const data = component.data;
+
+    // Check if this is a "column" layout with columnsData
+    if (data?.columnsData && Array.isArray(data.columnsData)) {
+      for (const column of data.columnsData) {
+        if (Array.isArray(column)) {
+          const found = findComponentById(column, id); // recurse into inner components
+          if (found) return found;
+        }
       }
+    }
+
+    // In case some components still use nested children
+    if (data?.components && Array.isArray(data.components)) {
+      const found = findComponentById(data.components, id);
+      if (found) return found;
     }
   }
 
@@ -39,6 +40,7 @@ export function EditorPanel({
   if (!selectedComponent) {
     return null;
   }
+
   const Editor = componentMap[selectedComponent.type]?.Editor;
 
   if (!Editor) {

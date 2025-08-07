@@ -1,5 +1,6 @@
 import React from "react";
 import { Plus } from "lucide-react";
+import { CirclePlus } from "lucide-react";
 import {
   Popover,
   PopoverTrigger,
@@ -26,248 +27,175 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { PopoverClose } from "@radix-ui/react-popover";
-const componentCategories = {
-  layouts: {
-    title: "Layouts",
-    icon: Layout,
-    components: [
-      {
-        type: "single-column",
-        name: "Single Column",
-        icon: Square,
-        description: "Full-width single column layout",
-        defaultData: {
-          width: "100%",
-          backgroundColor: "#ffffff",
-          padding: "20px",
-        },
-      },
-      {
-        type: "two-columns-50",
-        name: "Two Columns (50/50)",
-        icon: Columns,
-        description: "Two equal-width columns",
-        defaultData: {
-          leftWidth: "50%",
-          rightWidth: "50%",
-          backgroundColor: "#ffffff",
-          padding: "20px",
-          gap: "20px",
-        },
-      },
-      {
-        type: "two-columns-33-67",
-        name: "Two Columns (33/67)",
-        icon: Columns,
-        description: "Narrow left, wide right",
-        defaultData: {
-          leftWidth: "33%",
-          rightWidth: "67%",
-          backgroundColor: "#ffffff",
-          padding: "20px",
-          gap: "20px",
-        },
-      },
-      {
-        type: "two-columns-67-33",
-        name: "Two Columns (67/33)",
-        icon: Columns,
-        description: "Wide left, narrow right",
-        defaultData: {
-          leftWidth: "67%",
-          rightWidth: "33%",
-          backgroundColor: "#ffffff",
-          padding: "20px",
-          gap: "20px",
-        },
-      },
-      {
-        type: "three-columns",
-        name: "Three Columns",
-        icon: Grid,
-        description: "Three equal-width columns",
-        defaultData: {
-          columnWidth: "33.33%",
-          backgroundColor: "#ffffff",
-          padding: "20px",
-          gap: "20px",
-        },
-      },
-      {
-        type: "four-columns",
-        name: "Four Columns",
-        icon: Rows,
-        description: "Four equal-width columns",
-        defaultData: {
-          columnWidth: "25%",
-          backgroundColor: "#ffffff",
-          padding: "20px",
-          gap: "20px",
-        },
-      },
-    ],
+
+const components = [
+  {
+    type: "column",
+    name: "Column",
+    icon: Square,
+    description: "Full-width column layout",
+    defaultData: {
+      width: "100%",
+      backgroundColor: "#ffffff",
+      padding: "0px",
+      columns: "1",
+      gap: "20px",
+      columnsData: [],
+    },
   },
-  content: {
-    title: "Content",
+
+  {
+    type: "text-block",
+    name: "Text Block",
     icon: Type,
-    components: [
-      {
-        type: "text-block",
-        name: "Text Block",
-        icon: Type,
-        description: "Rich text content",
-        defaultData: {
-          content: "Text",
-          font: "Arial",
-          fontSize: "16px",
-          color: "#000000",
-          alignment: "left",
-          bold: false,
-          italic: false,
-          underline: false,
-        },
-      },
-      {
-        type: "heading",
-        name: "Heading",
-        icon: Type,
-        description: "Section headings",
-        defaultData: {
-          content: "Heading",
-          level: "h3",
-          color: "#000000",
-          alignment: "left",
-          font: "Arial",
-          italic: false,
-          underline: false,
-        },
-      },
-      {
-        type: "image",
-        name: "Image",
-        icon: Image,
-        description: "Add images to your email",
-        defaultData: {
-          src: "",
-          alt: "Image",
-          width: "100%",
-          height: "auto",
-        },
-      },
-      {
-        type: "button",
-        name: "Button",
-        icon: MousePointer,
-        description: "Call-to-action button",
-        defaultData: {
-          text: "Click Here",
-          url: "#",
-          backgroundColor: "#007bff",
-          color: "#ffffff",
-          padding: "12px 24px",
-          borderRadius: "4px",
-        },
-      },
-      {
-        type: "divider",
-        name: "Divider",
-        icon: Minus,
-        description: "Horizontal line separator",
-        defaultData: {
-          style: "solid",
-          color: "#e5e7eb",
-          height: "1px",
-        },
-      },
-      {
-        type: "spacer",
-        name: "Spacer",
-        icon: Minus,
-        description: "Vertical spacing",
-        defaultData: {
-          height: "20px",
-        },
-      },
-      {
-        type: "social-media",
-        name: "Social Media",
-        icon: Share2,
-        description: "Social media icons",
-        defaultData: {
-          platforms: [
-            { name: "facebook", url: "https://facebook.com" },
-            { name: "twitter", url: "https://twitter.com" },
-            { name: "instagram", url: "https://instagram.com" },
-          ],
-          iconSize: "24px",
-          color: "#666666",
-          alignment: "center",
-        },
-      },
-      {
-        type: "navigation",
-        name: "Navigation",
-        icon: Menu,
-        description: "Menu navigation",
-        defaultData: {
-          items: [
-            { text: "Home", url: "#" },
-            { text: "About", url: "#" },
-            { text: "Contact", url: "#" },
-          ],
-          alignment: "center",
-          fontSize: "16px",
-          color: "#000000",
-        },
-      },
-    ],
+    description: "Rich text content",
+    defaultData: {
+      content: "Text",
+      font: "Arial",
+      fontSize: "16px",
+      color: "#000000",
+      alignment: "left",
+      bold: false,
+      italic: false,
+      underline: false,
+    },
   },
-};
-function AddComponent({ handleComponentClick, columnId }) {
+  {
+    type: "heading",
+    name: "Heading",
+    icon: Type,
+    description: "Section headings",
+    defaultData: {
+      content: "Heading",
+      level: "h3",
+      color: "#000000",
+      alignment: "left",
+      font: "Arial",
+      italic: false,
+      underline: false,
+    },
+  },
+  {
+    type: "image",
+    name: "Image",
+    icon: Image,
+    description: "Add images to your email",
+    defaultData: {
+      src: "",
+      alt: "Image",
+      width: "100%",
+      height: "auto",
+    },
+  },
+  {
+    type: "button",
+    name: "Button",
+    icon: MousePointer,
+    description: "Call-to-action button",
+    defaultData: {
+      text: "Click Here",
+      url: "#",
+      backgroundColor: "#007bff",
+      color: "#ffffff",
+      padding: "12px 24px",
+      borderRadius: "4px",
+    },
+  },
+  {
+    type: "divider",
+    name: "Divider",
+    icon: Minus,
+    description: "Horizontal line separator",
+    defaultData: {
+      style: "solid",
+      color: "#e5e7eb",
+      height: "1px",
+    },
+  },
+  {
+    type: "spacer",
+    name: "Spacer",
+    icon: Minus,
+    description: "Vertical spacing",
+    defaultData: {
+      height: "20px",
+    },
+  },
+  {
+    type: "social-media",
+    name: "Social Media",
+    icon: Share2,
+    description: "Social media icons",
+    defaultData: {
+      platforms: [
+        { name: "facebook", url: "https://facebook.com" },
+        { name: "twitter", url: "https://twitter.com" },
+        { name: "instagram", url: "https://instagram.com" },
+      ],
+      iconSize: "24px",
+      color: "#666666",
+      alignment: "center",
+    },
+  },
+  {
+    type: "navigation",
+    name: "Navigation",
+    icon: Menu,
+    description: "Menu navigation",
+    defaultData: {
+      items: [
+        { text: "Home", url: "#" },
+        { text: "About", url: "#" },
+        { text: "Contact", url: "#" },
+      ],
+      alignment: "center",
+      fontSize: "16px",
+      color: "#000000",
+    },
+  },
+];
+
+function AddComponent({ handleComponentClick, columnId, inbetween, index }) {
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <div className="w-full  border rounded-md pl-3 py-1 cursor-pointer border-slate-600 flex  items-center gap-2">
-          <Plus size={18} />
-          Add Component
-        </div>
+        {inbetween ? (
+          <CirclePlus className="w-4 h-4 text-slate-500" />
+        ) : (
+          <div className="w-full  border rounded-md pl-3 py-1 cursor-pointer border-slate-600 flex  items-center gap-2">
+            <Plus size={18} />
+            Add Component
+          </div>
+        )}
       </PopoverTrigger>
       <PopoverContent className="w-96 p-0">
         <ScrollArea className="flex-1 h-[300px]">
           <div className="p-4">
-            <Accordion type="multiple" defaultValue={["layouts", "content"]}>
-              {Object.entries(componentCategories).map(([key, category]) => (
-                <AccordionItem key={key} value={key}>
-                  <AccordionTrigger className="text-sm font-medium">
-                    <category.icon className="h-4 w-4 mr-2" />
-                    {category.title}
-                  </AccordionTrigger>
-                  <AccordionContent>
-                    <div className="grid grid-cols-3 gap-2 pt-2">
-                      {category.components.map((component) => (
-                        <PopoverClose key={component.type} asChild>
-                          <div
-                            key={component.type}
-                            onClick={() =>
-                              handleComponentClick(component, columnId)
-                            }
-                            className={`
-                          p-3 border border-border rounded-lg cursor-pointer
-                          hover:border-primary hover:bg-accent transition-colors `}
-                          >
-                            <div className="flex flex-col items-center text-center">
-                              <component.icon className="h-6 w-6 text-primary mb-2" />
-                              <span className="text-xs font-medium text-foreground">
-                                {component.name}
-                              </span>
-                            </div>
+            <Accordion type="single" defaultValue="all" collapsible>
+              <AccordionItem value="all">
+                {/* No AccordionTrigger */}
+                <AccordionContent className="pt-0">
+                  <div className="grid grid-cols-3 gap-2 pt-2">
+                    {components.map((component) => (
+                      <PopoverClose key={component.type} asChild>
+                        <div
+                          onClick={() =>
+                            handleComponentClick(component, columnId, index)
+                          }
+                          className="p-3 border border-border rounded-lg cursor-pointer hover:border-primary hover:bg-accent transition-colors"
+                        >
+                          <div className="flex flex-col items-center text-center">
+                            <component.icon className="h-6 w-6 text-primary mb-2" />
+                            <span className="text-xs font-medium text-foreground">
+                              {component.name}
+                            </span>
                           </div>
-                        </PopoverClose>
-                      ))}
-                    </div>
-                  </AccordionContent>
-                </AccordionItem>
-              ))}
+                        </div>
+                      </PopoverClose>
+                    ))}
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
             </Accordion>
           </div>
         </ScrollArea>
