@@ -2,8 +2,16 @@
 
 import { useState, useEffect } from "react";
 import { Button as UIButton } from "@/components/ui/button";
+import { Palette } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
 
 export function ButtonComponent({ data }) {
   const { text, url, backgroundColor, color, padding, borderRadius } = data;
@@ -44,24 +52,9 @@ ButtonComponent.Editor = function ButtonEditor({ data, onUpdate, onCancel }) {
     return () => clearTimeout(timeoutId);
   }, [formData]);
 
-  const paddingOptions = [
-    { value: "8px 16px", label: "Small" },
-    { value: "12px 24px", label: "Medium" },
-    { value: "16px 32px", label: "Large" },
-    { value: "20px 40px", label: "Extra Large" },
-  ];
-
-  const borderRadiusOptions = [
-    { value: "0px", label: "None" },
-    { value: "4px", label: "Small" },
-    { value: "8px", label: "Medium" },
-    { value: "16px", label: "Large" },
-    { value: "24px", label: "Extra Large" },
-  ];
-
   return (
-    <div className="space-y-4">
-      <div>
+    <div className="flex items-center h-full justify-center gap-4 bg-muted px-4 py-2 shadow-sm border-b w-full overflow-x-auto">
+      <div className="flex items-center gap-2">
         <Label htmlFor="text">Button Text</Label>
         <Input
           id="text"
@@ -73,7 +66,7 @@ ButtonComponent.Editor = function ButtonEditor({ data, onUpdate, onCancel }) {
         />
       </div>
 
-      <div>
+      <div className="flex items-center gap-2">
         <Label htmlFor="url">Button URL</Label>
         <Input
           id="url"
@@ -85,73 +78,79 @@ ButtonComponent.Editor = function ButtonEditor({ data, onUpdate, onCancel }) {
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="backgroundColor">Background Color</Label>
-          <Input
-            id="backgroundColor"
-            type="color"
-            value={formData.backgroundColor}
-            onChange={(e) =>
-              setFormData((prev) => ({
-                ...prev,
-                backgroundColor: e.target.value,
-              }))
-            }
-          />
-        </div>
-
-        <div>
-          <Label htmlFor="color">Text Color</Label>
-          <Input
-            id="color"
-            type="color"
-            value={formData.color}
-            onChange={(e) =>
-              setFormData((prev) => ({ ...prev, color: e.target.value }))
-            }
-          />
+      <div className="flex items-center gap-2">
+        <Label htmlFor="backgroundColor">Background Color</Label>
+        <div className="relative w-6 h-6">
+          <label className="w-full h-full cursor-pointer inline-flex items-center justify-center">
+            <Palette className="w-4 h-4 text-muted-foreground" />
+            <input
+              type="color"
+              value={formData.color}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, color: e.target.value }))
+              }
+              className="absolute inset-0 opacity-0 cursor-pointer"
+            />
+          </label>
         </div>
       </div>
 
-      <div>
-        <Label>Padding</Label>
-        <div className="grid grid-cols-2 gap-2 mt-2">
-          {paddingOptions.map((option) => (
-            <UIButton
-              key={option.value}
-              variant={
-                formData.padding === option.value ? "default" : "secondary"
+      <div className="flex items-center gap-2">
+        <Label htmlFor="color">Text Color</Label>
+        <div className="relative w-6 h-6">
+          <label className="w-full h-full cursor-pointer inline-flex items-center justify-center">
+            <Palette className="w-4 h-4 text-muted-foreground" />
+            <input
+              type="color"
+              value={formData.color}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, color: e.target.value }))
               }
-              size="sm"
-              onClick={() =>
-                setFormData((prev) => ({ ...prev, padding: option.value }))
-              }
-            >
-              {option.label}
-            </UIButton>
-          ))}
+              className="absolute inset-0 opacity-0 cursor-pointer"
+            />
+          </label>
         </div>
       </div>
 
-      <div>
-        <Label>Border Radius</Label>
-        <div className="grid grid-cols-2 gap-2 mt-2">
-          {borderRadiusOptions.map((option) => (
-            <UIButton
-              key={option.value}
-              variant={
-                formData.borderRadius === option.value ? "default" : "secondary"
-              }
-              size="sm"
-              onClick={() =>
-                setFormData((prev) => ({ ...prev, borderRadius: option.value }))
-              }
-            >
-              {option.label}
-            </UIButton>
-          ))}
-        </div>
+      <div className="flex items-center gap-2">
+        <Label htmlFor="columnWidth">Padding</Label>
+        <Select
+          value={formData.padding}
+          onValueChange={(value) =>
+            setFormData((prev) => ({ ...prev, padding: value }))
+          }
+        >
+          <SelectTrigger className="w-[80px] h-8">
+            <SelectValue placeholder="padding" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="8px 16px">Small</SelectItem>
+            <SelectItem value="12px 24px">Medium</SelectItem>
+            <SelectItem value="16px 32px">Large</SelectItem>
+            <SelectItem value="20px 40px">XL</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="flex items-center gap-2">
+        <Label htmlFor="columnWidth">Border Radius</Label>
+        <Select
+          value={formData.borderRadius}
+          onValueChange={(value) =>
+            setFormData((prev) => ({ ...prev, borderRadius: value }))
+          }
+        >
+          <SelectTrigger className="w-[80px] h-8">
+            <SelectValue placeholder="border radius" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="0px">None</SelectItem>
+            <SelectItem value="4px">Small</SelectItem>
+            <SelectItem value="8px">Medium</SelectItem>
+            <SelectItem value="16px"> Large</SelectItem>
+            <SelectItem value="24px">XL</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
     </div>
   );

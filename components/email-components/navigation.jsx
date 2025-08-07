@@ -4,7 +4,14 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-
+import { Palette } from "lucide-react";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
 export function Navigation({ data }) {
   const { items, alignment, fontSize, color } = data;
 
@@ -43,20 +50,6 @@ Navigation.Editor = function NavigationEditor({ data, onUpdate, onCancel }) {
     return () => clearTimeout(timeoutId);
   }, [formData]);
 
-  const fontSizeOptions = [
-    { value: "12px", label: "12px" },
-    { value: "14px", label: "14px" },
-    { value: "16px", label: "16px" },
-    { value: "18px", label: "18px" },
-    { value: "20px", label: "20px" },
-  ];
-
-  const alignmentOptions = [
-    { value: "left", label: "Left" },
-    { value: "center", label: "Center" },
-    { value: "right", label: "Right" },
-  ];
-
   const addItem = () => {
     setFormData((prev) => ({
       ...prev,
@@ -81,31 +74,29 @@ Navigation.Editor = function NavigationEditor({ data, onUpdate, onCancel }) {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="flex items-center h-full justify-center gap-5 bg-muted px-4 py-2 shadow-sm border-b w-full overflow-x-auto">
       <div>
         <Label>Navigation Items</Label>
         <div className="space-y-2 mt-2">
           {formData.items.map((item, index) => (
             <div key={index} className="flex gap-2 items-center">
-              <div className="flex-1 grid grid-cols-2 gap-2">
-                <div>
-                  <Label className="text-xs">Text</Label>
-                  <Input
-                    value={item.text}
-                    onChange={(e) => updateItem(index, "text", e.target.value)}
-                    placeholder="Link text"
-                    className="text-xs"
-                  />
-                </div>
-                <div>
-                  <Label className="text-xs">URL</Label>
-                  <Input
-                    value={item.url}
-                    onChange={(e) => updateItem(index, "url", e.target.value)}
-                    placeholder="https://..."
-                    className="text-xs"
-                  />
-                </div>
+              <div>
+                <Label className="text-xs">Text</Label>
+                <Input
+                  value={item.text}
+                  onChange={(e) => updateItem(index, "text", e.target.value)}
+                  placeholder="Link text"
+                  className="text-xs"
+                />
+              </div>
+              <div>
+                <Label className="text-xs">URL</Label>
+                <Input
+                  value={item.url}
+                  onChange={(e) => updateItem(index, "url", e.target.value)}
+                  placeholder="https://..."
+                  className="text-xs"
+                />
               </div>
               <Button
                 variant="outline"
@@ -123,64 +114,41 @@ Navigation.Editor = function NavigationEditor({ data, onUpdate, onCancel }) {
             onClick={addItem}
             className="w-full"
           >
-            + Add Navigation Item
+            + Add
           </Button>
         </div>
       </div>
 
-      <div>
-        <Label>Font Size</Label>
-        <div className="grid grid-cols-5 gap-2 mt-2">
-          {fontSizeOptions.map((option) => (
-            <Button
-              key={option.value}
-              variant={
-                formData.fontSize === option.value ? "default" : "secondary"
-              }
-              size="sm"
-              onClick={() =>
-                setFormData((prev) => ({ ...prev, fontSize: option.value }))
-              }
-              className="text-xs"
-            >
-              {option.label}
-            </Button>
-          ))}
-        </div>
-      </div>
+      <Select
+        value={formData.fontSize.replace("px", "")}
+        onValueChange={(value) =>
+          setFormData((prev) => ({ ...prev, fontSize: value + "px" }))
+        }
+      >
+        <SelectTrigger className="w-[80px] h-8">
+          <SelectValue placeholder="Size" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="12">12</SelectItem>
+          <SelectItem value="14">14</SelectItem>
+          <SelectItem value="16">16</SelectItem>
+          <SelectItem value="18">18</SelectItem>
+          <SelectItem value="24">24</SelectItem>
+        </SelectContent>
+      </Select>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="color">Text Color</Label>
-          <Input
-            id="color"
+      <div className="relative w-6 h-6">
+        <label className="w-full h-full cursor-pointer inline-flex items-center justify-center">
+          <Palette className="w-4 h-4 text-muted-foreground" />
+          <input
             type="color"
             value={formData.color}
             onChange={(e) =>
               setFormData((prev) => ({ ...prev, color: e.target.value }))
             }
+            className="absolute inset-0 opacity-0 cursor-pointer"
           />
-        </div>
-
-        <div>
-          <Label>Alignment</Label>
-          <div className="grid grid-cols-1 gap-2 mt-2">
-            {alignmentOptions.map((option) => (
-              <Button
-                key={option.value}
-                variant={
-                  formData.alignment === option.value ? "default" : "outline"
-                }
-                size="sm"
-                onClick={() =>
-                  setFormData((prev) => ({ ...prev, alignment: option.value }))
-                }
-              >
-                {option.label}
-              </Button>
-            ))}
-          </div>
-        </div>
+        </label>
       </div>
     </div>
   );

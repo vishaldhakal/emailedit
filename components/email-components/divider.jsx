@@ -4,7 +4,14 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-
+import { Palette } from "lucide-react";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
 export function Divider({ data }) {
   const { style, color, height } = data;
 
@@ -31,71 +38,59 @@ Divider.Editor = function DividerEditor({ data, onUpdate, onCancel }) {
     return () => clearTimeout(timeoutId);
   }, [formData]);
 
-  const styleOptions = [
-    { value: "solid", label: "Solid" },
-    { value: "dashed", label: "Dashed" },
-    { value: "dotted", label: "Dotted" },
-  ];
-
-  const heightOptions = [
-    { value: "1px", label: "Thin" },
-    { value: "2px", label: "Medium" },
-    { value: "3px", label: "Thick" },
-    { value: "4px", label: "Extra Thick" },
-  ];
-
   return (
-    <div className="space-y-4">
-      <div>
+    <div className="flex items-center h-full justify-center gap-5 bg-muted px-4 py-2 shadow-sm border-b w-full overflow-x-auto">
+      <div className="flex items-center gap-1">
         <Label>Line Style</Label>
-        <div className="grid grid-cols-3 gap-2 mt-2">
-          {styleOptions.map((option) => (
-            <Button
-              key={option.value}
-              variant={
-                formData.style === option.value ? "default" : "secondary"
-              }
-              size="sm"
-              onClick={() =>
-                setFormData((prev) => ({ ...prev, style: option.value }))
-              }
-            >
-              {option.label}
-            </Button>
-          ))}
-        </div>
-      </div>
-
-      <div>
-        <Label>Line Height</Label>
-        <div className="grid grid-cols-2 gap-2 mt-2">
-          {heightOptions.map((option) => (
-            <Button
-              key={option.value}
-              variant={
-                formData.height === option.value ? "default" : "secondary"
-              }
-              size="sm"
-              onClick={() =>
-                setFormData((prev) => ({ ...prev, height: option.value }))
-              }
-            >
-              {option.label}
-            </Button>
-          ))}
-        </div>
-      </div>
-
-      <div>
-        <Label htmlFor="color">Line Color</Label>
-        <Input
-          id="color"
-          type="color"
-          value={formData.color}
-          onChange={(e) =>
-            setFormData((prev) => ({ ...prev, color: e.target.value }))
+        <Select
+          value={formData.style}
+          onValueChange={(value) =>
+            setFormData((prev) => ({ ...prev, style: value }))
           }
-        />
+        >
+          <SelectTrigger className="w-[140px] h-8">
+            <SelectValue placeholder="line style" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="solid">Solid</SelectItem>
+            <SelectItem value="dashed">Dashed</SelectItem>
+            <SelectItem value="dotted">Dotted</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="flex items-center gap-1">
+        <Label>Line Height</Label>
+        <Select
+          value={formData.height}
+          onValueChange={(value) =>
+            setFormData((prev) => ({ ...prev, height: value }))
+          }
+        >
+          <SelectTrigger className="w-[140px] h-8">
+            <SelectValue placeholder="line height" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="1px">Thin</SelectItem>
+            <SelectItem value="2px">Medium</SelectItem>
+            <SelectItem value="3px">Thick</SelectItem>
+            <SelectItem value="4px">Extra Thick</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="relative w-6 h-6">
+        <label className="w-full h-full cursor-pointer inline-flex items-center justify-center">
+          <Palette className="w-4 h-4 text-muted-foreground" />
+          <input
+            type="color"
+            value={formData.color}
+            onChange={(e) =>
+              setFormData((prev) => ({ ...prev, color: e.target.value }))
+            }
+            className="absolute inset-0 opacity-0 cursor-pointer"
+          />
+        </label>
       </div>
     </div>
   );

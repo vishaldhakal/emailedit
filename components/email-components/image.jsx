@@ -4,7 +4,13 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
 export function ImageComponent({ data }) {
   const { src, alt, width, height } = data;
 
@@ -44,27 +50,9 @@ ImageComponent.Editor = function ImageEditor({ data, onUpdate, onCancel }) {
     return () => clearTimeout(timeoutId);
   }, [formData]);
 
-  const widthOptions = [
-    { value: "100%", label: "Full Width" },
-    { value: "75%", label: "75%" },
-    { value: "50%", label: "50%" },
-    { value: "25%", label: "25%" },
-    { value: "200px", label: "200px" },
-    { value: "300px", label: "300px" },
-    { value: "400px", label: "400px" },
-  ];
-
-  const heightOptions = [
-    { value: "auto", label: "Auto" },
-    { value: "100px", label: "100px" },
-    { value: "200px", label: "200px" },
-    { value: "300px", label: "300px" },
-    { value: "400px", label: "400px" },
-  ];
-
   return (
-    <div className="space-y-4">
-      <div>
+    <div className="flex items-center h-full justify-center gap-5 bg-muted px-4 py-2 shadow-sm border-b w-full overflow-x-auto">
+      <div className="flex items-center gap-1">
         <Label htmlFor="src">Image URL</Label>
         <Input
           id="src"
@@ -76,7 +64,7 @@ ImageComponent.Editor = function ImageEditor({ data, onUpdate, onCancel }) {
         />
       </div>
 
-      <div>
+      <div className="flex items-center gap-1">
         <Label htmlFor="alt">Alt Text</Label>
         <Input
           id="alt"
@@ -88,46 +76,48 @@ ImageComponent.Editor = function ImageEditor({ data, onUpdate, onCancel }) {
         />
       </div>
 
-      <div>
+      <div className="flex items-center gap-2">
         <Label>Width</Label>
-        <div className="grid grid-cols-2 gap-2 mt-2">
-          {widthOptions.map((option) => (
-            <Button
-              key={option.value}
-              variant={
-                formData.width === option.value ? "default" : "secondary"
-              }
-              size="sm"
-              onClick={() =>
-                setFormData((prev) => ({ ...prev, width: option.value }))
-              }
-              className="text-xs"
-            >
-              {option.label}
-            </Button>
-          ))}
-        </div>
+        <Select
+          value={formData.level}
+          onValueChange={(value) =>
+            setFormData((prev) => ({ ...prev, width: value }))
+          }
+        >
+          <SelectTrigger className="w-[80px] h-8">
+            <SelectValue placeholder="width" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="100%">Full Width</SelectItem>
+            <SelectItem value="75%">75%</SelectItem>
+            <SelectItem value="50%">50%</SelectItem>
+            <SelectItem value="25%">25%</SelectItem>
+            <SelectItem value="200px">200px</SelectItem>
+            <SelectItem value="300px">300px</SelectItem>
+            <SelectItem value="400px">400px</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
-      <div>
+      <div className="flex items-center gap-2">
         <Label>Height</Label>
-        <div className="grid grid-cols-2 gap-2 mt-2">
-          {heightOptions.map((option) => (
-            <Button
-              key={option.value}
-              variant={
-                formData.height === option.value ? "default" : "secondary"
-              }
-              size="sm"
-              onClick={() =>
-                setFormData((prev) => ({ ...prev, height: option.value }))
-              }
-              className="text-xs"
-            >
-              {option.label}
-            </Button>
-          ))}
-        </div>
+        <Select
+          value={formData.height}
+          onValueChange={(value) =>
+            setFormData((prev) => ({ ...prev, height: value }))
+          }
+        >
+          <SelectTrigger className="w-[80px] h-8">
+            <SelectValue placeholder="width" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="auto">auto</SelectItem>
+            <SelectItem value="100px">100px</SelectItem>
+            <SelectItem value="200px">200px</SelectItem>
+            <SelectItem value="300px">300px</SelectItem>
+            <SelectItem value="400px">400px</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
     </div>
   );
