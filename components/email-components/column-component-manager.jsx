@@ -4,7 +4,7 @@ import { EmailComponent } from "@/components/email-component";
 import { Button } from "@/components/ui/button";
 import { Trash2, ChevronUp, ChevronDown } from "lucide-react";
 import React from "react";
-
+import AddComponent from "../addComponent";
 export function ColumnComponentManager({
   component,
   index,
@@ -14,6 +14,7 @@ export function ColumnComponentManager({
   onMoveDown,
   totalComponents,
   setSelectedComponentId,
+  handleInbetweenAdd,
 }) {
   const handleDelete = (e) => {
     e.preventDefault();
@@ -59,6 +60,20 @@ export function ColumnComponentManager({
           type={component.type}
           data={component.data}
           onUpdate={onUpdate}
+        />
+      </div>
+
+      {/* circluar add component icon below component */}
+      <div
+        onClick={(e) => {
+          e.stopPropagation();
+        }}
+        className=" absolute -bottom-3.5 -left-4 cursor-pointer w-4 h-4 rounded-full opacity-0 group-hover/inner:opacity-100"
+      >
+        <AddComponent
+          inbetween
+          index={index}
+          handleComponentClick={handleInbetweenAdd}
         />
       </div>
 

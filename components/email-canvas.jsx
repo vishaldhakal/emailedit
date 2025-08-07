@@ -7,6 +7,8 @@ import { Trash2 } from "lucide-react";
 import React from "react";
 import { ChevronUp, ChevronDown } from "lucide-react";
 import AddComponent from "./addComponent";
+import { CirclePlus } from "lucide-react";
+import { nanoid } from "nanoid";
 export function EmailCanvas({
   components,
   handleComponentUpdate,
@@ -66,7 +68,23 @@ export function EmailCanvas({
   const handleComponentClick = (component) => {
     onAddComponent(component.type, component.defaultData);
   };
-
+  const handleInbetweenAdd = (component, columnId, index) => {
+    const newComponent = {
+      id: nanoid(),
+      type: component.type,
+      data: component.defaultData,
+    };
+    const newComponents = [...components];
+    newComponents.splice(index + 1, 0, newComponent); // Insert after current index
+    onUpdateComponents(newComponents);
+  };
+  if (components.length == 0) {
+    return (
+      <div className=" w-full p-6 max-w-4xl mx-auto">
+        <AddComponent handleComponentClick={handleComponentClick} />
+      </div>
+    );
+  }
   return (
     <div className="flex-1 h-full bg-background border-l border-border overflow-y-auto">
       <div className="p-6 max-w-4xl mx-auto">
@@ -110,15 +128,32 @@ export function EmailCanvas({
               }
             />
 
+            {/* circluar add component icon below component */}
+            <div
+              onClick={(e) => {
+                e.stopPropagation();
+              }}
+              className=" absolute -bottom-3.5 -left-4 cursor-pointer w-4 h-4 rounded-full opacity-0 group-hover/outer:opacity-100"
+            >
+              <AddComponent
+                inbetween
+                index={index}
+                handleComponentClick={handleInbetweenAdd}
+              />
+            </div>
+
             {/* Drag handles for reordering */}
-            <div className="absolute top-1/2 -left-12 -translate-y-1/2 transform opacity-0 group-hover/outer:opacity-100 transition-opacity z-10">
+            <div className="  absolute top-1/2 -left-12 -translate-y-1/2 transform opacity-0 group-hover/outer:opacity-100 transition-opacity z-10">
               <div className="flex flex-col gap-1">
                 {index > 0 && (
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => handleComponentMove(index, index - 1)}
-                    className="bg-card hover:bg-accent text-xs"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleComponentMove(index, index - 1);
+                    }}
+                    className=" w-8 h-8 bg-card hover:bg-accent "
                   >
                     <ChevronUp className="h-4 w-4" />
                   </Button>
@@ -128,8 +163,11 @@ export function EmailCanvas({
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => handleComponentMove(index, index + 1)}
-                    className="bg-card hover:bg-accent text-xs"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleComponentMove(index, index + 1);
+                    }}
+                    className="w-8 h-8  bg-card hover:bg-accent"
                   >
                     <ChevronDown className="h-4 w-4" />
                   </Button>
@@ -138,8 +176,6 @@ export function EmailCanvas({
             </div>
           </div>
         ))}
-
-        <AddComponent handleComponentClick={handleComponentClick} />
       </div>
     </div>
   );
