@@ -72,29 +72,20 @@ AVAILABLE COMPONENTS:
 5. divider - For horizontal separators
 6. spacer - For vertical spacing
 7. social-media - For social media links
-8. navigation - For menu navigation
-9. single-column - A single column layout that can contain other components
-10. two-columns-50 - Two equal-width columns that can contain other components
-11. two-columns-33-67 - Two columns (33% and 67%) that can contain other components
-12. two-columns-67-33 - Two columns (67% and 33%) that can contain other components
-13. three-columns - Three equal-width columns that can contain other components
-14. four-columns - Four equal-width columns that can contain other components
+8. Link - for general redirect links
+9. column - can be split upto 3 columns and can contain other components
 
 COMPONENT DATA STRUCTURES:
-- heading: { content: string, level: "h1"|"h2"|"h3", fontSize: string, color: string, alignment: "left"|"center"|"right" }
-- text-block: { content: string, fontSize: string, color: string, alignment: "left"|"center"|"right"|"justify" }
+- heading: { content: string, level: "h1"|"h2"|"h3"|"h4"|"h5"|"h6", color: string, alignment: "left"|"center"|"right",font:"Arial"|"Georgia"|"Times new Roman" |"Verdana",bold:boolean,italic:boolean,underline:boolean }
+- text-block: { content: string, fontSize: string,font:"Arial"|"Georgia"|"Times new Roman" |"Verdana", color: string, alignment: "left"|"center"|"right",bold:boolean,italic:boolean,underline:boolean}
 - image: { src: string, alt: string, width: string, height: string, pexelsQuery: string }
 - button: { text: string, url: string, backgroundColor: string, color: string, padding: string, borderRadius: string }
 - divider: { style: "solid"|"dashed"|"dotted", color: string, height: string }
 - spacer: { height: string }
 - social-media: { platforms: [{ name: string, url: string }], iconSize: string, color: string, alignment: "left"|"center"|"right" }
-- navigation: { items: [{ text: string, url: string }], alignment: "left"|"center"|"right", fontSize: string, color: string }
-- single-column: { width: string, backgroundColor: string, padding: string, components: [] }
-- two-columns-50: { leftWidth: "50%", rightWidth: "50%", backgroundColor: string, padding: string, gap: string, leftComponents: [], rightComponents: [] }
-- two-columns-33-67: { leftWidth: "33%", rightWidth: "67%", backgroundColor: string, padding: string, gap: string, leftComponents: [], rightComponents: [] }
-- two-columns-67-33: { leftWidth: "67%", rightWidth: "33%", backgroundColor: string, padding: string, gap: string, leftComponents: [], rightComponents: [] }
-- three-columns: { columnWidth: "33.33%", backgroundColor: string, padding: string, gap: string, column1Components: [], column2Components: [], column3Components: [] }
-- four-columns: { columnWidth: "25%", backgroundColor: string, padding: string, gap: string, column1Components: [], column2Components: [], column3Components: [], column4Components: [] }
+-link:{text:string,url:string, color:string,underline:boolean ,alignment: "left" || "right" || "center"}
+- column: { width: string , backgroundColor: string, padding: string,columns:string number //number of columns ,columnsData = [], // Array of arrays: components per column}
+
 
 INSTRUCTIONS:
 1.  Analyze the user's request carefully to understand the email's purpose and tone.
@@ -112,7 +103,7 @@ RESPONSE FORMAT:
 Return ONLY a valid JSON object with this exact structure:
 {
   "components": [
-    {
+    {"id":"unique id",
       "type": "component-type",
       "data": { /* component data */ }
     }

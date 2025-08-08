@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -24,21 +23,25 @@ export function ImageComponent({ data }) {
   }
 
   return (
-    <img
-      src={src}
-      alt={alt}
-      style={{
-        width,
-        height,
-        maxWidth: "100%",
-        display: "block",
-      }}
-      className="rounded"
-    />
+    <div
+      style={{ width: width || "100%" }}
+      className="flex justify-center items-center"
+    >
+      <img
+        src={src}
+        alt={alt}
+        style={{
+          height: height,
+          maxWidth: "100%",
+          display: "block",
+        }}
+        className="rounded"
+      />
+    </div>
   );
 }
 
-ImageComponent.Editor = function ImageEditor({ data, onUpdate, onCancel }) {
+ImageComponent.Editor = function ImageEditor({ data, onUpdate }) {
   const [formData, setFormData] = useState(data);
 
   // Auto-save when formData changes

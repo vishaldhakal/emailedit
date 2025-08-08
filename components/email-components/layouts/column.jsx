@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { Palette } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -38,9 +37,9 @@ export function Column({ data, onUpdate, setSelectedComponentId }) {
       : Array(columns).fill(`${(100 / columns).toFixed(2)}%`);
 
   // Update whole data helper
-  function updateData(newData) {
-    onUpdate({ ...data, ...newData });
-  }
+  // function updateData(newData) {
+  //   onUpdate({ ...data, ...newData });
+  // }
 
   // Handle adding new component to a specific column
   const handleComponentClick = (component, columnIndex) => {
@@ -54,7 +53,7 @@ export function Column({ data, onUpdate, setSelectedComponentId }) {
       ...newColumnsData[columnIndex],
       newComponent,
     ];
-    updateData({ columnsData: newColumnsData });
+    onUpdate({ ...data, columnsData: newColumnsData });
   };
 
   // Insert component after a given index inside a column
@@ -68,7 +67,7 @@ export function Column({ data, onUpdate, setSelectedComponentId }) {
     const columnComponents = [...newColumnsData[columnIndex]];
     columnComponents.splice(index + 1, 0, newComponent);
     newColumnsData[columnIndex] = columnComponents;
-    updateData({ columnsData: newColumnsData });
+    onUpdate({ ...data, columnsData: newColumnsData });
   };
 
   // Update component data inside a column
@@ -79,7 +78,7 @@ export function Column({ data, onUpdate, setSelectedComponentId }) {
       ...newColumnsData[columnIndex][componentIndex],
       data: updatedData,
     };
-    updateData({ columnsData: newColumnsData });
+    onUpdate({ ...data, columnsData: newColumnsData });
   };
 
   // Delete component inside a column
@@ -88,7 +87,7 @@ export function Column({ data, onUpdate, setSelectedComponentId }) {
     newColumnsData[columnIndex] = newColumnsData[columnIndex].filter(
       (_, i) => i !== componentIndex
     );
-    updateData({ columnsData: newColumnsData });
+    onUpdate({ ...data, columnsData: newColumnsData });
   };
 
   // Move component inside a column up/down
@@ -98,7 +97,7 @@ export function Column({ data, onUpdate, setSelectedComponentId }) {
     const [movedComponent] = columnComponents.splice(fromIndex, 1);
     columnComponents.splice(toIndex, 0, movedComponent);
     newColumnsData[columnIndex] = columnComponents;
-    updateData({ columnsData: newColumnsData });
+    onUpdate({ ...data, columnsData: newColumnsData });
   };
 
   // Render nothing if no columns
@@ -124,7 +123,7 @@ export function Column({ data, onUpdate, setSelectedComponentId }) {
             flexDirection: "column",
           }}
           data-column-id={`column-${columnIndex}`}
-          className="border border-border rounded-md p-2"
+          className="border border-border rounded-md p-4"
         >
           {components.length === 0 && (
             <AddComponent
@@ -164,51 +163,18 @@ export function Column({ data, onUpdate, setSelectedComponentId }) {
 }
 
 Column.Editor = function ColumnEditor({ data, onUpdate }) {
-  const [formData, setFormData] = useState(data);
-
-  // When number of columns changes, initialize columnsData and columnWidths if needed
-  useEffect(() => {
-    const n = Number(formData.columns) || 1;
-
-    let updated = false;
-    let newColumnsData = formData.columnsData || [];
-    if (newColumnsData.length !== n) {
-      newColumnsData = Array(n)
-        .fill(0)
-        .map((_, i) => formData.columnsData?.[i] || []);
-      updated = true;
-    }
-
-    let newColumnWidths = formData.columnWidths || [];
-    if (newColumnWidths.length !== n) {
-      newColumnWidths = Array(n).fill(`${(100 / n).toFixed(2)}%`);
-      updated = true;
-    }
-
-    if (updated) {
-      setFormData((prev) => ({
-        ...prev,
-        columns: n,
-        columnsData: newColumnsData,
-        columnWidths: newColumnWidths,
-      }));
-    }
-  }, [formData.columns]);
-
-  // Propagate changes upstream
-  useEffect(() => {
-    onUpdate(formData);
-  }, [formData]);
+  const updateField = (field, value) => {
+    onUpdate({ ...data, [field]: value });
+  };
 
   return (
-    <div className="flex items-center h-full justify-center gap-4 bg-muted px-4 py-2 shadow-sm border-b w-full overflow-x-auto">
+    <div className="flex items-center justify-center h-full gap-4 bg-muted px-4 py-2 border-b w-full overflow-x-auto">
+      {/* Width */}
       <div className="flex items-center gap-2">
-        <Label htmlFor="width">Width</Label>
+        <Label>Width</Label>
         <Select
-          value={formData.width}
-          onValueChange={(value) =>
-            setFormData((prev) => ({ ...prev, width: value }))
-          }
+          value={data.width}
+          onValueChange={(value) => updateField("width", value)}
         >
           <SelectTrigger>
             <SelectValue />
@@ -222,32 +188,12 @@ Column.Editor = function ColumnEditor({ data, onUpdate }) {
         </Select>
       </div>
 
+      {/* Padding */}
       <div className="flex items-center gap-2">
-        <Label htmlFor="padding">Padding</Label>
+        <Label>Padding</Label>
         <Select
-          value={formData.padding}
-          onValueChange={(value) =>
-            setFormData((prev) => ({ ...prev, padding: value }))
-          }
-        >
-          <SelectTrigger>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="0px">None</SelectItem>
-            <SelectItem value="10px">Small</SelectItem>
-            <SelectItem value="20px">Medium</SelectItem>
-            <SelectItem value="30px">Large</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-      <div className="flex items-center gap-2">
-        <Label htmlFor="padding">Gap</Label>
-        <Select
-          value={formData.gap}
-          onValueChange={(value) =>
-            setFormData((prev) => ({ ...prev, gap: value }))
-          }
+          value={data.padding}
+          onValueChange={(value) => updateField("padding", value)}
         >
           <SelectTrigger>
             <SelectValue />
@@ -261,35 +207,42 @@ Column.Editor = function ColumnEditor({ data, onUpdate }) {
         </Select>
       </div>
 
-      <div className="flex items-center gap-2 ">
-        <Label htmlFor="backgroundColor" className="text-sm">
-          Background Color
-        </Label>
-        <div className="relative w-6 h-6">
-          <label className="w-full h-full cursor-pointer inline-flex items-center justify-center">
-            <Palette className="w-4 h-4 text-muted-foreground" />
-            <input
-              type="color"
-              value={formData.backgroundColor}
-              onChange={(e) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  backgroundColor: e.target.value,
-                }))
-              }
-              className="absolute inset-0 opacity-0 cursor-pointer"
-            />
-          </label>
-        </div>
+      {/* Gap */}
+      <div className="flex items-center gap-2">
+        <Label>Gap</Label>
+        <Select
+          value={data.gap}
+          onValueChange={(value) => updateField("gap", value)}
+        >
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="0px">None</SelectItem>
+            <SelectItem value="10px">Small</SelectItem>
+            <SelectItem value="20px">Medium</SelectItem>
+            <SelectItem value="30px">Large</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
+      {/* Background color */}
       <div className="flex items-center gap-2">
-        <Label htmlFor="columns">Columns</Label>
+        <Label>Background</Label>
+        <input
+          type="color"
+          value={data.backgroundColor}
+          onChange={(e) => updateField("backgroundColor", e.target.value)}
+          className="w-6 h-6 p-0 border-none"
+        />
+      </div>
+
+      {/* Columns */}
+      <div className="flex items-center gap-2">
+        <Label>Columns</Label>
         <Select
-          value={formData.columns}
-          onValueChange={(value) =>
-            setFormData((prev) => ({ ...prev, columns: value }))
-          }
+          value={String(data.columns)}
+          onValueChange={(value) => updateField("columns", Number(value))}
         >
           <SelectTrigger>
             <SelectValue />

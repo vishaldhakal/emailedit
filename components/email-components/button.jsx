@@ -1,8 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Button as UIButton } from "@/components/ui/button";
-import { Palette } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -19,7 +17,8 @@ export function ButtonComponent({ data }) {
   return (
     <div className="text-center">
       <a
-        href={url}
+        target="_blank"
+        href={url?.trim() || undefined}
         style={{
           backgroundColor,
           color,
@@ -40,7 +39,7 @@ export function ButtonComponent({ data }) {
   );
 }
 
-ButtonComponent.Editor = function ButtonEditor({ data, onUpdate, onCancel }) {
+ButtonComponent.Editor = function ButtonEditor({ data, onUpdate }) {
   const [formData, setFormData] = useState(data);
 
   // Auto-save when formData changes
@@ -77,39 +76,36 @@ ButtonComponent.Editor = function ButtonEditor({ data, onUpdate, onCancel }) {
           placeholder="https://example.com"
         />
       </div>
-
+      {/* Background color */}
       <div className="flex items-center gap-2">
-        <Label htmlFor="backgroundColor">Background Color</Label>
-        <div className="relative w-6 h-6">
-          <label className="w-full h-full cursor-pointer inline-flex items-center justify-center">
-            <Palette className="w-4 h-4 text-muted-foreground" />
-            <input
-              type="color"
-              value={formData.color}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, color: e.target.value }))
-              }
-              className="absolute inset-0 opacity-0 cursor-pointer"
-            />
-          </label>
-        </div>
+        <Label>Background Color</Label>
+        <input
+          type="color"
+          value={formData.backgroundColor}
+          onChange={(e) =>
+            setFormData((prev) => ({
+              ...prev,
+              backgroundColor: e.target.value,
+            }))
+          }
+          className="w-6 h-6 p-0 border-none"
+        />
       </div>
 
+      {/* text color */}
       <div className="flex items-center gap-2">
-        <Label htmlFor="color">Text Color</Label>
-        <div className="relative w-6 h-6">
-          <label className="w-full h-full cursor-pointer inline-flex items-center justify-center">
-            <Palette className="w-4 h-4 text-muted-foreground" />
-            <input
-              type="color"
-              value={formData.color}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, color: e.target.value }))
-              }
-              className="absolute inset-0 opacity-0 cursor-pointer"
-            />
-          </label>
-        </div>
+        <Label>Text Color</Label>
+        <input
+          type="color"
+          value={formData.color}
+          onChange={(e) =>
+            setFormData((prev) => ({
+              ...prev,
+              color: e.target.value,
+            }))
+          }
+          className="w-6 h-6 p-0 border-none"
+        />
       </div>
 
       <div className="flex items-center gap-2">
