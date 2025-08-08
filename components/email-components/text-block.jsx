@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useRef } from "react";
+import { Label } from "@/components/ui/label";
 import {
   Bold,
   Italic,
@@ -18,7 +19,6 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
-import { Palette } from "lucide-react";
 export function TextBlock({ data, onUpdate }) {
   const { content, fontSize, color, alignment, font, bold, italic, underline } =
     data;
@@ -168,18 +168,20 @@ TextBlock.Editor = function TextBlockEditor({ data, onUpdate }) {
           );
         })}
       </div>
-      <div className="relative w-6 h-6">
-        <label className="w-full h-full cursor-pointer inline-flex items-center justify-center">
-          <Palette className="w-4 h-4 text-muted-foreground" />
-          <input
-            type="color"
-            value={formData.color}
-            onChange={(e) =>
-              setFormData((prev) => ({ ...prev, color: e.target.value }))
-            }
-            className="absolute inset-0 opacity-0 cursor-pointer"
-          />
-        </label>
+
+      <div className="flex items-center gap-2">
+        <Label>Color</Label>
+        <input
+          type="color"
+          value={formData.color}
+          onChange={(e) =>
+            setFormData((prev) => ({
+              ...prev,
+              color: e.target.value,
+            }))
+          }
+          className="w-6 h-6 p-0 border-none"
+        />
       </div>
     </div>
   );

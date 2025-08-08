@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useRef } from "react";
-import { Palette } from "lucide-react";
+import { Label } from "@/components/ui/label";
 import {
   Bold,
   Italic,
@@ -21,7 +21,8 @@ import {
 } from "@/components/ui/select";
 
 export function Heading({ data, onUpdate }) {
-  const { content, level, color, alignment, font, italic, underline } = data;
+  const { content, level, color, alignment, font, bold, italic, underline } =
+    data;
   const Tag = level || "h3";
   const ref = useRef(null);
 
@@ -49,6 +50,7 @@ export function Heading({ data, onUpdate }) {
         color,
         textAlign: alignment,
         fontFamily: font,
+        fontWeight: bold ? "bold" : "normal",
         fontStyle: italic ? "italic" : "normal",
         textDecoration: underline ? "underline" : "none",
       }}
@@ -64,6 +66,7 @@ Heading.Editor = function HeadingEditor({ data, onUpdate }) {
     color: data.color,
     alignment: data.alignment,
     font: data.font,
+    bold: data.bold || false,
     italic: data.italic || false,
     underline: data.underline || false,
   });
@@ -120,6 +123,13 @@ Heading.Editor = function HeadingEditor({ data, onUpdate }) {
       {/* Formatting */}
       <div className="flex items-center gap-1">
         <Button
+          variant={formData.bold ? "default" : "ghost"}
+          onClick={() => setFormData((prev) => ({ ...prev, bold: !prev.bold }))}
+          size="icon"
+        >
+          <Bold className="w-4 h-4" />
+        </Button>
+        <Button
           variant={formData.italic ? "default" : "ghost"}
           size="icon"
           onClick={() =>
@@ -162,18 +172,20 @@ Heading.Editor = function HeadingEditor({ data, onUpdate }) {
           );
         })}
       </div>
-      <div className="relative w-6 h-6">
-        <label className="w-full h-full cursor-pointer inline-flex items-center justify-center">
-          <Palette className="w-4 h-4 text-muted-foreground" />
-          <input
-            type="color"
-            value={formData.color}
-            onChange={(e) =>
-              setFormData((prev) => ({ ...prev, color: e.target.value }))
-            }
-            className="absolute inset-0 opacity-0 cursor-pointer"
-          />
-        </label>
+
+      <div className="flex items-center gap-2">
+        <Label>Color</Label>
+        <input
+          type="color"
+          value={formData.color}
+          onChange={(e) =>
+            setFormData((prev) => ({
+              ...prev,
+              color: e.target.value,
+            }))
+          }
+          className="w-6 h-6 p-0 border-none"
+        />
       </div>
     </div>
   );

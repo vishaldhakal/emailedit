@@ -4,44 +4,76 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from "@/components/ui/popover";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
+import { PopoverClose } from "@radix-ui/react-popover";
+import { AlignLeft, AlignCenter, AlignRight } from "lucide-react";
+import {
+  FaFacebookF,
+  FaTwitter,
+  FaInstagram,
+  FaLinkedinIn,
+  FaYoutube,
+} from "react-icons/fa";
+import { SiTiktok } from "react-icons/si";
 export function SocialMedia({ data }) {
   const { platforms, iconSize, color, alignment } = data;
 
   const socialIcons = {
-    facebook: "📘",
-    twitter: "🐦",
-    instagram: "📷",
-    linkedin: "💼",
-    youtube: "📺",
-    tiktok: "🎵",
+    facebook: FaFacebookF,
+    twitter: FaTwitter,
+    instagram: FaInstagram,
+    linkedin: FaLinkedinIn,
+    youtube: FaYoutube,
+    tiktok: SiTiktok,
   };
-
+  const justifyContentMap = {
+    left: "flex-start",
+    center: "center",
+    right: "flex-end",
+  };
   return (
     <div style={{ textAlign: alignment }}>
-      <div className="flex gap-4 justify-center">
-        {platforms.map((platform, index) => (
-          <a
-            key={index}
-            href={platform.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{
-              fontSize: iconSize,
-              color: color,
-              textDecoration: "none",
-            }}
-            className="hover:opacity-70 transition-opacity"
-          >
-            {socialIcons[platform.name] || "🔗"}
-          </a>
-        ))}
+      <div
+        className="flex gap-4 "
+        style={{ justifyContent: justifyContentMap[alignment] || "center" }}
+      >
+        {platforms?.map((platform, index) => {
+          const Icon = socialIcons[platform.name];
+          const sizeNumber = parseInt(iconSize, 10) || 24;
+          return (
+            <a
+              key={index}
+              href={platform.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                fontSize: iconSize,
+                color: color,
+                textDecoration: "none",
+              }}
+              className="hover:opacity-70 transition-opacity"
+            >
+              {Icon ? <Icon size={sizeNumber} color={color} /> : "🔗"}
+            </a>
+          );
+        })}
       </div>
     </div>
   );
 }
 
-SocialMedia.Editor = function SocialMediaEditor({ data, onUpdate, onCancel }) {
+SocialMedia.Editor = function SocialMediaEditor({ data, onUpdate }) {
   const [formData, setFormData] = useState(data);
 
   // Auto-save when formData changes
@@ -54,25 +86,12 @@ SocialMedia.Editor = function SocialMediaEditor({ data, onUpdate, onCancel }) {
   }, [formData]);
 
   const platformOptions = [
-    { value: "facebook", label: "Facebook", icon: "📘" },
-    { value: "twitter", label: "Twitter", icon: "🐦" },
-    { value: "instagram", label: "Instagram", icon: "📷" },
-    { value: "linkedin", label: "LinkedIn", icon: "💼" },
-    { value: "youtube", label: "YouTube", icon: "📺" },
-    { value: "tiktok", label: "TikTok", icon: "🎵" },
-  ];
-
-  const iconSizeOptions = [
-    { value: "20px", label: "Small" },
-    { value: "24px", label: "Medium" },
-    { value: "32px", label: "Large" },
-    { value: "40px", label: "Extra Large" },
-  ];
-
-  const alignmentOptions = [
-    { value: "left", label: "Left" },
-    { value: "center", label: "Center" },
-    { value: "right", label: "Right" },
+    { value: "facebook", label: "Facebook", icon: FaFacebookF },
+    { value: "twitter", label: "Twitter", icon: FaTwitter },
+    { value: "instagram", label: "Instagram", icon: FaInstagram },
+    { value: "linkedin", label: "LinkedIn", icon: FaLinkedinIn },
+    { value: "youtube", label: "YouTube", icon: FaYoutube },
+    { value: "tiktok", label: "TikTok", icon: SiTiktok },
   ];
 
   const addPlatform = () => {
@@ -99,123 +118,185 @@ SocialMedia.Editor = function SocialMediaEditor({ data, onUpdate, onCancel }) {
   };
 
   return (
-    <div className="space-y-4">
-      <div>
-        <Label>Social Platforms</Label>
-        <div className="space-y-2 mt-2">
-          {formData.platforms.map((platform, index) => (
-            <div key={index} className="flex gap-2 items-center">
-              <div className="flex-1">
-                <div className="grid grid-cols-2 gap-2">
-                  <div>
-                    <Label className="text-xs">Platform</Label>
-                    <div className="grid grid-cols-3 gap-1 mt-1">
-                      {platformOptions.map((option) => (
-                        <Button
+    <div className="flex items-center h-full justify-center gap-5 bg-muted px-4  shadow-sm border-b w-full overflow-x-auto">
+      <Popover>
+        <PopoverTrigger
+          className="inline-flex items-center px-4 py-2 bg-blue-600 text-white font-semibold rounded-md shadow-sm
+             hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
+             transition-colors duration-150 ease-in-out cursor-pointer"
+        >
+          Platforms
+        </PopoverTrigger>
+
+        <PopoverContent className="w-[320px] max-h-[400px] overflow-auto space-y-4 p-4">
+          <Label className="block mb-2 font-semibold text-base">
+            Social Platforms
+          </Label>
+
+          {formData.platforms?.map((platform, index) => (
+            <fieldset
+              key={index}
+              className="flex items-center gap-3 border border-gray-200 rounded p-2"
+            >
+              <legend className="sr-only">
+                Edit social platform {platform.name}
+              </legend>
+
+              <div className="flex-1 grid grid-cols-2 gap-3">
+                {/* Platform selector */}
+                <div>
+                  <Label className="text-xs mb-1 block">Platform</Label>
+                  <div className="grid grid-cols-3 gap-1">
+                    {platformOptions.map((option) => {
+                      const Icon = option.icon;
+                      const isSelected = platform.name === option.value;
+                      return (
+                        <button
                           key={option.value}
-                          variant={
-                            platform.name === option.value
-                              ? "default"
-                              : "secondary"
-                          }
-                          size="sm"
+                          type="button"
                           onClick={() =>
                             updatePlatform(index, "name", option.value)
                           }
-                          className="text-xs p-1"
-                        >
-                          {option.icon}
-                        </Button>
-                      ))}
-                    </div>
-                  </div>
-                  <div>
-                    <Label className="text-xs">URL</Label>
-                    <Input
-                      value={platform.url}
-                      onChange={(e) =>
-                        updatePlatform(index, "url", e.target.value)
+                          aria-pressed={isSelected}
+                          className={`flex items-center justify-center p-1 rounded border 
+                      ${
+                        isSelected
+                          ? "bg-primary text-white border-primary"
+                          : "border-gray-300 text-gray-600"
                       }
-                      placeholder="https://..."
-                      className="text-xs"
-                    />
+                      focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-primary`}
+                          title={option.label}
+                        >
+                          <Icon size={18} />
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
+
+                {/* URL input */}
+                <div>
+                  <Label
+                    className="text-xs mb-1 block"
+                    htmlFor={`url-${index}`}
+                  >
+                    URL
+                  </Label>
+                  <Input
+                    id={`url-${index}`}
+                    type="url"
+                    value={platform.url}
+                    onChange={(e) =>
+                      updatePlatform(index, "url", e.target.value)
+                    }
+                    placeholder="https://..."
+                    className="text-xs"
+                  />
+                </div>
               </div>
-              <Button
-                variant="outline"
-                size="sm"
+
+              {/* Remove button */}
+              <button
+                type="button"
                 onClick={() => removePlatform(index)}
-                className="text-red-500 hover:text-red-700"
+                aria-label={`Remove ${platform.name} platform`}
+                className="text-red-600 hover:text-red-800 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-red-600 rounded px-1"
+                title="Remove platform"
               >
                 ✕
-              </Button>
-            </div>
+              </button>
+            </fieldset>
           ))}
+
           <Button
             variant="outline"
             size="sm"
             onClick={addPlatform}
-            className="w-full"
+            className="w-full mt-2"
           >
             + Add Platform
           </Button>
-        </div>
+        </PopoverContent>
+      </Popover>
+
+      <div className="flex items-center gap-2">
+        <Label>Icon Size</Label>
+        <Select
+          value={formData.iconSize}
+          onValueChange={(value) =>
+            setFormData((prev) => ({ ...prev, iconSize: value }))
+          }
+        >
+          <SelectTrigger className="w-[80px] h-8">
+            <SelectValue placeholder="icon Size" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="20px">Small</SelectItem>
+            <SelectItem value="24px">Medium</SelectItem>
+            <SelectItem value="32px">Large</SelectItem>
+            <SelectItem value="40px">Extra Large</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
-      <div>
-        <Label>Icon Size</Label>
-        <div className="grid grid-cols-2 gap-2 mt-2">
-          {iconSizeOptions.map((option) => (
+      <div className="flex items-center gap-2">
+        <Label>Color</Label>
+        <input
+          type="color"
+          value={formData.color}
+          onChange={(e) =>
+            setFormData((prev) => ({
+              ...prev,
+              color: e.target.value,
+            }))
+          }
+          className="w-6 h-6 p-0 border-none"
+        />
+      </div>
+
+      {/* Alignment Buttons */}
+      <div className="flex items-center gap-1 border-l pl-2 ml-2">
+        {["left", "center", "right"].map((align) => {
+          const Icon =
+            align === "left"
+              ? AlignLeft
+              : align === "center"
+              ? AlignCenter
+              : AlignRight;
+          return (
+            <Button
+              key={align}
+              variant={formData.alignment === align ? "default" : "ghost"}
+              size="icon"
+              onClick={() =>
+                setFormData((prev) => ({ ...prev, alignment: align }))
+              }
+            >
+              <Icon className="w-4 h-4" />
+            </Button>
+          );
+        })}
+      </div>
+
+      {/* <div className="flex items-center gap-2">
+        <Label>Alignment</Label>
+        <div className="grid grid-cols-1 gap-2 mt-2">
+          {alignmentOptions.map((option) => (
             <Button
               key={option.value}
               variant={
-                formData.iconSize === option.value ? "default" : "outline"
+                formData.alignment === option.value ? "default" : "outline"
               }
               size="sm"
               onClick={() =>
-                setFormData((prev) => ({ ...prev, iconSize: option.value }))
+                setFormData((prev) => ({ ...prev, alignment: option.value }))
               }
             >
               {option.label}
             </Button>
           ))}
         </div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="color">Icon Color</Label>
-          <Input
-            id="color"
-            type="color"
-            value={formData.color}
-            onChange={(e) =>
-              setFormData((prev) => ({ ...prev, color: e.target.value }))
-            }
-          />
-        </div>
-
-        <div>
-          <Label>Alignment</Label>
-          <div className="grid grid-cols-1 gap-2 mt-2">
-            {alignmentOptions.map((option) => (
-              <Button
-                key={option.value}
-                variant={
-                  formData.alignment === option.value ? "default" : "outline"
-                }
-                size="sm"
-                onClick={() =>
-                  setFormData((prev) => ({ ...prev, alignment: option.value }))
-                }
-              >
-                {option.label}
-              </Button>
-            ))}
-          </div>
-        </div>
-      </div>
+      </div> */}
     </div>
   );
 };

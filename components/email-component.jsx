@@ -8,9 +8,8 @@ import { ButtonComponent } from "./email-components/button";
 import { Divider } from "./email-components/divider";
 import { Spacer } from "./email-components/spacer";
 import { SocialMedia } from "./email-components/social-media";
-import { Navigation } from "./email-components/navigation";
 import { Column } from "./email-components/layouts/column";
-
+import { Link } from "./email-components/Link";
 export const componentMap = {
   "text-block": TextBlock,
   heading: Heading,
@@ -19,8 +18,8 @@ export const componentMap = {
   divider: Divider,
   spacer: Spacer,
   "social-media": SocialMedia,
-  navigation: Navigation,
   column: Column,
+  link: Link,
 };
 
 export function EmailComponent({

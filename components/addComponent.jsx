@@ -1,5 +1,5 @@
 import React from "react";
-import { Plus } from "lucide-react";
+import { Move, Plus } from "lucide-react";
 import { CirclePlus } from "lucide-react";
 import {
   Popover,
@@ -7,18 +7,17 @@ import {
   PopoverContent,
 } from "@/components/ui/popover";
 import {
-  Layout,
+  Heading,
+  Link,
+  MoveVertical,
   Type,
   Image,
   MousePointer,
   Minus,
   Share2,
-  Menu,
-  Columns,
   Square,
-  Grid,
-  Rows,
 } from "lucide-react";
+import { FaLink } from "react-icons/fa";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Accordion,
@@ -63,7 +62,7 @@ const components = [
   {
     type: "heading",
     name: "Heading",
-    icon: Type,
+    icon: Heading,
     description: "Section headings",
     defaultData: {
       content: "Heading",
@@ -71,6 +70,7 @@ const components = [
       color: "#000000",
       alignment: "left",
       font: "Arial",
+      bold: false,
       italic: false,
       underline: false,
     },
@@ -94,11 +94,24 @@ const components = [
     description: "Call-to-action button",
     defaultData: {
       text: "Click Here",
-      url: "#",
+      url: "https://",
       backgroundColor: "#007bff",
       color: "#ffffff",
       padding: "12px 24px",
       borderRadius: "4px",
+    },
+  },
+  {
+    type: "link",
+    name: "Link",
+    icon: Link,
+    description: " link text",
+    defaultData: {
+      text: "click here",
+      url: "",
+      color: "#000000",
+      underline: true,
+      alignment: "left",
     },
   },
   {
@@ -115,7 +128,7 @@ const components = [
   {
     type: "spacer",
     name: "Spacer",
-    icon: Minus,
+    icon: MoveVertical,
     description: "Vertical spacing",
     defaultData: {
       height: "20px",
@@ -135,22 +148,6 @@ const components = [
       iconSize: "24px",
       color: "#666666",
       alignment: "center",
-    },
-  },
-  {
-    type: "navigation",
-    name: "Navigation",
-    icon: Menu,
-    description: "Menu navigation",
-    defaultData: {
-      items: [
-        { text: "Home", url: "#" },
-        { text: "About", url: "#" },
-        { text: "Contact", url: "#" },
-      ],
-      alignment: "center",
-      fontSize: "16px",
-      color: "#000000",
     },
   },
 ];
