@@ -5,6 +5,7 @@ import { EmailComponent } from "./email-component";
 import { Button } from "./ui/button";
 import { Trash2 } from "lucide-react";
 import React from "react";
+
 import { ChevronUp, ChevronDown } from "lucide-react";
 import AddComponent from "./addComponent";
 import { CirclePlus } from "lucide-react";
@@ -40,6 +41,7 @@ export function EmailCanvas({
       try {
         const parsedData = JSON.parse(savedData);
         onUpdateComponents(parsedData);
+        console.log(parsedData);
         console.log("Loaded saved data");
       } catch (error) {
         console.error("Error loading saved data:", error);
@@ -78,6 +80,13 @@ export function EmailCanvas({
     newComponents.splice(index + 1, 0, newComponent); // Insert after current index
     onUpdateComponents(newComponents);
   };
+
+  const handleClearAll = () => {
+    if (confirm("Are you sure you want to remove all components?")) {
+      onUpdateComponents([]);
+    }
+  };
+
   if (components.length == 0) {
     return (
       <div className=" w-full p-6 max-w-4xl mx-auto">
@@ -88,11 +97,20 @@ export function EmailCanvas({
   return (
     <div className="flex-1 h-full bg-background border-l border-border overflow-y-auto">
       <div className="p-6 max-w-4xl mx-auto">
-        {formattedTime && (
-          <div className="mb-4 text-sm text-muted-foreground">
-            Last saved: {formattedTime}
-          </div>
-        )}
+        <div className="flex mb-4 gap-5 items-center ">
+          {formattedTime && (
+            <div className="text-sm text-muted-foreground">
+              Last saved: {formattedTime}
+            </div>
+          )}
+          <Button
+            onClick={handleClearAll}
+            className="flex items-center gap-2 bg-red-600 text-white hover:bg-red-700"
+          >
+            <Trash2 className="w-4 h-4" />
+            Clear All
+          </Button>
+        </div>
 
         {components.map((component, index) => (
           <div

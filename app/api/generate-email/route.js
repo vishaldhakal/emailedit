@@ -72,19 +72,19 @@ AVAILABLE COMPONENTS:
 5. divider - For horizontal separators
 6. spacer - For vertical spacing
 7. social-media - For social media links
-8. Link - for general redirect links
+8. link - for general  links
 9. column - can be split upto 3 columns and can contain other components
 
 COMPONENT DATA STRUCTURES:
-- heading: { content: string, level: "h1"|"h2"|"h3"|"h4"|"h5"|"h6", color: string, alignment: "left"|"center"|"right",font:"Arial"|"Georgia"|"Times new Roman" |"Verdana",bold:boolean,italic:boolean,underline:boolean }
-- text-block: { content: string, fontSize: string,font:"Arial"|"Georgia"|"Times new Roman" |"Verdana", color: string, alignment: "left"|"center"|"right",bold:boolean,italic:boolean,underline:boolean}
-- image: { src: string, alt: string, width: string, height: string, pexelsQuery: string }
-- button: { text: string, url: string, backgroundColor: string, color: string, padding: string, borderRadius: string }
-- divider: { style: "solid"|"dashed"|"dotted", color: string, height: string }
-- spacer: { height: string }
-- social-media: { platforms: [{ name: string, url: string }], iconSize: string, color: string, alignment: "left"|"center"|"right" }
+- heading: { content: string, level: "h1"|"h2"|"h3"|"h4"|"h5"|"h6", color: string, alignment: "left"|"center"|"right",font:"Arial"|"Georgia"|"Times New Roman" |"Verdana",bold:boolean,italic:boolean,underline:boolean }
+- text-block: { content: string, fontSize: string,font:"Arial"|"Georgia"|"Times New Roman" |"Verdana", color: string, alignment: "left"|"center"|"right",bold:boolean,italic:boolean,underline:boolean}
+- image: { src: string, alt: string, width: "100%"|"75%"|"50%"|"25%"|"200px"|"300px"|"400px" height: "auto"|"100px"| "200px"|"300px"|"400px", pexelsQuery: string }
+- button: { text: string, url: string, backgroundColor: string, color: string, padding: "8px 16px"|"12px 24px"| |"16px 32px"|"20px 40px", borderRadius: "0px"|"4px"|"8px"|"16px"|"24px" }
+- divider: { style: "solid"|"dashed"|"dotted", color: string, height: "1px"|"2px"|"3px"|"4px"|}
+- spacer: { height: "10px"|"20px"|"30px"|"40px"|"50px"|"60px"| }
+- social-media: { platforms: [{ name: "facebbok"|"twitter"|"instagram"|"linkedin"|"youtube"|"tiktok", url: string }], iconSize:"20px"|"24px"|"32px"|"40px", color: string, alignment: "left"|"center"|"right" }
 -link:{text:string,url:string, color:string,underline:boolean ,alignment: "left" || "right" || "center"}
-- column: { width: string , backgroundColor: string, padding: string,columns:string number //number of columns ,columnsData = [], // Array of arrays: components per column}
+- column: { width: "100%"|"90%"|"80%"|"70%" , backgroundColor: string, padding: "0px"|"10px"|"20px"|"30px",gap:"0px"|"10px"|"20px"|"30px",columns:number //number of columns ,columnsData = [], // Array of arrays: components per column}
 
 
 INSTRUCTIONS:
@@ -94,7 +94,7 @@ INSTRUCTIONS:
 4.  Choose appropriate font sizes and styles for headings and body text to ensure readability and visual hierarchy.
 5.  Incorporate engaging and well-written copy that matches the email's purpose.
 6.  Use spacers and dividers effectively to create a clean and well-organized layout.
-7.  For images, provide a relevant 'pexelsQuery' to fetch appropriate visuals.
+7.  For every image component, whether nested inside columns or standalone, provide a direct src URL of a relevant image from Pexels and include a meaningful pexelsQuery. Do not leave src empty or omit it inside columns.
 8.  Include clear and compelling call-to-action buttons for promotional content.
 9.  Add social media links to enhance brand presence.
 10. Do NOT generate any HTML. Only use the provided component data structures.

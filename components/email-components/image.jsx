@@ -82,7 +82,7 @@ ImageComponent.Editor = function ImageEditor({ data, onUpdate }) {
       <div className="flex items-center gap-2">
         <Label>Width</Label>
         <Select
-          value={formData.level}
+          value={formData.width}
           onValueChange={(value) =>
             setFormData((prev) => ({ ...prev, width: value }))
           }
