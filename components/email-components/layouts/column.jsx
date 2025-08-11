@@ -36,11 +36,12 @@ export function Column({ data, onUpdate, setSelectedComponentId }) {
       ? columnWidths
       : Array(columns).fill(`${(100 / columns).toFixed(2)}%`);
 
-  // Update whole data helper
-  // function updateData(newData) {
-  //   onUpdate({ ...data, ...newData });
-  // }
-
+  useEffect(() => {
+    onUpdate({
+      ...data,
+      columnWidths: normalizedColumnWidths,
+    });
+  }, [normalizedColumnWidths]);
   // Handle adding new component to a specific column
   const handleComponentClick = (component, columnIndex) => {
     const newComponent = {

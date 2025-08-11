@@ -39,6 +39,7 @@ const components = [
       padding: "0px",
       columns: "1",
       gap: "20px",
+      columnWidths: [],
       columnsData: [],
     },
   },

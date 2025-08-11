@@ -69,18 +69,22 @@ export function Header({
                 Templates
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-80 max-h-80 overflow-y-auto">
+            <PopoverContent className="w-[32rem] max-h-96 overflow-y-auto">
               <div className="grid grid-cols-2 gap-3">
                 {Templates?.map((template, i) => (
                   <PopoverClose key={i}>
                     <div
-                      className="p-3 rounded-md hover:bg-gray-100 cursor-pointer min-h-[120px] flex flex-col justify-center"
+                      className="p-2 rounded-md hover:bg-gray-100 cursor-pointer min-h-[120px] flex flex-col justify-center"
                       onClick={() => handleTempleteClick(template)}
                     >
+                      {template.image && (
+                        <img
+                          src={template.image}
+                          alt={template.name}
+                          className="mb-2 w-full h-auto rounded-md object-cover"
+                        />
+                      )}
                       <p className="font-medium mb-1">{template.name}</p>
-                      <p className="text-sm text-gray-500">
-                        {template.description}
-                      </p>
                     </div>
                   </PopoverClose>
                 ))}
