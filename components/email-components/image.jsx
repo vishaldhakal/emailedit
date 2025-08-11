@@ -23,14 +23,12 @@ export function ImageComponent({ data }) {
   }
 
   return (
-    <div
-      style={{ width: width || "100%" }}
-      className="flex justify-center items-center"
-    >
+    <div className="flex w-auto justify-center items-center">
       <img
         src={src}
         alt={alt}
         style={{
+          width: width,
           height: height,
           maxWidth: "100%",
           display: "block",
@@ -82,7 +80,7 @@ ImageComponent.Editor = function ImageEditor({ data, onUpdate }) {
       <div className="flex items-center gap-2">
         <Label>Width</Label>
         <Select
-          value={formData.level}
+          value={formData.width}
           onValueChange={(value) =>
             setFormData((prev) => ({ ...prev, width: value }))
           }

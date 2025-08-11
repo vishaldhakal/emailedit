@@ -106,6 +106,7 @@ export function EmailEditor() {
     <div className="h-screen flex flex-col bg-background">
       <Header
         components={components}
+        onUpdateComponents={handleUpdateComponents}
         onSave={handleSave}
         lastSaved={lastSaved}
         onGenerateEmail={handleGenerateEmail}
