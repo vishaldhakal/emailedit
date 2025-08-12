@@ -5,11 +5,42 @@ import { Header } from "./header";
 import { EmailCanvas } from "./email-canvas";
 import { EditorPanel } from "./editor-panel";
 import { nanoid } from "nanoid";
+import { useEffect } from "react";
 
 export function EmailEditor() {
-  const [components, setComponents] = useState([]);
+  const MAX_HISTORY_LENGTH = 20;
+
+  // History array and current pointer
+  const [history, setHistory] = useState([[]]); // initial empty components array in history
+  const [historyIndex, setHistoryIndex] = useState(0);
+
   const [lastSaved, setLastSaved] = useState(Date.now());
   const [selectedComponentId, setSelectedComponentId] = useState(null);
+
+  // Current components is always the history[historyIndex]
+  const components = history[historyIndex];
+
+  // Utility to update history on any change
+  const pushToHistory = (newComponents) => {
+    const currentComponents = history[historyIndex];
+
+    if (JSON.stringify(newComponents) === JSON.stringify(currentComponents)) {
+      // Same snapshot, do nothing
+      return;
+    }
+
+    // Cut off any "future" redo states if user edits after undo
+    let newHistory = history.slice(0, historyIndex + 1);
+    newHistory.push(newComponents);
+
+    // If history exceeds max length, remove the oldest snapshot (at index 0)
+    if (newHistory.length > MAX_HISTORY_LENGTH) {
+      newHistory = newHistory.slice(newHistory.length - MAX_HISTORY_LENGTH);
+    }
+
+    setHistory(newHistory);
+    setHistoryIndex(newHistory.length - 1);
+  };
 
   const handleAddComponent = (type, defaultData) => {
     const newComponent = {
@@ -17,13 +48,14 @@ export function EmailEditor() {
       type,
       data: defaultData,
     };
-    setComponents((prev) => [...prev, newComponent]);
+    const newComponents = [...components, newComponent];
+    pushToHistory(newComponents);
   };
 
   //updates individual components
   const handleComponentUpdate = (id, updatedData) => {
     const newComponents = updateComponentById(components, id, updatedData);
-    setComponents(newComponents);
+    pushToHistory(newComponents);
   };
 
   // Recursively search nested components by ID and update
@@ -87,12 +119,46 @@ export function EmailEditor() {
 
   //updates entire components list
   const handleUpdateComponents = (newComponents) => {
-    setComponents(newComponents);
+    pushToHistory(newComponents);
   };
+
+  // Undo function
+  const undo = () => {
+    if (historyIndex > 0) {
+      setHistoryIndex(historyIndex - 1);
+    }
+  };
+
+  // Redo function
+  const redo = () => {
+    if (historyIndex < history.length - 1) {
+      setHistoryIndex(historyIndex + 1);
+    }
+  };
+
+  // Keyboard event handler
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.ctrlKey && !e.shiftKey && e.key === "z") {
+        e.preventDefault();
+        undo();
+      } else if (
+        (e.ctrlKey && e.key === "y") ||
+        (e.ctrlKey && e.shiftKey && e.key === "Z")
+      ) {
+        e.preventDefault();
+        redo();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [undo, redo]);
 
   const handleGenerateEmail = (aiComponents) => {
     // Replace current components with AI-generated ones
-    setComponents(aiComponents);
+    pushToHistory(aiComponents);
   };
 
   const handleSave = useCallback(() => {
