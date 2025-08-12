@@ -36,13 +36,15 @@ export function ColumnComponentManager({
 
   return (
     <div
-      className="relative group/inner border-2 border-transparent hover:border-primary/30 rounded-lg transition-colors"
+      className={`relative group/inner mb-4 border-2 border-transparent hover:border-primary/30 rounded-lg transition-colors`}
       onClick={(e) => {
         e.stopPropagation();
         setSelectedComponentId(component.id);
       }}
     >
-      <div className="absolute top-1/2 -translate-y-1/2 -right-8 z-10 opacity-0  group-hover/inner:opacity-100 transition-colors">
+      <div
+        className={`absolute top-1/2 -translate-y-1/2 -right-8 z-10 opacity-0  group-hover/inner:opacity-100 transition-colors`}
+      >
         <Button
           variant="ghost"
           size="icon"
@@ -68,7 +70,7 @@ export function ColumnComponentManager({
         onClick={(e) => {
           e.stopPropagation();
         }}
-        className=" absolute -bottom-3.5 -left-4 cursor-pointer w-4 h-4 rounded-full opacity-0 group-hover/inner:opacity-100"
+        className={`absolute -bottom-5 left-1/2 cursor-pointer w-4 h-4 rounded-full opacity-0 group-hover/inner:opacity-100`}
       >
         <AddComponent
           inbetween
@@ -78,7 +80,9 @@ export function ColumnComponentManager({
       </div>
 
       {/* Move Controls */}
-      <div className="absolute top-1/2 -left-5 -translate-y-1/2 transform opacity-0 group-hover/inner:opacity-100 transition-opacity z-10">
+      <div
+        className={`absolute top-1/2 -left-5 -translate-y-1/2 transform opacity-0 group-hover/inner:opacity-100 transition-opacity z-10`}
+      >
         <div className="flex flex-col items-center gap-[2px] bg-muted px-1 py-[2px] rounded-md shadow-sm">
           {index > 0 && (
             <ChevronUp

@@ -96,7 +96,7 @@ export function EmailCanvas({
   }
   return (
     <div className="flex-1 h-full bg-background border-l border-border overflow-y-auto">
-      <div className="p-6 max-w-4xl mx-auto">
+      <div className=" p-6 max-w-4xl mx-auto">
         <div className="flex mb-4 gap-5 items-center ">
           {formattedTime && (
             <div className="text-sm text-muted-foreground">
@@ -116,7 +116,8 @@ export function EmailCanvas({
           <div
             key={component.id}
             data-component-index={index}
-            className="relative group/outer mb-2 border-2 border-transparent hover:border-primary rounded-lg transition-colors "
+            className="relative group/outer  mb-4 border-2 border-transparent hover:border-primary rounded-lg transition-colors  transition-padding
+   "
             onClick={(e) => {
               e.stopPropagation();
               setSelectedComponentId(component.id);
@@ -151,7 +152,7 @@ export function EmailCanvas({
               onClick={(e) => {
                 e.stopPropagation();
               }}
-              className=" absolute -bottom-3.5 -left-4 cursor-pointer w-4 h-4 rounded-full opacity-0 group-hover/outer:opacity-100"
+              className=" absolute -bottom-4 left-1/2  cursor-pointer w-3 h-3 rounded-full opacity-0 group-hover/outer:opacity-100  "
             >
               <AddComponent
                 inbetween

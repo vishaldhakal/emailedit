@@ -37,10 +37,17 @@ export function Column({ data, onUpdate, setSelectedComponentId }) {
       : Array(columns).fill(`${(100 / columns).toFixed(2)}%`);
 
   useEffect(() => {
-    onUpdate({
-      ...data,
-      columnWidths: normalizedColumnWidths,
-    });
+    // Only update if columnWidths are different
+    if (
+      !data.columnWidths ||
+      data.columnWidths.length !== normalizedColumnWidths.length ||
+      data.columnWidths.some((w, i) => w !== normalizedColumnWidths[i])
+    ) {
+      onUpdate({
+        ...data,
+        columnWidths: normalizedColumnWidths,
+      });
+    }
   }, [normalizedColumnWidths]);
   // Handle adding new component to a specific column
   const handleComponentClick = (component, columnIndex) => {

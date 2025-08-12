@@ -11,6 +11,7 @@ import {
   Link,
   MoveVertical,
   Type,
+  List as listIcon,
   Image,
   MousePointer,
   Minus,
@@ -58,6 +59,19 @@ const components = [
       bold: false,
       italic: false,
       underline: false,
+    },
+  },
+  {
+    type: "list",
+    name: "List",
+    icon: listIcon,
+    description: "list items",
+    defaultData: {
+      listType: "unordered",
+      listStyle: "disc",
+      fontSize: "16px",
+      color: "#333333",
+      items: ["item1", "item2", "item3"],
     },
   },
   {

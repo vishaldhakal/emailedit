@@ -277,26 +277,6 @@ SocialMedia.Editor = function SocialMediaEditor({ data, onUpdate }) {
           );
         })}
       </div>
-
-      {/* <div className="flex items-center gap-2">
-        <Label>Alignment</Label>
-        <div className="grid grid-cols-1 gap-2 mt-2">
-          {alignmentOptions.map((option) => (
-            <Button
-              key={option.value}
-              variant={
-                formData.alignment === option.value ? "default" : "outline"
-              }
-              size="sm"
-              onClick={() =>
-                setFormData((prev) => ({ ...prev, alignment: option.value }))
-              }
-            >
-              {option.label}
-            </Button>
-          ))}
-        </div>
-      </div> */}
     </div>
   );
 };
