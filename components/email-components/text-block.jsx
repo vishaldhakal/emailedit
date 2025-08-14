@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useRef } from "react";
 import { Label } from "@/components/ui/label";
+
 import {
   Bold,
   Italic,
@@ -23,7 +24,7 @@ export function TextBlock({ data, onUpdate }) {
   const { content, fontSize, color, alignment, font, bold, italic, underline } =
     data;
   const ref = useRef(null);
-
+  const debounceRef = useRef(null);
   //update ui on the basis of content prop
   useEffect(() => {
     if (ref.current && ref.current.textContent !== content) {
@@ -33,7 +34,12 @@ export function TextBlock({ data, onUpdate }) {
   const handleInput = () => {
     const newText = ref.current?.textContent || "";
     if (newText !== content) {
-      onUpdate({ ...data, content: newText });
+      // clear previous debounce timer
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      // debounce: wait 500ms after last input before updating
+      debounceRef.current = setTimeout(() => {
+        onUpdate({ ...data, content: newText });
+      }, 500);
     }
   };
 

@@ -13,7 +13,7 @@ export function EmailEditor() {
   // History array and current pointer
   const [history, setHistory] = useState([[]]); // initial empty components array in history
   const [historyIndex, setHistoryIndex] = useState(0);
-
+  console.log(history.length);
   const [lastSaved, setLastSaved] = useState(Date.now());
   const [selectedComponentId, setSelectedComponentId] = useState(null);
 

@@ -8,7 +8,6 @@ import React from "react";
 
 import { ChevronUp, ChevronDown } from "lucide-react";
 import AddComponent from "./addComponent";
-import { CirclePlus } from "lucide-react";
 import { nanoid } from "nanoid";
 export function EmailCanvas({
   components,
