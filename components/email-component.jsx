@@ -11,7 +11,6 @@ import { SocialMedia } from "./email-components/social-media";
 import { Column } from "./email-components/layouts/column";
 import { Link } from "./email-components/Link";
 import { List } from "./email-components/list";
-
 export const componentMap = {
   "text-block": TextBlock,
   heading: Heading,

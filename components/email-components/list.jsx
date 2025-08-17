@@ -64,7 +64,7 @@ List.Editor = function ListEditor({ data, onUpdate }) {
   const styleOptions =
     formData.listType === "unordered" ? unorderedOptions : orderedOptions;
   return (
-    <div className="flex items-center justify-start gap-5 px-2 py-2 w-full overflow-x-auto text-black">
+    <div className="flex items-center h-full justify-center gap-5 bg-muted px-4 py-2 shadow-sm border-b w-full overflow-x-auto">
       {/* items  */}
       <Popover>
         <PopoverTrigger

@@ -1,5 +1,6 @@
-import React, { useMemo, useState } from "react";
-import { Plus, CirclePlus } from "lucide-react";
+import React from "react";
+import { Move, Plus } from "lucide-react";
+import { CirclePlus } from "lucide-react";
 import {
   Popover,
   PopoverTrigger,
@@ -19,7 +20,12 @@ import {
 } from "lucide-react";
 import { FaLink } from "react-icons/fa";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Input } from "@/components/ui/input";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { PopoverClose } from "@radix-ui/react-popover";
 
 const components = [
@@ -162,75 +168,48 @@ const components = [
 ];
 
 function AddComponent({ handleComponentClick, columnId, inbetween, index }) {
-  const [query, setQuery] = useState("");
-
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    if (!q) return components;
-    return components.filter((c) =>
-      [c.name, c.type, c.description]
-        .filter(Boolean)
-        .some((v) => String(v).toLowerCase().includes(q))
-    );
-  }, [query]);
-
   return (
     <Popover>
       <PopoverTrigger asChild>
         {inbetween ? (
-          <button
-            type="button"
-            className="w-10 h-10 rounded-full bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/70 text-slate-700 shadow-md border border-border flex items-center justify-center hover:text-foreground hover:shadow-lg transition"
-            aria-label="Add component"
-          >
-            <CirclePlus className="w-5 h-5" />
-          </button>
+          <CirclePlus className="w-4 h-4 text-slate-500" />
         ) : (
-          <div className="w-full rounded-xl px-4 py-3 cursor-pointer bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/70 text-foreground shadow-md hover:shadow-lg transition flex items-center gap-3">
+          <div className="w-full  border rounded-md pl-3 py-1 cursor-pointer border-slate-600 flex  items-center gap-2">
             <Plus size={18} />
-            <span className="text-sm font-medium">Add New Component</span>
+            Add Component
           </div>
         )}
       </PopoverTrigger>
-      <PopoverContent className="w-[480px] p-0 bg-white/70 backdrop-blur supports-[backdrop-filter]:bg-white/60 rounded-2xl shadow-xl border border-border">
-        <div className="p-3 border-b">
-          <Input
-            placeholder="Search components"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            className="h-9"
-          />
-        </div>
-        <ScrollArea className="h-[360px]">
-          <ul className="divide-y divide-border">
-            {filtered.map((component) => (
-              <PopoverClose key={component.type} asChild>
-                <li
-                  className="px-4 py-3 cursor-pointer hover:bg-accent/50 transition flex items-center gap-3"
-                  onClick={() =>
-                    handleComponentClick(component, columnId, index)
-                  }
-                >
-                  <div className="h-9 w-9 rounded-lg bg-accent text-foreground flex items-center justify-center shadow-sm border border-border">
-                    <component.icon className="h-5 w-5" />
+      <PopoverContent className="w-96 p-0">
+        <ScrollArea className="flex-1 h-[300px]">
+          <div className="p-4">
+            <Accordion type="single" defaultValue="all" collapsible>
+              <AccordionItem value="all">
+                {/* No AccordionTrigger */}
+                <AccordionContent className="pt-0">
+                  <div className="grid grid-cols-3 gap-2 pt-2">
+                    {components.map((component) => (
+                      <PopoverClose key={component.type} asChild>
+                        <div
+                          onClick={() =>
+                            handleComponentClick(component, columnId, index)
+                          }
+                          className="p-3 border border-border rounded-lg cursor-pointer hover:border-primary hover:bg-accent transition-colors"
+                        >
+                          <div className="flex flex-col items-center text-center">
+                            <component.icon className="h-6 w-6 text-primary mb-2" />
+                            <span className="text-xs font-medium text-foreground">
+                              {component.name}
+                            </span>
+                          </div>
+                        </div>
+                      </PopoverClose>
+                    ))}
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-sm font-medium leading-none truncate">
-                      {component.name}
-                    </div>
-                    <div className="text-xs text-muted-foreground truncate">
-                      {component.description}
-                    </div>
-                  </div>
-                </li>
-              </PopoverClose>
-            ))}
-            {filtered.length === 0 && (
-              <li className="px-3 py-6 text-center text-sm text-muted-foreground">
-                No components found
-              </li>
-            )}
-          </ul>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+          </div>
         </ScrollArea>
       </PopoverContent>
     </Popover>

@@ -176,7 +176,7 @@ Column.Editor = function ColumnEditor({ data, onUpdate }) {
   };
 
   return (
-    <div className="flex items-center justify-start gap-4 px-2 py-2 w-full overflow-x-auto text-black">
+    <div className="flex items-center justify-center h-full gap-4 bg-muted px-4 py-2 border-b w-full overflow-x-auto">
       {/* Width */}
       <div className="flex items-center gap-2">
         <Label>Width</Label>

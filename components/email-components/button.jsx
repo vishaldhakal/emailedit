@@ -52,7 +52,7 @@ ButtonComponent.Editor = function ButtonEditor({ data, onUpdate }) {
   }, [formData]);
 
   return (
-    <div className="flex items-center justify-start gap-4 px-2 py-2 w-full overflow-x-auto text-black">
+    <div className="flex items-center h-full justify-center gap-4 bg-muted px-4 py-2 shadow-sm border-b w-full overflow-x-auto">
       <div className="flex items-center gap-2">
         <Label htmlFor="text">Button Text</Label>
         <Input

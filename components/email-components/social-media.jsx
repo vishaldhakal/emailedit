@@ -118,7 +118,7 @@ SocialMedia.Editor = function SocialMediaEditor({ data, onUpdate }) {
   };
 
   return (
-    <div className="flex items-center justify-start gap-5 px-2 py-2 w-full overflow-x-auto text-black">
+    <div className="flex items-center h-full justify-center gap-5 bg-muted px-4  shadow-sm border-b w-full overflow-x-auto">
       <Popover>
         <PopoverTrigger
           className="inline-flex items-center px-4 py-2 bg-blue-600 text-white font-semibold rounded-md shadow-sm
