@@ -7,13 +7,13 @@ import { EditorPanel } from "./editor-panel";
 import { nanoid } from "nanoid";
 import { useEffect } from "react";
 
-export function EmailEditor() {
+export function EmailEditor({ headerVariant, storageKey }) {
   const MAX_HISTORY_LENGTH = 20;
 
   // History array and current pointer
   const [history, setHistory] = useState([[]]); // initial empty components array in history
   const [historyIndex, setHistoryIndex] = useState(0);
-  console.log(history.length);
+
   const [lastSaved, setLastSaved] = useState(Date.now());
   const [selectedComponentId, setSelectedComponentId] = useState(null);
 
@@ -171,6 +171,7 @@ export function EmailEditor() {
   return (
     <div className="h-screen flex flex-col bg-background">
       <Header
+        headerVariant={headerVariant}
         components={components}
         onUpdateComponents={handleUpdateComponents}
         onSave={handleSave}
@@ -184,6 +185,7 @@ export function EmailEditor() {
       />
 
       <EmailCanvas
+        storageKey={storageKey}
         components={components}
         onUpdateComponents={handleUpdateComponents}
         handleComponentUpdate={handleComponentUpdate}
