@@ -92,7 +92,7 @@ export function EmailCanvas({
     onUpdateComponents([]);
   };
 
-  if (components.length == 0) {
+  if (components?.length == 0) {
     return (
       <div className=" w-full p-6 max-w-4xl mx-auto">
         <AddComponent handleComponentClick={handleComponentClick} />
@@ -111,7 +111,7 @@ export function EmailCanvas({
 
           <Dialog>
             <DialogTrigger asChild>
-              <Button className="flex items-center gap-2 bg-red-600 text-white hover:bg-red-700">
+              <Button className="flex items-center gap-2 bg-red-100 text-red-700 hover:bg-red-200 hover:shadow-sm transform hover:scale-105 transition-all duration-150 rounded-md px-3 py-1">
                 <Trash2 className="w-4 h-4" />
                 Clear All
               </Button>

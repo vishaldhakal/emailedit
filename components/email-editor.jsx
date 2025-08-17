@@ -7,7 +7,7 @@ import { EditorPanel } from "./editor-panel";
 import { nanoid } from "nanoid";
 import { useEffect } from "react";
 
-export function EmailEditor({ headerVariant, storageKey }) {
+export function EmailEditor({ template, headerVariant, storageKey }) {
   const MAX_HISTORY_LENGTH = 20;
 
   // History array and current pointer
@@ -19,6 +19,13 @@ export function EmailEditor({ headerVariant, storageKey }) {
 
   // Current components is always the history[historyIndex]
   const components = history[historyIndex];
+
+  useEffect(() => {
+    if (template) {
+      setHistory([template.component || []]);
+      setHistoryIndex(0);
+    }
+  }, [template]);
 
   // Utility to update history on any change
   const pushToHistory = (newComponents) => {
@@ -171,6 +178,7 @@ export function EmailEditor({ headerVariant, storageKey }) {
   return (
     <div className="h-screen flex flex-col bg-background">
       <Header
+        template={template}
         headerVariant={headerVariant}
         components={components}
         onUpdateComponents={handleUpdateComponents}
