@@ -25,6 +25,7 @@ export function Heading({ data, onUpdate }) {
     data;
   const Tag = level || "h3";
   const ref = useRef(null);
+  const debounceRef = useRef(null);
 
   //update ui on the basis of content prop and level
   useEffect(() => {
@@ -36,7 +37,12 @@ export function Heading({ data, onUpdate }) {
   const handleInput = () => {
     const newText = ref.current?.textContent || "";
     if (newText !== content) {
-      onUpdate({ ...data, content: newText });
+      // clear previous debounce timer
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      // debounce: wait 500ms after last input before updating
+      debounceRef.current = setTimeout(() => {
+        onUpdate({ ...data, content: newText });
+      }, 500);
     }
   };
 

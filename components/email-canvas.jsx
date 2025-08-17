@@ -5,10 +5,16 @@ import { EmailComponent } from "./email-component";
 import { Button } from "./ui/button";
 import { Trash2 } from "lucide-react";
 import React from "react";
-
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { ChevronUp, ChevronDown } from "lucide-react";
 import AddComponent from "./addComponent";
-import { CirclePlus } from "lucide-react";
 import { nanoid } from "nanoid";
 export function EmailCanvas({
   components,
@@ -16,6 +22,7 @@ export function EmailCanvas({
   onUpdateComponents,
   onAddComponent,
   setSelectedComponentId,
+  storageKey,
 }) {
   const [lastSaved, setLastSaved] = useState(Date.now());
   const [formattedTime, setFormattedTime] = useState("");
@@ -23,7 +30,7 @@ export function EmailCanvas({
   // Auto-save function
   const autoSave = useCallback(() => {
     // Save to localStorage
-    localStorage.setItem("emailEditorData", JSON.stringify(components));
+    localStorage.setItem(storageKey, JSON.stringify(components));
     setLastSaved(Date.now());
     console.log("Auto-saved at:", new Date().toLocaleTimeString());
   }, [components]);
@@ -36,7 +43,7 @@ export function EmailCanvas({
 
   // Load saved data on mount (only once)
   useEffect(() => {
-    const savedData = localStorage.getItem("emailEditorData");
+    const savedData = localStorage.getItem(storageKey);
     if (savedData) {
       try {
         const parsedData = JSON.parse(savedData);
@@ -82,12 +89,10 @@ export function EmailCanvas({
   };
 
   const handleClearAll = () => {
-    if (confirm("Are you sure you want to remove all components?")) {
-      onUpdateComponents([]);
-    }
+    onUpdateComponents([]);
   };
 
-  if (components.length == 0) {
+  if (components?.length == 0) {
     return (
       <div className=" w-full p-6 max-w-4xl mx-auto">
         <AddComponent handleComponentClick={handleComponentClick} />
@@ -103,13 +108,32 @@ export function EmailCanvas({
               Last saved: {formattedTime}
             </div>
           )}
-          <Button
-            onClick={handleClearAll}
-            className="flex items-center gap-2 bg-red-600 text-white hover:bg-red-700"
-          >
-            <Trash2 className="w-4 h-4" />
-            Clear All
-          </Button>
+
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button className="flex items-center gap-2 bg-red-100 text-red-700 hover:bg-red-200 hover:shadow-sm transform hover:scale-105 transition-all duration-150 rounded-md px-3 py-1">
+                <Trash2 className="w-4 h-4" />
+                Clear All
+              </Button>
+            </DialogTrigger>
+
+            <DialogContent className="sm:max-w-[400px]">
+              <DialogHeader>
+                <DialogTitle>Are you sure?</DialogTitle>
+              </DialogHeader>
+
+              <p className="mt-2 mb-4 text-sm">
+                This will remove all components. This action cannot be undone.
+              </p>
+
+              <DialogFooter className="flex justify-end gap-2">
+                <Button variant="outline">Cancel</Button>
+                <Button variant="destructive" onClick={handleClearAll}>
+                  Yes
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </div>
 
         {components.map((component, index) => (
