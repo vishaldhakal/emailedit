@@ -45,20 +45,24 @@ export function EditorPanel({
 
   if (!Editor) {
     return (
-      <div className=" border-l border-border bg-muted  text-muted-foreground">
-        <p>No editor available for: {selectedComponent.type}</p>
+      <div className="fixed top-16 left-1/2 -translate-x-1/2 z-50 w-[92vw] max-w-5xl bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/70 text-black shadow-lg rounded-2xl px-4 py-3">
+        <p className="text-sm">
+          No editor available for: {selectedComponent.type}
+        </p>
       </div>
     );
   }
   return (
-    <div className=" h-14 bg-red  border-l  border-border flex flex-col ">
-      <Editor
-        key={selectedComponent.id}
-        data={selectedComponent.data}
-        onUpdate={(newData) =>
-          handleComponentUpdate(selectedComponent.id, newData)
-        }
-      />
+    <div className="fixed top-16 left-1/2 -translate-x-1/2 z-50 w-[92vw] max-w-5xl bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/70 text-black shadow-lg rounded-2xl px-4 py-3">
+      <div className="w-full overflow-x-auto">
+        <Editor
+          key={selectedComponent.id}
+          data={selectedComponent.data}
+          onUpdate={(newData) =>
+            handleComponentUpdate(selectedComponent.id, newData)
+          }
+        />
+      </div>
     </div>
   );
 }

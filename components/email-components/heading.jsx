@@ -81,7 +81,7 @@ Heading.Editor = function HeadingEditor({ data, onUpdate }) {
   }, [formData, data.content]);
 
   return (
-    <div className="flex items-center h-full justify-center gap-5 bg-muted px-4 py-2 shadow-sm border-b w-full overflow-x-auto">
+    <div className="flex items-center justify-start gap-5 px-2 py-2 w-full overflow-x-auto text-black">
       {/* Font Family */}
       <Select
         value={formData.font}

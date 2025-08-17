@@ -65,12 +65,21 @@ export function ColumnComponentManager({
         />
       </div>
 
-      {/* circluar add component icon below component */}
+      {/* add component controls above and below */}
+      <div
+        className={`absolute -top-5 left-1/2 -translate-x-1/2 opacity-0 group-hover/inner:opacity-100 transition`}
+      >
+        <AddComponent
+          inbetween
+          index={index - 1}
+          handleComponentClick={handleInbetweenAdd}
+        />
+      </div>
       <div
         onClick={(e) => {
           e.stopPropagation();
         }}
-        className={`absolute -bottom-5 left-1/2 cursor-pointer w-4 h-4 rounded-full opacity-0 group-hover/inner:opacity-100`}
+        className={`absolute -bottom-5 left-1/2 -translate-x-1/2 opacity-0 group-hover/inner:opacity-100 transition`}
       >
         <AddComponent
           inbetween

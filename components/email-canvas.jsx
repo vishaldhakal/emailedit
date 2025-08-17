@@ -96,22 +96,11 @@ export function EmailCanvas({
   }
   return (
     <div className="flex-1 h-full bg-background border-l border-border overflow-y-auto">
-      <div className=" p-6 max-w-4xl mx-auto">
-        <div className="flex mb-4 gap-5 items-center ">
-          {formattedTime && (
-            <div className="text-sm text-muted-foreground">
-              Last saved: {formattedTime}
-            </div>
-          )}
-          <Button
-            onClick={handleClearAll}
-            className="flex items-center gap-2 bg-red-600 text-white hover:bg-red-700"
-          >
-            <Trash2 className="w-4 h-4" />
-            Clear All
-          </Button>
+      <div className=" p-6 max-w-4xl mt-36 mx-auto">
+        {/* Global add button at top */}
+        <div className="mb-4">
+          <AddComponent handleComponentClick={handleComponentClick} />
         </div>
-
         {components.map((component, index) => (
           <div
             key={component.id}
@@ -147,12 +136,19 @@ export function EmailCanvas({
               }
             />
 
-            {/* circluar add component icon below component */}
+            {/* add component controls above and below */}
+            <div className="absolute -top-5 left-1/2 -translate-x-1/2 opacity-0 group-hover/outer:opacity-100 transition">
+              <AddComponent
+                inbetween
+                index={index - 1}
+                handleComponentClick={handleInbetweenAdd}
+              />
+            </div>
             <div
               onClick={(e) => {
                 e.stopPropagation();
               }}
-              className=" absolute -bottom-4 left-1/2  cursor-pointer w-3 h-3 rounded-full opacity-0 group-hover/outer:opacity-100  "
+              className=" absolute -bottom-5 left-1/2 -translate-x-1/2  opacity-0 group-hover/outer:opacity-100 transition"
             >
               <AddComponent
                 inbetween
@@ -195,6 +191,10 @@ export function EmailCanvas({
             </div>
           </div>
         ))}
+        {/* Global add button at bottom */}
+        <div className="mt-6">
+          <AddComponent handleComponentClick={handleComponentClick} />
+        </div>
       </div>
     </div>
   );
