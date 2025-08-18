@@ -28,7 +28,11 @@ Spacer.Editor = function SpacerEditor({ data, onUpdate }) {
   }, [formData]);
 
   return (
-    <div className="flex items-center h-full justify-center gap-3 bg-muted px-4 py-2 shadow-sm border-b w-full overflow-x-auto">
+    <div
+      className="flex items-center gap-3 bg-white px-3 py-2 h-12 
+  shadow-lg rounded-md fixed top-[74px] left-1/2 -translate-x-1/2 
+  z-50 border"
+    >
       <div className="flex items-center gap-2">
         <Label>Spacing Height</Label>
         <Select

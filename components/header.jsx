@@ -109,6 +109,7 @@ export function Header({
 
       toast.success(template?.id ? "Template updated!" : "Template saved!");
       if (!template?.id) onUpdateComponents([]); // clear only after new template
+      router.push("/");
     } catch (err) {
       toast.error(err.message || "Error saving template");
     }
@@ -128,11 +129,11 @@ export function Header({
   };
 
   return (
-    <header className="bg-card border-b border-border px-6 py-4">
+    <header className="bg-card border-b border-border px-6 py-2">
       <div className="flex items-center justify-between">
-        <div>
+        <div className="flex flex-col justify-center gap-1">
           <Link href="/">
-            <h1 className="text-xl font-semibold text-gray-900">
+            <h1 className="m-0 text-xl font-semibold text-gray-900">
               Email Editor
             </h1>
           </Link>
@@ -149,7 +150,7 @@ export function Header({
           {headerVariant == "default" && (
             <Popover>
               <PopoverTrigger asChild>
-                <Button className="flex items-center gap-2 bg-black text-white hover:bg-gray-900">
+                <Button className="flex items-center gap-2 bg-blue-500 text-white hover:bg-blue-400">
                   <LayoutTemplate className="w-4 h-4" />
                   Templates
                 </Button>
@@ -161,76 +162,85 @@ export function Header({
                   </Button>
                 </Link>
 
-                <div className="grid grid-cols-2 gap-3">
-                  {templates?.map((template, i) => (
-                    <div key={i} className="relative">
-                      {/* Wrap only the clickable area that selects the template */}
-                      <PopoverClose asChild>
-                        <div
-                          className="p-2 rounded-md cursor-pointer min-h-[120px] flex flex-col justify-center border border-transparent hover:border-gray-300 transition-colors duration-200"
-                          onClick={() => handleTempleteClick(template)}
-                        >
-                          <p className="font-medium mb-1 text-center">
-                            {template.name}
-                          </p>
-                        </div>
-                      </PopoverClose>
-
-                      {/* Top-right icons (edit/delete) */}
-                      <div className="absolute top-2 right-2 flex gap-1">
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            router.push(`/template/${template.id}/edit`);
-                          }}
-                        >
-                          <Edit className="w-4 h-4" />
-                        </Button>
-
-                        <Dialog>
-                          <DialogTrigger asChild>
-                            <Button
-                              size="icon"
-                              variant="ghost"
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              <Trash2 className="w-4 h-4 text-red-500" />
-                            </Button>
-                          </DialogTrigger>
-
-                          <DialogContent className="sm:max-w-[400px]">
-                            <DialogHeader>
-                              <DialogTitle>Are you sure?</DialogTitle>
-                            </DialogHeader>
-
-                            <p className="mt-2 mb-4 text-sm">
-                              This will permanently delete template. This action
-                              cannot be undone.
+                {templates.length === 0 || !templates ? (
+                  <div className="flex flex-1 items-center justify-center min-h-[200px]">
+                    <p className="text-gray-500">No templates</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 gap-3">
+                    {templates?.map((template, i) => (
+                      <div
+                        key={i}
+                        className="relative group/temp  hover:border-gray-300 transition-colors duration-200 "
+                      >
+                        {/* Wrap only the clickable area that selects the template */}
+                        <PopoverClose asChild>
+                          <div
+                            className="p-2 rounded-md cursor-pointer min-h-[120px] flex flex-col justify-center border  border-gray-300 hover:border-gray-950 transition-colors duration-200"
+                            onClick={() => handleTempleteClick(template)}
+                          >
+                            <p className="font-medium mb-1 text-center">
+                              {template.name}
                             </p>
+                          </div>
+                        </PopoverClose>
 
-                            <DialogFooter className="flex justify-end gap-2">
-                              <DialogClose asChild>
-                                <Button variant="outline">Cancel</Button>
-                              </DialogClose>
-                              <DialogClose asChild>
-                                <Button
-                                  variant="destructive"
-                                  onClick={() =>
-                                    handleDeleteTemplate(template.id)
-                                  }
-                                >
-                                  Yes
-                                </Button>
-                              </DialogClose>
-                            </DialogFooter>
-                          </DialogContent>
-                        </Dialog>
+                        {/* Top-right icons (edit/delete) */}
+                        <div className="absolute opacity-0 top-2 right-2 flex gap-1 group-hover/temp:opacity-100">
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              router.push(`/template/${template.id}/edit`);
+                            }}
+                          >
+                            <Edit className="w-4 h-4" />
+                          </Button>
+
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button
+                                size="icon"
+                                variant="ghost"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <Trash2 className="w-4 h-4 text-red-500" />
+                              </Button>
+                            </DialogTrigger>
+
+                            <DialogContent className="sm:max-w-[400px]">
+                              <DialogHeader>
+                                <DialogTitle>Are you sure?</DialogTitle>
+                              </DialogHeader>
+
+                              <p className="mt-2 mb-4 text-sm">
+                                This will permanently delete template. This
+                                action cannot be undone.
+                              </p>
+
+                              <DialogFooter className="flex justify-end gap-2">
+                                <DialogClose asChild>
+                                  <Button variant="outline">Cancel</Button>
+                                </DialogClose>
+                                <DialogClose asChild>
+                                  <Button
+                                    variant="destructive"
+                                    onClick={() =>
+                                      handleDeleteTemplate(template.id)
+                                    }
+                                  >
+                                    Yes
+                                  </Button>
+                                </DialogClose>
+                              </DialogFooter>
+                            </DialogContent>
+                          </Dialog>
+                        </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                )}
               </PopoverContent>
             </Popover>
           )}

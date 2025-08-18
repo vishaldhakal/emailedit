@@ -64,7 +64,11 @@ List.Editor = function ListEditor({ data, onUpdate }) {
   const styleOptions =
     formData.listType === "unordered" ? unorderedOptions : orderedOptions;
   return (
-    <div className="flex items-center h-full justify-center gap-5 bg-muted px-4 py-2 shadow-sm border-b w-full overflow-x-auto">
+    <div
+      className="flex items-center gap-3 bg-white px-3 py-2 h-12 
+  shadow-lg rounded-md fixed top-[74px] left-1/2 -translate-x-1/2 
+  z-50 border"
+    >
       {/* items  */}
       <Popover>
         <PopoverTrigger
@@ -119,18 +123,29 @@ List.Editor = function ListEditor({ data, onUpdate }) {
         </PopoverContent>
       </Popover>
 
-      {/* text color   */}
-      <div className="flex items-center gap-1">
-        <Label htmlFor="color">Text Color</Label>
-        <Input
-          id="color"
+      {/* text color  */}
+      <div className="relative">
+        {/* Hidden native input */}
+        <input
           type="color"
-          value={formData.color || "#007bff"}
+          value={formData.color}
           onChange={(e) =>
-            setFormData((prev) => ({ ...prev, color: e.target.value }))
+            setFormData((prev) => ({
+              ...prev,
+              color: e.target.value,
+            }))
           }
-          style={{ width: "40px", height: "30px", padding: 0 }}
+          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
         />
+
+        {/* A icon with underline */}
+        <div className="flex flex-col items-center justify-center cursor-pointer">
+          <span className="text-lg font-bold">A</span>
+          <span
+            className="w-5 h-1 rounded-sm -mt-1"
+            style={{ backgroundColor: formData.color }}
+          ></span>
+        </div>
       </div>
 
       {/* Font Size */}

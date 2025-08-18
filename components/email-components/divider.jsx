@@ -36,7 +36,11 @@ Divider.Editor = function DividerEditor({ data, onUpdate }) {
   }, [formData]);
 
   return (
-    <div className="flex items-center h-full justify-center gap-5 bg-muted px-4 py-2 shadow-sm border-b w-full overflow-x-auto">
+    <div
+      className="flex items-center gap-3 bg-white px-3 py-2 h-12 
+  shadow-lg rounded-md fixed top-[74px] left-1/2 -translate-x-1/2 
+  z-50 border"
+    >
       <div className="flex items-center gap-1">
         <Label>Line Style</Label>
         <Select
@@ -76,8 +80,9 @@ Divider.Editor = function DividerEditor({ data, onUpdate }) {
         </Select>
       </div>
 
-      <div className="flex items-center gap-2">
-        <Label>Color</Label>
+      {/* text color  */}
+      <div className="relative">
+        {/* Hidden native input */}
         <input
           type="color"
           value={formData.color}
@@ -87,8 +92,17 @@ Divider.Editor = function DividerEditor({ data, onUpdate }) {
               color: e.target.value,
             }))
           }
-          className="w-6 h-6 p-0 border-none"
+          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
         />
+
+        {/* A icon with underline */}
+        <div className="flex flex-col items-center justify-center cursor-pointer">
+          <span className="text-lg font-bold">A</span>
+          <span
+            className="w-5 h-1 rounded-sm -mt-1"
+            style={{ backgroundColor: formData.color }}
+          ></span>
+        </div>
       </div>
     </div>
   );

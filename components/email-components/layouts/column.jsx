@@ -7,6 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { FaPaintbrush } from "react-icons/fa6";
 import { nanoid } from "nanoid";
 import { ColumnComponentManager } from "@/components/email-components/column-component-manager";
 import AddComponent from "@/components/addComponent";
@@ -176,7 +177,11 @@ Column.Editor = function ColumnEditor({ data, onUpdate }) {
   };
 
   return (
-    <div className="flex items-center justify-center h-full gap-4 bg-muted px-4 py-2 border-b w-full overflow-x-auto">
+    <div
+      className="flex items-center gap-3 bg-white px-3 py-2 h-12 
+  shadow-lg rounded-md fixed top-[74px] left-1/2 -translate-x-1/2 
+  z-50 border"
+    >
       {/* Width */}
       <div className="flex items-center gap-2">
         <Label>Width</Label>
@@ -234,14 +239,23 @@ Column.Editor = function ColumnEditor({ data, onUpdate }) {
         </Select>
       </div>
 
-      {/* Background color */}
-      <div className="flex items-center gap-2">
-        <Label>Background</Label>
+      {/* backgroundColor */}
+      <div className="flex flex-col items-center justify-center relative">
+        {/* Hidden color input */}
         <input
           type="color"
           value={data.backgroundColor}
           onChange={(e) => updateField("backgroundColor", e.target.value)}
-          className="w-6 h-6 p-0 border-none"
+          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+        />
+
+        {/* Paint brush icon */}
+        <FaPaintbrush className="w-4 h-4 text-black" />
+
+        {/* Horizontal color line */}
+        <div
+          className="w-5 h-1 rounded-sm mt-0.5"
+          style={{ backgroundColor: data.backgroundColor }}
         />
       </div>
 
