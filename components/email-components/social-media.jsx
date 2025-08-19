@@ -26,7 +26,7 @@ import {
   FaYoutube,
 } from "react-icons/fa";
 import { SiTiktok } from "react-icons/si";
-export function SocialMedia({ data }) {
+export function SocialMedia({ data, onUpdate, isSelected }) {
   const { platforms, iconSize, color, alignment } = data;
 
   const socialIcons = {
@@ -43,33 +43,36 @@ export function SocialMedia({ data }) {
     right: "flex-end",
   };
   return (
-    <div style={{ textAlign: alignment }}>
-      <div
-        className="flex gap-4 "
-        style={{ justifyContent: justifyContentMap[alignment] || "center" }}
-      >
-        {platforms?.map((platform, index) => {
-          const Icon = socialIcons[platform.name];
-          const sizeNumber = parseInt(iconSize, 10) || 24;
-          return (
-            <a
-              key={index}
-              href={platform.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
-                fontSize: iconSize,
-                color: color,
-                textDecoration: "none",
-              }}
-              className="hover:opacity-70 transition-opacity"
-            >
-              {Icon ? <Icon size={sizeNumber} color={color} /> : "🔗"}
-            </a>
-          );
-        })}
+    <>
+      <div style={{ textAlign: alignment }}>
+        <div
+          className="flex gap-4 "
+          style={{ justifyContent: justifyContentMap[alignment] || "center" }}
+        >
+          {platforms?.map((platform, index) => {
+            const Icon = socialIcons[platform.name];
+            const sizeNumber = parseInt(iconSize, 10) || 24;
+            return (
+              <a
+                key={index}
+                href={platform.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  fontSize: iconSize,
+                  color: color,
+                  textDecoration: "none",
+                }}
+                className="hover:opacity-70 transition-opacity"
+              >
+                {Icon ? <Icon size={sizeNumber} color={color} /> : "🔗"}
+              </a>
+            );
+          })}
+        </div>
       </div>
-    </div>
+      {isSelected && <SocialMedia.Editor data={data} onUpdate={onUpdate} />}
+    </>
   );
 }
 

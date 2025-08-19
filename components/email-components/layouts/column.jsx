@@ -12,7 +12,13 @@ import { nanoid } from "nanoid";
 import { ColumnComponentManager } from "@/components/email-components/column-component-manager";
 import AddComponent from "@/components/addComponent";
 
-export function Column({ data, onUpdate, setSelectedComponentId }) {
+export function Column({
+  data,
+  onUpdate,
+  setSelectedComponentId,
+  isSelected,
+  selectedComponentId,
+}) {
   const {
     width,
     backgroundColor,
@@ -113,61 +119,66 @@ export function Column({ data, onUpdate, setSelectedComponentId }) {
   if (columns === 0) return null;
 
   return (
-    <div
-      style={{
-        width,
-        backgroundColor,
-        padding,
-        display: "flex",
-        gap,
-      }}
-      className="border border-border rounded-lg transition-colors hover:border-primary/50"
-    >
-      {normalizedColumnsData.map((components, columnIndex) => (
-        <div
-          key={columnIndex}
-          style={{
-            width: normalizedColumnWidths[columnIndex],
-            display: "flex",
-            flexDirection: "column",
-          }}
-          data-column-id={`column-${columnIndex}`}
-          className="border border-border rounded-md p-4"
-        >
-          {components.length === 0 && (
-            <AddComponent
-              columnId={`column-${columnIndex}`}
-              handleComponentClick={(comp) =>
-                handleComponentClick(comp, columnIndex)
-              }
-            />
-          )}
-          {components.map((component, index) => (
-            <ColumnComponentManager
-              key={component.id}
-              component={component}
-              index={index}
-              totalComponents={components.length}
-              setSelectedComponentId={setSelectedComponentId}
-              handleInbetweenAdd={(comp, _, i) =>
-                handleInbetweenAdd(comp, columnIndex, i)
-              }
-              onUpdate={(updatedData) =>
-                handleComponentUpdate(columnIndex, index, updatedData)
-              }
-              onDelete={() => handleComponentDelete(columnIndex, index)}
-              onMoveUp={() =>
-                index > 0 && handleComponentMove(columnIndex, index, index - 1)
-              }
-              onMoveDown={() =>
-                index < components.length - 1 &&
-                handleComponentMove(columnIndex, index, index + 1)
-              }
-            />
-          ))}
-        </div>
-      ))}
-    </div>
+    <>
+      <div
+        style={{
+          width,
+          backgroundColor,
+          padding,
+          display: "flex",
+          gap,
+        }}
+        className="border border-border rounded-lg transition-colors hover:border-primary/50"
+      >
+        {normalizedColumnsData.map((components, columnIndex) => (
+          <div
+            key={columnIndex}
+            style={{
+              width: normalizedColumnWidths[columnIndex],
+              display: "flex",
+              flexDirection: "column",
+            }}
+            data-column-id={`column-${columnIndex}`}
+            className="border border-border rounded-md p-4"
+          >
+            {components.length === 0 && (
+              <AddComponent
+                columnId={`column-${columnIndex}`}
+                handleComponentClick={(comp) =>
+                  handleComponentClick(comp, columnIndex)
+                }
+              />
+            )}
+            {components.map((component, index) => (
+              <ColumnComponentManager
+                selectedComponentId={selectedComponentId}
+                key={component.id}
+                component={component}
+                index={index}
+                totalComponents={components.length}
+                setSelectedComponentId={setSelectedComponentId}
+                handleInbetweenAdd={(comp, _, i) =>
+                  handleInbetweenAdd(comp, columnIndex, i)
+                }
+                onUpdate={(updatedData) =>
+                  handleComponentUpdate(columnIndex, index, updatedData)
+                }
+                onDelete={() => handleComponentDelete(columnIndex, index)}
+                onMoveUp={() =>
+                  index > 0 &&
+                  handleComponentMove(columnIndex, index, index - 1)
+                }
+                onMoveDown={() =>
+                  index < components.length - 1 &&
+                  handleComponentMove(columnIndex, index, index + 1)
+                }
+              />
+            ))}
+          </div>
+        ))}
+      </div>
+      {isSelected && <Column.Editor data={data} onUpdate={onUpdate} />}
+    </>
   );
 }
 

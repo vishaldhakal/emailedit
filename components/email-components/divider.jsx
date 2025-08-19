@@ -9,17 +9,20 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
-export function Divider({ data }) {
+export function Divider({ data, onUpdate, isSelected }) {
   const { style, color, height } = data;
 
   return (
-    <hr
-      style={{
-        border: "none",
-        borderTop: `${height} ${style} ${color}`,
-        margin: 0,
-      }}
-    />
+    <>
+      <hr
+        style={{
+          border: "none",
+          borderTop: `${height} ${style} ${color}`,
+          margin: 0,
+        }}
+      />
+      {isSelected && <Divider.Editor data={data} onUpdate={onUpdate} />}
+    </>
   );
 }
 

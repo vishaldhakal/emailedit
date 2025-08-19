@@ -10,7 +10,7 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
-export function ImageComponent({ data }) {
+export function ImageComponent({ data, onUpdate, isSelected }) {
   const { src, alt, width, height } = data;
 
   if (!src) {
@@ -23,19 +23,22 @@ export function ImageComponent({ data }) {
   }
 
   return (
-    <div className="flex w-auto justify-center items-center">
-      <img
-        src={src}
-        alt={alt}
-        style={{
-          width: width,
-          height: height,
-          maxWidth: "100%",
-          display: "block",
-        }}
-        className="rounded"
-      />
-    </div>
+    <>
+      <div className="flex w-auto justify-center items-center">
+        <img
+          src={src}
+          alt={alt}
+          style={{
+            width: width,
+            height: height,
+            maxWidth: "100%",
+            display: "block",
+          }}
+          className="rounded"
+        />
+      </div>
+      {isSelected && <ImageComponent.Editor data={data} onUpdate={onUpdate} />}
+    </>
   );
 }
 

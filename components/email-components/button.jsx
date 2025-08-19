@@ -11,31 +11,34 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import { FaPaintbrush } from "react-icons/fa6";
-export function ButtonComponent({ data }) {
+export function ButtonComponent({ data, onUpdate, isSelected }) {
   const { text, url, backgroundColor, color, padding, borderRadius } = data;
 
   return (
-    <div className="text-center">
-      <a
-        target="_blank"
-        href={url?.trim() || undefined}
-        style={{
-          backgroundColor,
-          color,
-          padding,
-          borderRadius: borderRadius || "4px",
-          textDecoration: "none",
-          display: "inline-block",
-          fontSize: "16px",
-          fontWeight: "500",
-          border: "none",
-          cursor: "pointer",
-        }}
-        className="hover:opacity-90 transition-opacity"
-      >
-        {text}
-      </a>
-    </div>
+    <>
+      <div className="text-center">
+        <a
+          target="_blank"
+          href={url?.trim() || undefined}
+          style={{
+            backgroundColor,
+            color,
+            padding,
+            borderRadius: borderRadius || "4px",
+            textDecoration: "none",
+            display: "inline-block",
+            fontSize: "16px",
+            fontWeight: "500",
+            border: "none",
+            cursor: "pointer",
+          }}
+          className="hover:opacity-90 transition-opacity"
+        >
+          {text}
+        </a>
+      </div>
+      {isSelected && <ButtonComponent.Editor data={data} onUpdate={onUpdate} />}
+    </>
   );
 }
 
