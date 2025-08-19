@@ -9,10 +9,15 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
-export function Spacer({ data }) {
+export function Spacer({ data, onUpdate, isSelected }) {
   const { height } = data;
 
-  return <div style={{ height }} />;
+  return (
+    <>
+      <div style={{ height }} />
+      {isSelected && <Spacer.Editor data={data} onUpdate={onUpdate} />}
+    </>
+  );
 }
 
 Spacer.Editor = function SpacerEditor({ data, onUpdate }) {

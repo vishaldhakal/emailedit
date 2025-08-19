@@ -25,9 +25,11 @@ export const componentMap = {
 };
 
 export function EmailComponent({
+  id,
   type,
   data,
   onUpdate,
+  selectedComponentId,
   setSelectedComponentId,
 }) {
   const ComponentRenderer = componentMap[type];
@@ -42,6 +44,8 @@ export function EmailComponent({
 
   return (
     <ComponentRenderer
+      selectedComponentId={selectedComponentId}
+      isSelected={id == selectedComponentId}
       setSelectedComponentId={setSelectedComponentId}
       data={data}
       onUpdate={onUpdate}

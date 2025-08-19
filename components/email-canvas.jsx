@@ -24,6 +24,7 @@ export function EmailCanvas({
   setSelectedComponentId,
   storageKey,
   setLastSaved,
+  selectedComponentId,
 }) {
   // Auto-save function
   const autoSave = useCallback(() => {
@@ -148,7 +149,9 @@ export function EmailCanvas({
             </div>
 
             <EmailComponent
+              id={component.id}
               key={component.id}
+              selectedComponentId={selectedComponentId}
               setSelectedComponentId={setSelectedComponentId}
               type={component.type}
               data={component.data}

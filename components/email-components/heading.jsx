@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useRef } from "react";
 import { Label } from "@/components/ui/label";
 import { FaPaintbrush } from "react-icons/fa6";
+
 import {
   Popover,
   PopoverTrigger,
@@ -27,7 +28,7 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 
-export function Heading({ data, onUpdate }) {
+export function Heading({ data, onUpdate, isSelected }) {
   const {
     content,
     level,
@@ -65,25 +66,28 @@ export function Heading({ data, onUpdate }) {
   };
 
   return (
-    <Tag
-      className=" border-none outline-none pl-1"
-      ref={ref}
-      key={level}
-      onInput={handleInput}
-      style={{
-        color,
-        backgroundColor,
-        textAlign: alignment,
-        letterSpacing,
-        lineHeight,
-        fontFamily: font,
-        fontWeight: bold ? "bold" : "normal",
-        fontStyle: italic ? "italic" : "normal",
-        textDecoration: underline ? "underline" : "none",
-      }}
-      contentEditable
-      suppressContentEditableWarning
-    />
+    <>
+      <Tag
+        className=" border-none outline-none pl-1"
+        ref={ref}
+        key={level}
+        onInput={handleInput}
+        style={{
+          color,
+          backgroundColor,
+          textAlign: alignment,
+          letterSpacing,
+          lineHeight,
+          fontFamily: font,
+          fontWeight: bold ? "bold" : "normal",
+          fontStyle: italic ? "italic" : "normal",
+          textDecoration: underline ? "underline" : "none",
+        }}
+        contentEditable
+        suppressContentEditableWarning
+      />
+      {isSelected && <Heading.Editor data={data} onUpdate={onUpdate} />}
+    </>
   );
 }
 

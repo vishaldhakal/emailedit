@@ -3,7 +3,7 @@
 import { useState, useCallback } from "react";
 import { Header } from "./header";
 import { EmailCanvas } from "./email-canvas";
-import { EditorPanel } from "./editor-panel";
+
 import { nanoid } from "nanoid";
 import { useEffect } from "react";
 
@@ -187,13 +187,6 @@ export function EmailEditor({ template, headerVariant, storageKey }) {
         onGenerateEmail={handleGenerateEmail}
       />
 
-      <div className="fixed top-[72px] left-1/2 z-50">
-        <EditorPanel
-          selectedComponentId={selectedComponentId}
-          handleComponentUpdate={handleComponentUpdate}
-          components={components}
-        />
-      </div>
       <EmailCanvas
         setLastSaved={setLastSaved}
         storageKey={storageKey}

@@ -6,27 +6,30 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "../ui/button";
 import { Underline, AlignLeft, AlignCenter, AlignRight } from "lucide-react";
-export function Link({ data }) {
+export function Link({ data, onUpdate, isSelected }) {
   const { text, url, color, underline, alignment } = data;
 
   return (
-    <div style={{ textAlign: alignment }}>
-      <a
-        href={url}
-        target="_blank"
-        rel="noopener noreferrer"
-        style={{
-          textAlign: alignment,
-          color: color || "#007bff",
-          textDecoration: underline ? "underline" : "none",
-          cursor: "pointer",
-          fontWeight: "500",
-          display: "inline-block",
-        }}
-      >
-        {text || "Click here"}
-      </a>
-    </div>
+    <>
+      <div style={{ textAlign: alignment }}>
+        <a
+          href={url}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            textAlign: alignment,
+            color: color || "#007bff",
+            textDecoration: underline ? "underline" : "none",
+            cursor: "pointer",
+            fontWeight: "500",
+            display: "inline-block",
+          }}
+        >
+          {text || "Click here"}
+        </a>
+      </div>
+      {isSelected && <Link.Editor data={data} onUpdate={onUpdate} />}
+    </>
   );
 }
 

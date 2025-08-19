@@ -15,148 +15,97 @@ import {
   PopoverTrigger,
   PopoverContent,
 } from "@/components/ui/popover";
-export function List({ data }) {
+import { useEditor, EditorContent } from "@tiptap/react";
+import StarterKit from "@tiptap/starter-kit";
+import { TextStyle } from "@tiptap/extension-text-style";
+import { Color } from "@tiptap/extension-color";
+import { TextAlign } from "@tiptap/extension-text-align";
+import { Move } from "lucide-react";
+
+export function List({ data, onUpdate, isSelected }) {
+  const editor = useEditor({
+    extensions: [
+      StarterKit.configure({
+        heading: false,
+        blockquote: false,
+        codeBlock: false,
+        horizontalRule: false,
+        dropcursor: false,
+        gapcursor: false,
+      }),
+      TextStyle,
+      Color,
+      TextAlign.configure({ types: ["paragraph"] }),
+    ],
+    content: data.content,
+    immediatelyRender: false,
+    onUpdate: ({ editor }) => {
+      onUpdate({ ...data, content: editor.getHTML() });
+    },
+  });
   return (
-    <div style={{ color: data.color, fontSize: data.fontSize }}>
-      {data.listType === "unordered" && (
-        <ul style={{ listStyleType: data.listStyle, paddingLeft: "1.25rem" }}>
-          {data.items.map((item, i) => (
-            <li key={i}>{item}</li>
-          ))}
-        </ul>
+    <>
+      <EditorContent
+        className="prose h-full w-full [&>li>p]:m-0 list-disc list-inside marker:text-black marker:text-lg leading-none  focus:ring-0"
+        editor={editor}
+        style={{
+          fontFamily: data.font,
+          fontSize: data.fontSize,
+        }}
+      />
+      {isSelected && (
+        <List.Editor editor={editor} data={data} onUpdate={onUpdate} />
       )}
-      {data.listType === "ordered" && (
-        <ol style={{ listStyleType: data.listStyle, paddingLeft: "1.25rem" }}>
-          {data.items.map((item, i) => (
-            <li key={i}>{item}</li>
-          ))}
-        </ol>
-      )}
-    </div>
+    </>
   );
 }
 
-List.Editor = function ListEditor({ data, onUpdate }) {
-  const [formData, setFormData] = useState(data);
+List.Editor = function ListEditor({ data, onUpdate, editor }) {
+  if (!editor) return null;
+  const [formData, setFormData] = useState({
+    font: data.font,
+    fontSize: data.fontSize,
+  });
 
   useEffect(() => {
-    const timer = setTimeout(() => onUpdate(formData), 500);
-    return () => clearTimeout(timer);
-  }, [formData]);
+    const timeoutId = setTimeout(() => {
+      onUpdate({ ...data, content: editor.getHTML(), ...formData });
+    }, 500);
 
-  const unorderedOptions = [
-    { value: "disc", label: "Disc" },
-    { value: "circle", label: "Circle" },
-    { value: "square", label: "Square" },
-  ];
-
-  const orderedOptions = [
-    { value: "decimal", label: "1, 2, 3" },
-    { value: "upper-roman", label: "I, II, III" },
-    { value: "lower-alpha", label: "a, b, c" },
-  ];
-  const addItem = () => {
-    setFormData((prev) => ({
-      ...prev,
-      items: [...prev.items, ""],
-    }));
-  };
-  const styleOptions =
-    formData.listType === "unordered" ? unorderedOptions : orderedOptions;
+    return () => clearTimeout(timeoutId);
+  }, [formData, editor?.getHTML()]);
   return (
     <div
       className="flex items-center gap-3 bg-white px-3 py-2 h-12 
   shadow-lg rounded-md fixed top-[74px] left-1/2 -translate-x-1/2 
   z-50 border"
     >
-      {/* items  */}
-      <Popover>
-        <PopoverTrigger
-          className="inline-flex items-center px-4 py-1 bg-blue-600 text-white font-semibold rounded-md shadow-sm
-                 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
-                 transition-colors duration-150 ease-in-out cursor-pointer"
-        >
-          Items
-        </PopoverTrigger>
-
-        <PopoverContent className="w-[320px] max-h-[400px] overflow-auto space-y-4 p-4">
-          {formData.items?.map((item, i) => {
-            const handleItemChange = (e) => {
-              const newItems = [...formData.items];
-              newItems[i] = e.target.value;
-              setFormData((prev) => ({ ...prev, items: newItems }));
-            };
-
-            const removeItem = () => {
-              const newItems = formData.items.filter((_, index) => index !== i);
-              setFormData((prev) => ({ ...prev, items: newItems }));
-            };
-            return (
-              <div className="flex gap-10" key={i}>
-                <Input
-                  type="text"
-                  value={item}
-                  onChange={handleItemChange}
-                  placeholder="Enter a item"
-                  className="text-xs"
-                />
-                <button
-                  type="button"
-                  onClick={removeItem}
-                  aria-label={`Remove ${item} `}
-                  className="text-red-600 hover:bg-red-400 hover:text-slate-100  rounded px-1"
-                  title="Remove item"
-                >
-                  ✕
-                </button>
-              </div>
-            );
-          })}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={addItem}
-            className="w-full mt-2"
-          >
-            + Add Item
-          </Button>
-        </PopoverContent>
-      </Popover>
-
-      {/* text color  */}
-      <div className="relative">
-        {/* Hidden native input */}
-        <input
-          type="color"
-          value={formData.color}
-          onChange={(e) =>
-            setFormData((prev) => ({
-              ...prev,
-              color: e.target.value,
-            }))
-          }
-          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-        />
-
-        {/* A icon with underline */}
-        <div className="flex flex-col items-center justify-center cursor-pointer">
-          <span className="text-lg font-bold">A</span>
-          <span
-            className="w-5 h-1 rounded-sm -mt-1"
-            style={{ backgroundColor: formData.color }}
-          ></span>
-        </div>
-      </div>
+      {/* Font Family */}
+      <Select
+        value={formData.font}
+        onValueChange={(value) =>
+          setFormData((prev) => ({ ...prev, font: value }))
+        }
+      >
+        <SelectTrigger className="w-[140px] h-9 rounded-md">
+          <SelectValue placeholder="Font" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="Arial">Arial</SelectItem>
+          <SelectItem value="Georgia">Georgia</SelectItem>
+          <SelectItem value="Times New Roman">Times New Roman</SelectItem>
+          <SelectItem value="Verdana">Verdana</SelectItem>
+        </SelectContent>
+      </Select>
 
       {/* Font Size */}
-
       <Select
         value={formData.fontSize.replace("px", "")}
         onValueChange={(value) =>
           setFormData((prev) => ({ ...prev, fontSize: value + "px" }))
         }
       >
-        <SelectTrigger className="w-[80px] h-8">
+        <SelectTrigger className="w-[80px] h-9 rounded-md">
           <SelectValue placeholder="Size" />
         </SelectTrigger>
         <SelectContent>
@@ -168,51 +117,43 @@ List.Editor = function ListEditor({ data, onUpdate }) {
         </SelectContent>
       </Select>
 
-      {/* List style */}
-
-      <div className="flex items-center gap-2">
-        <Label>List Type</Label>
-        <Select
-          value={formData.listType}
-          onValueChange={(value) =>
-            setFormData((prev) => ({
-              ...prev,
-              listType: value,
-              listStyle: value === "unordered" ? "disc" : "decimal", // default style
-            }))
+      {/* text color  */}
+      <div className="relative">
+        {/* Hidden native input */}
+        <input
+          type="color"
+          value={editor.getAttributes("textStyle")?.color}
+          onChange={(e) =>
+            editor.chain().focus().setColor(e.target.value).run()
           }
-        >
-          <SelectTrigger className="w-[110px] h-8">
-            <SelectValue placeholder="Type" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="unordered">Unordered</SelectItem>
-            <SelectItem value="ordered">Ordered</SelectItem>
-          </SelectContent>
-        </Select>
+          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+        />
+
+        {/* A icon with underline */}
+        <div className="flex flex-col items-center justify-center cursor-pointer">
+          <span className="text-lg font-bold">A</span>
+          <span
+            className="w-5 h-1 rounded-sm -mt-1"
+            style={{
+              backgroundColor: editor.getAttributes("textStyle")?.color,
+            }}
+          ></span>
+        </div>
       </div>
 
-      {/* Style Select */}
-      <div className="flex items-center gap-2">
-        <Label>Style</Label>
-        <Select
-          value={formData.listStyle}
-          onValueChange={(value) =>
-            setFormData((prev) => ({ ...prev, listStyle: value }))
-          }
-        >
-          <SelectTrigger className="w-[130px] h-8">
-            <SelectValue placeholder="Style" />
-          </SelectTrigger>
-          <SelectContent>
-            {styleOptions.map((opt) => (
-              <SelectItem key={opt.value} value={opt.value}>
-                {opt.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+      {/* Lists */}
+      <Button
+        variant={editor.isActive("bulletList") ? "default" : "ghost"}
+        onClick={() => editor.chain().focus().toggleBulletList().run()}
+      >
+        • List
+      </Button>
+      <Button
+        variant={editor.isActive("orderedList") ? "default" : "ghost"}
+        onClick={() => editor.chain().focus().toggleOrderedList().run()}
+      >
+        1. List
+      </Button>
     </div>
   );
 };

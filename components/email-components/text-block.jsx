@@ -2,7 +2,11 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { useRef } from "react";
+import { useEditor, EditorContent } from "@tiptap/react";
+import StarterKit from "@tiptap/starter-kit";
+import { TextStyle } from "@tiptap/extension-text-style";
+import { Color } from "@tiptap/extension-color";
+import { TextAlign } from "@tiptap/extension-text-align";
 import { Label } from "@/components/ui/label";
 import { FaPaintbrush } from "react-icons/fa6";
 import {
@@ -10,15 +14,15 @@ import {
   PopoverTrigger,
   PopoverContent,
 } from "@/components/ui/popover";
-
 import {
-  Type,
   Bold,
   Italic,
   Underline,
   AlignLeft,
   AlignCenter,
   AlignRight,
+  Move,
+  Strikethrough,
 } from "lucide-react";
 import {
   Select,
@@ -27,85 +31,62 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
-export function TextBlock({ data, onUpdate }) {
-  const {
-    content,
-    fontSize,
-    backgroundColor,
-    color,
-    alignment,
-    font,
-    bold,
-    italic,
-    underline,
-    letterSpacing,
-    lineHeight,
-  } = data;
-  const ref = useRef(null);
-  const debounceRef = useRef(null);
-  //update ui on the basis of content prop
-  useEffect(() => {
-    if (ref.current && ref.current.textContent !== content) {
-      ref.current.textContent = content;
-    }
-  }, [content]);
-  const handleInput = () => {
-    const newText = ref.current?.textContent || "";
-    if (newText !== content) {
-      // clear previous debounce timer
-      if (debounceRef.current) clearTimeout(debounceRef.current);
-      // debounce: wait 500ms after last input before updating
-      debounceRef.current = setTimeout(() => {
-        onUpdate({ ...data, content: newText });
-      }, 500);
-    }
-  };
-
+export function TextBlock({ data, onUpdate, isSelected }) {
+  const editor = useEditor({
+    extensions: [
+      StarterKit.configure({
+        heading: false,
+      }),
+      TextStyle,
+      Color,
+      TextAlign.configure({ types: ["paragraph"] }),
+    ],
+    content: data.content,
+    immediatelyRender: false,
+    onUpdate: ({ editor }) => {
+      onUpdate({ ...data, content: editor.getHTML() });
+    },
+  });
   return (
-    <div
-      ref={ref}
-      className=" pl-2  w-full border-none outline-none"
-      onInput={handleInput}
-      style={{
-        backgroundColor,
-        fontSize,
-        color,
-        letterSpacing,
-        lineHeight,
-        fontFamily: font,
-        textAlign: alignment,
-        fontWeight: bold ? "bold" : "normal",
-        fontStyle: italic ? "italic" : "normal",
-        textDecoration: underline ? "underline" : "none",
-      }}
-      contentEditable
-      suppressContentEditableWarning
-    />
+    <>
+      <EditorContent
+        editor={editor}
+        style={{
+          fontFamily: data.font,
+          fontSize: data.fontSize,
+          color: data.color,
+          backgroundColor: data.backgroundColor,
+          textAlign: data.alignment,
+          letterSpacing: data.letterSpacing,
+          lineHeight: data.lineHeight,
+        }}
+      />
+      {isSelected && (
+        <TextBlock.Editor editor={editor} data={data} onUpdate={onUpdate} />
+      )}
+    </>
   );
 }
 
-TextBlock.Editor = function TextBlockEditor({ data, onUpdate }) {
+TextBlock.Editor = function TextBlockEditor({ data, onUpdate, editor }) {
+  if (!editor) return null;
+
   const [formData, setFormData] = useState({
+    font: data.font,
     fontSize: data.fontSize,
     backgroundColor: data.backgroundColor,
-    color: data.color,
     alignment: data.alignment,
-    font: data.font,
-    bold: data.bold || false,
-    italic: data.italic || false,
-    underline: data.underline || false,
-    letterSpacing: data.letterSpacing || "0px",
-    lineHeight: data.lineHeight || "1.5",
+    letterSpacing: data.letterSpacing,
+    lineHeight: data.lineHeight,
   });
 
-  // Auto-save when formData changes
   useEffect(() => {
     const timeoutId = setTimeout(() => {
-      onUpdate({ content: data.content, ...formData });
+      onUpdate({ ...data, content: editor.getHTML(), ...formData });
     }, 500);
 
     return () => clearTimeout(timeoutId);
-  }, [formData, data.content]);
+  }, [formData, editor?.getHTML()]);
 
   return (
     <div
@@ -153,29 +134,25 @@ TextBlock.Editor = function TextBlockEditor({ data, onUpdate }) {
       {/* Formatting */}
       <div className="flex items-center gap-1">
         <Button
-          variant={formData.bold ? "default" : "ghost"}
-          onClick={() => setFormData((prev) => ({ ...prev, bold: !prev.bold }))}
+          variant={editor.isActive("bold") ? "default" : "ghost"}
+          onClick={() => editor.chain().focus().toggleBold().run()}
           size="icon"
           className="h-9 w-9"
         >
           <Bold className="w-4 h-4" />
         </Button>
         <Button
-          variant={formData.italic ? "default" : "ghost"}
+          variant={editor.isActive("italic") ? "default" : "ghost"}
           size="icon"
-          onClick={() =>
-            setFormData((prev) => ({ ...prev, italic: !prev.italic }))
-          }
+          onClick={() => editor.chain().focus().toggleItalic().run()}
           className="h-9 w-9"
         >
           <Italic className="w-4 h-4" />
         </Button>
         <Button
-          variant={formData.underline ? "default" : "ghost"}
+          variant={editor.isActive("underline") ? "default" : "ghost"}
           size="icon"
-          onClick={() =>
-            setFormData((prev) => ({ ...prev, underline: !prev.underline }))
-          }
+          onClick={() => editor.chain().focus().toggleUnderline().run()}
           className="h-9 w-9"
         >
           <Underline className="w-4 h-4" />
@@ -187,12 +164,9 @@ TextBlock.Editor = function TextBlockEditor({ data, onUpdate }) {
         {/* Hidden native input */}
         <input
           type="color"
-          value={formData.color}
+          value={editor.getAttributes("textStyle")?.color}
           onChange={(e) =>
-            setFormData((prev) => ({
-              ...prev,
-              color: e.target.value,
-            }))
+            editor.chain().focus().setColor(e.target.value).run()
           }
           className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
         />
@@ -202,7 +176,9 @@ TextBlock.Editor = function TextBlockEditor({ data, onUpdate }) {
           <span className="text-lg font-bold">A</span>
           <span
             className="w-5 h-1 rounded-sm -mt-1"
-            style={{ backgroundColor: formData.color }}
+            style={{
+              backgroundColor: editor.getAttributes("textStyle")?.color,
+            }}
           ></span>
         </div>
       </div>
@@ -235,9 +211,7 @@ TextBlock.Editor = function TextBlockEditor({ data, onUpdate }) {
       {/* Letter + Line Spacing */}
       <Popover>
         <PopoverTrigger asChild>
-          <Button variant="outline" size="icon" className="h-9 w-9">
-            <Type className="w-4 h-4" />
-          </Button>
+          <Move className="w-4 h-4" />
         </PopoverTrigger>
         <PopoverContent className="w-[220px] p-4 space-y-4">
           {/* Letter Spacing */}
@@ -285,6 +259,13 @@ TextBlock.Editor = function TextBlockEditor({ data, onUpdate }) {
           </div>
         </PopoverContent>
       </Popover>
+      <Button
+        variant={editor.isActive("strike") ? "default" : "ghost"}
+        size="icon"
+        onClick={() => editor.chain().focus().toggleStrike().run()}
+      >
+        <Strikethrough className="w-4 h-4" />
+      </Button>
       {/* Alignment */}
       <div className="flex items-center gap-1 border-l pl-2 ml-2">
         {["left", "center", "right"].map((align) => {

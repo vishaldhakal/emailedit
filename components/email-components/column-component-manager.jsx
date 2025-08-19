@@ -15,6 +15,7 @@ export function ColumnComponentManager({
   totalComponents,
   setSelectedComponentId,
   handleInbetweenAdd,
+  selectedComponentId,
 }) {
   const handleDelete = (e) => {
     e.preventDefault();
@@ -57,6 +58,8 @@ export function ColumnComponentManager({
 
       <div className="p-2">
         <EmailComponent
+          selectedComponentId={selectedComponentId}
+          id={component.id}
           key={component.id}
           setSelectedComponentId={setSelectedComponentId}
           type={component.type}
