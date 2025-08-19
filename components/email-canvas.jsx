@@ -23,10 +23,8 @@ export function EmailCanvas({
   onAddComponent,
   setSelectedComponentId,
   storageKey,
+  setLastSaved,
 }) {
-  const [lastSaved, setLastSaved] = useState(Date.now());
-  const [formattedTime, setFormattedTime] = useState("");
-
   // Auto-save function
   const autoSave = useCallback(() => {
     // Save to localStorage
@@ -55,11 +53,6 @@ export function EmailCanvas({
       }
     }
   }, []); // Empty dependency array - only run once
-
-  // Format timestamp for display (client-side only)
-  useEffect(() => {
-    setFormattedTime(new Date(lastSaved).toLocaleTimeString());
-  }, [lastSaved]);
 
   const handleComponentDelete = (id) => {
     const newComponents = components.filter((component) => component.id !== id);
@@ -94,48 +87,41 @@ export function EmailCanvas({
 
   if (components?.length == 0) {
     return (
-      <div className=" w-full p-6 max-w-4xl mx-auto">
+      <div className=" w-full p-6 max-w-[600px] mx-auto">
         <AddComponent handleComponentClick={handleComponentClick} />
       </div>
     );
   }
   return (
-    <div className="flex-1 h-full bg-background border-l border-border overflow-y-auto">
-      <div className=" p-6 max-w-4xl mx-auto">
-        <div className="flex mb-4 gap-5 items-center ">
-          {formattedTime && (
-            <div className="text-sm text-muted-foreground">
-              Last saved: {formattedTime}
-            </div>
-          )}
+    <div className="flex-1 h-full bg-background border-l border-border overflow-y-auto ">
+      <div className="flex justify-end pr-32 pt-5">
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button className="flex items-center gap-2 bg-red-100 text-red-700 hover:bg-red-200 hover:shadow-sm transform hover:scale-105 transition-all duration-150 rounded-md px-3 py-1 self-end">
+              <Trash2 className="w-4 h-4" />
+              Clear All
+            </Button>
+          </DialogTrigger>
 
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button className="flex items-center gap-2 bg-red-100 text-red-700 hover:bg-red-200 hover:shadow-sm transform hover:scale-105 transition-all duration-150 rounded-md px-3 py-1">
-                <Trash2 className="w-4 h-4" />
-                Clear All
+          <DialogContent className="sm:max-w-[400px]">
+            <DialogHeader>
+              <DialogTitle>Are you sure?</DialogTitle>
+            </DialogHeader>
+
+            <p className="mt-2 mb-4 text-sm">
+              This will remove all components. This action cannot be undone.
+            </p>
+
+            <DialogFooter className="flex justify-end gap-2">
+              <Button variant="outline">Cancel</Button>
+              <Button variant="destructive" onClick={handleClearAll}>
+                Yes
               </Button>
-            </DialogTrigger>
-
-            <DialogContent className="sm:max-w-[400px]">
-              <DialogHeader>
-                <DialogTitle>Are you sure?</DialogTitle>
-              </DialogHeader>
-
-              <p className="mt-2 mb-4 text-sm">
-                This will remove all components. This action cannot be undone.
-              </p>
-
-              <DialogFooter className="flex justify-end gap-2">
-                <Button variant="outline">Cancel</Button>
-                <Button variant="destructive" onClick={handleClearAll}>
-                  Yes
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        </div>
-
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
+      <div className=" p-6 max-w-[600px] mx-auto">
         {components.map((component, index) => (
           <div
             key={component.id}

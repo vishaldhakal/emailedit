@@ -99,7 +99,7 @@ INSTRUCTIONS:
 8.  Include clear and compelling call-to-action buttons for promotional content.
 9.  Add social media links to enhance brand presence.
 10. Do NOT generate any HTML. Only use the provided component data structures.
-
+11.keep the alignment for possible components to center
 RESPONSE FORMAT:
 Return ONLY a valid JSON object with this exact structure:
 {

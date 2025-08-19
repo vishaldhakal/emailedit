@@ -10,7 +10,7 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
-
+import { FaPaintbrush } from "react-icons/fa6";
 export function ButtonComponent({ data }) {
   const { text, url, backgroundColor, color, padding, borderRadius } = data;
 
@@ -52,7 +52,11 @@ ButtonComponent.Editor = function ButtonEditor({ data, onUpdate }) {
   }, [formData]);
 
   return (
-    <div className="flex items-center h-full justify-center gap-4 bg-muted px-4 py-2 shadow-sm border-b w-full overflow-x-auto">
+    <div
+      className="flex items-center gap-3 bg-white px-3 py-2 h-12 
+  shadow-lg rounded-md fixed top-[74px] left-1/2 -translate-x-1/2 
+  z-50 border"
+    >
       <div className="flex items-center gap-2">
         <Label htmlFor="text">Button Text</Label>
         <Input
@@ -76,25 +80,10 @@ ButtonComponent.Editor = function ButtonEditor({ data, onUpdate }) {
           placeholder="https://example.com"
         />
       </div>
-      {/* Background color */}
-      <div className="flex items-center gap-2">
-        <Label>Background Color</Label>
-        <input
-          type="color"
-          value={formData.backgroundColor}
-          onChange={(e) =>
-            setFormData((prev) => ({
-              ...prev,
-              backgroundColor: e.target.value,
-            }))
-          }
-          className="w-6 h-6 p-0 border-none"
-        />
-      </div>
 
-      {/* text color */}
-      <div className="flex items-center gap-2">
-        <Label>Text Color</Label>
+      {/* text color  */}
+      <div className="relative">
+        {/* Hidden native input */}
         <input
           type="color"
           value={formData.color}
@@ -104,7 +93,41 @@ ButtonComponent.Editor = function ButtonEditor({ data, onUpdate }) {
               color: e.target.value,
             }))
           }
-          className="w-6 h-6 p-0 border-none"
+          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+        />
+
+        {/* A icon with underline */}
+        <div className="flex flex-col items-center justify-center cursor-pointer">
+          <span className="text-lg font-bold">A</span>
+          <span
+            className="w-5 h-1 rounded-sm -mt-1"
+            style={{ backgroundColor: formData.color }}
+          ></span>
+        </div>
+      </div>
+
+      {/* backgroundColor */}
+      <div className="flex flex-col items-center justify-center relative">
+        {/* Hidden color input */}
+        <input
+          type="color"
+          value={formData.backgroundColor}
+          onChange={(e) =>
+            setFormData((prev) => ({
+              ...prev,
+              backgroundColor: e.target.value,
+            }))
+          }
+          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+        />
+
+        {/* Paint brush icon */}
+        <FaPaintbrush className="w-5 h-5 text-black" />
+
+        {/* Horizontal color line */}
+        <div
+          className="w-5 h-1 rounded-sm mt-0.5"
+          style={{ backgroundColor: formData.backgroundColor }}
         />
       </div>
 

@@ -4,7 +4,14 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useRef } from "react";
 import { Label } from "@/components/ui/label";
+import { FaPaintbrush } from "react-icons/fa6";
 import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from "@/components/ui/popover";
+import {
+  Type,
   Bold,
   Italic,
   Underline,
@@ -21,8 +28,19 @@ import {
 } from "@/components/ui/select";
 
 export function Heading({ data, onUpdate }) {
-  const { content, level, color, alignment, font, bold, italic, underline } =
-    data;
+  const {
+    content,
+    level,
+    backgroundColor,
+    color,
+    alignment,
+    font,
+    bold,
+    italic,
+    underline,
+    letterSpacing,
+    lineHeight,
+  } = data;
   const Tag = level || "h3";
   const ref = useRef(null);
   const debounceRef = useRef(null);
@@ -54,7 +72,10 @@ export function Heading({ data, onUpdate }) {
       onInput={handleInput}
       style={{
         color,
+        backgroundColor,
         textAlign: alignment,
+        letterSpacing,
+        lineHeight,
         fontFamily: font,
         fontWeight: bold ? "bold" : "normal",
         fontStyle: italic ? "italic" : "normal",
@@ -68,6 +89,7 @@ export function Heading({ data, onUpdate }) {
 
 Heading.Editor = function HeadingEditor({ data, onUpdate }) {
   const [formData, setFormData] = useState({
+    backgroundColor: data.backgroundColor,
     level: data.level,
     color: data.color,
     alignment: data.alignment,
@@ -75,6 +97,8 @@ Heading.Editor = function HeadingEditor({ data, onUpdate }) {
     bold: data.bold || false,
     italic: data.italic || false,
     underline: data.underline || false,
+    letterSpacing: data.letterSpacing || "0px",
+    lineHeight: data.lineHeight || "1.5",
   });
 
   // Auto-save when formData changes
@@ -87,7 +111,11 @@ Heading.Editor = function HeadingEditor({ data, onUpdate }) {
   }, [formData, data.content]);
 
   return (
-    <div className="flex items-center h-full justify-center gap-5 bg-muted px-4 py-2 shadow-sm border-b w-full overflow-x-auto">
+    <div
+      className="flex items-center gap-3 bg-white px-3 py-2 h-12 
+  shadow-lg rounded-md fixed top-[74px] left-1/2 -translate-x-1/2 
+  z-50 border"
+    >
       {/* Font Family */}
       <Select
         value={formData.font}
@@ -155,6 +183,110 @@ Heading.Editor = function HeadingEditor({ data, onUpdate }) {
         </Button>
       </div>
 
+      {/* text color  */}
+      <div className="relative">
+        {/* Hidden native input */}
+        <input
+          type="color"
+          value={formData.color}
+          onChange={(e) =>
+            setFormData((prev) => ({
+              ...prev,
+              color: e.target.value,
+            }))
+          }
+          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+        />
+
+        {/* A icon with underline */}
+        <div className="flex flex-col items-center justify-center cursor-pointer">
+          <span className="text-lg font-bold">A</span>
+          <span
+            className="w-5 h-1 rounded-sm -mt-1"
+            style={{ backgroundColor: formData.color }}
+          ></span>
+        </div>
+      </div>
+
+      {/* backgroundColor */}
+      <div className="flex flex-col items-center justify-center relative">
+        {/* Hidden color input */}
+        <input
+          type="color"
+          value={formData.backgroundColor}
+          onChange={(e) =>
+            setFormData((prev) => ({
+              ...prev,
+              backgroundColor: e.target.value,
+            }))
+          }
+          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+        />
+
+        {/* Paint brush icon */}
+        <FaPaintbrush className="w-4 h-4 text-black" />
+
+        {/* Horizontal color line */}
+        <div
+          className="w-5 h-1 rounded-sm mt-0.5"
+          style={{ backgroundColor: formData.backgroundColor }}
+        />
+      </div>
+
+      {/* Letter + Line Spacing */}
+      <Popover>
+        <PopoverTrigger asChild>
+          <Button variant="outline" size="icon" className="h-9 w-9">
+            <Type className="w-4 h-4" />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-[220px] p-4 space-y-4">
+          {/* Letter Spacing */}
+          <div>
+            <Label>Letter Spacing</Label>
+            <input
+              type="range"
+              min={0}
+              max={10}
+              step={0.1}
+              value={formData.letterSpacing}
+              onChange={(e) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  letterSpacing: parseFloat(e.target.value),
+                }))
+              }
+              className="w-full"
+            />
+            <div className="text-xs text-right">
+              {(Number(formData.letterSpacing) || 0).toFixed(1)}px
+            </div>
+          </div>
+
+          {/* Line Height */}
+          <div>
+            <Label>Line Height</Label>
+            <input
+              type="range"
+              min={1}
+              max={3}
+              step={0.05}
+              value={formData.lineHeight}
+              onChange={(e) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  lineHeight: parseFloat(e.target.value),
+                }))
+              }
+              className="w-full"
+            />
+            <div className="text-xs text-right">
+              {(Number(formData.lineHeight) || 1.5).toFixed(2)}
+            </div>
+          </div>
+        </PopoverContent>
+      </Popover>
+
       {/* Alignment Buttons */}
       <div className="flex items-center gap-1 border-l pl-2 ml-2">
         {["left", "center", "right"].map((align) => {
@@ -177,21 +309,6 @@ Heading.Editor = function HeadingEditor({ data, onUpdate }) {
             </Button>
           );
         })}
-      </div>
-
-      <div className="flex items-center gap-2">
-        <Label>Color</Label>
-        <input
-          type="color"
-          value={formData.color}
-          onChange={(e) =>
-            setFormData((prev) => ({
-              ...prev,
-              color: e.target.value,
-            }))
-          }
-          className="w-6 h-6 p-0 border-none"
-        />
       </div>
     </div>
   );

@@ -186,13 +186,16 @@ export function EmailEditor({ template, headerVariant, storageKey }) {
         lastSaved={lastSaved}
         onGenerateEmail={handleGenerateEmail}
       />
-      <EditorPanel
-        selectedComponentId={selectedComponentId}
-        handleComponentUpdate={handleComponentUpdate}
-        components={components}
-      />
 
+      <div className="fixed top-[72px] left-1/2 z-50">
+        <EditorPanel
+          selectedComponentId={selectedComponentId}
+          handleComponentUpdate={handleComponentUpdate}
+          components={components}
+        />
+      </div>
       <EmailCanvas
+        setLastSaved={setLastSaved}
         storageKey={storageKey}
         components={components}
         onUpdateComponents={handleUpdateComponents}
