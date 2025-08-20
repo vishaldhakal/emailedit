@@ -1,7 +1,5 @@
 import React from "react";
-import { Input } from "@/components/ui/input";
 import { Button } from "../ui/button";
-import { Label } from "@/components/ui/label";
 import { useState, useEffect } from "react";
 import {
   Select,
@@ -10,17 +8,16 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
-import {
-  Popover,
-  PopoverTrigger,
-  PopoverContent,
-} from "@/components/ui/popover";
+import { List as ListIcon, ListOrdered } from "lucide-react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { TextStyle } from "@tiptap/extension-text-style";
 import { Color } from "@tiptap/extension-color";
 import { TextAlign } from "@tiptap/extension-text-align";
 import { Move } from "lucide-react";
+import { BulletList } from "@tiptap/extension-list";
+import { OrderedList } from "@tiptap/extension-list";
+import { ListItem } from "@tiptap/extension-list";
 
 export function List({ data, onUpdate, isSelected }) {
   const editor = useEditor({
@@ -35,7 +32,17 @@ export function List({ data, onUpdate, isSelected }) {
       }),
       TextStyle,
       Color,
-      TextAlign.configure({ types: ["paragraph"] }),
+      // TextAlign.configure({ types: ["paragraph"] }),
+      OrderedList.configure({
+        HTMLAttributes: {
+          class: "list-decimal ml-6",
+        },
+      }),
+      BulletList.configure({
+        HTMLAttributes: {
+          class: "list-disc ml-6",
+        },
+      }),
     ],
     content: data.content,
     immediatelyRender: false,
@@ -46,7 +53,6 @@ export function List({ data, onUpdate, isSelected }) {
   return (
     <>
       <EditorContent
-        className="prose h-full w-full [&>li>p]:m-0 list-disc list-inside marker:text-black marker:text-lg leading-none  focus:ring-0"
         editor={editor}
         style={{
           fontFamily: data.font,
@@ -146,13 +152,13 @@ List.Editor = function ListEditor({ data, onUpdate, editor }) {
         variant={editor.isActive("bulletList") ? "default" : "ghost"}
         onClick={() => editor.chain().focus().toggleBulletList().run()}
       >
-        • List
+        <ListIcon className="w-4 h-4" />
       </Button>
       <Button
         variant={editor.isActive("orderedList") ? "default" : "ghost"}
         onClick={() => editor.chain().focus().toggleOrderedList().run()}
       >
-        1. List
+        <ListOrdered className="w-4 h-4" />
       </Button>
     </div>
   );
