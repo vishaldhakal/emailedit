@@ -72,21 +72,21 @@ AVAILABLE COMPONENTS:
 5. divider - For horizontal separators
 6. spacer - For vertical spacing
 7. social-media - For social media links
-8. link - for general  links
+8. link - for block level link text
 9. column - can be split upto 3 columns and can contain other components
 10.list - can list ordered or unordered items 
 
 COMPONENT DATA STRUCTURES:
-- heading: { content: string, level: "h1"|"h2"|"h3"|"h4"|"h5"|"h6", color: string, alignment: "left"|"center"|"right",font:"Arial"|"Georgia"|"Times New Roman" |"Verdana",bold:boolean,italic:boolean,underline:boolean }
-- text-block: { content: string, fontSize: "12px" |"14px"|"16px" |"18px"|"24px" ,font:"Arial"|"Georgia"|"Times New Roman" |"Verdana", color: string, alignment: "left"|"center"|"right",bold:boolean,italic:boolean,underline:boolean}
-- image: { src: string, alt: string, width: "100%"|"75%"|"50%"|"25%"|"200px"|"300px"|"400px" height: "auto"|"100px"| "200px"|"300px"|"400px", pexelsQuery: string }
+- heading: { content: string, level: "h1"|"h2"|"h3"|"h4"|"h5"|"h6", color: string, alignment: "left"|"center"|"right",font:"Arial"|"Georgia"|"Times New Roman" |"Verdana",bold:boolean,italic:boolean,underline:boolean ,backgroundColor:string}
+- text-block: { content: string, fontSize: "12px" |"14px"|"16px" |"18px"|"24px" ,font:"Arial"|"Georgia"|"Times New Roman" |"Verdana", alignment: "left"|"center"|"right",backgoundColor:string}
+- image: { src: string, alt: string, width: "100%"|"75%"|"50%"|"25%"|"200px"|"300px"|"400px", height: "auto"|"100px"| "200px"|"300px"|"400px", pexelsQuery: string }
 - button: { text: string, url: string, backgroundColor: string, color: string, padding: "8px 16px"|"12px 24px"| |"16px 32px"|"20px 40px", borderRadius: "0px"|"4px"|"8px"|"16px"|"24px" }
 - divider: { style: "solid"|"dashed"|"dotted", color: string, height: "1px"|"2px"|"3px"|"4px"|}
 - spacer: { height: "10px"|"20px"|"30px"|"40px"|"50px"|"60px"| }
 - social-media: { platforms: [{ name: "facebbok"|"twitter"|"instagram"|"linkedin"|"youtube"|"tiktok", url: string }], iconSize:"20px"|"24px"|"32px"|"40px", color: string, alignment: "left"|"center"|"right" }
 -link:{text:string,url:string, color:string,underline:boolean ,alignment: "left" || "right" || "center"}
 - column: { width: "100%"|"90%"|"80%"|"70%" , backgroundColor: string, padding: "0px"|"10px"|"20px"|"30px",gap:"0px"|"10px"|"20px"|"30px",columns:number //number of columns ,columnsData = [], // Array of arrays: components per column}
--list :{listType:"unordered" | "ordered", listStyle:   //for unordered "disc"|"circle"|"square"  //for ordered "decimal" | "upper-roman" |"lower-alpha",items:[],color:string, fontSize:"12px" |"14px"|"16px" |"18px"|"24px" , }
+-list :{content:html,font:"Arial"|"Georgia"|"Times New Roman" |"Verdana", fontSize:"12px" |"14px"|"16px" |"18px"|"24px"  } //cpntent can have bullet or numbered list
 
 INSTRUCTIONS:
 1.  Analyze the user's request carefully to understand the email's purpose and tone.
@@ -100,6 +100,7 @@ INSTRUCTIONS:
 9.  Add social media links to enhance brand presence.
 10. Do NOT generate any HTML. Only use the provided component data structures.
 11.keep the alignment for possible components to center
+12.consider the whole canvas to be 600px max width
 RESPONSE FORMAT:
 Return ONLY a valid JSON object with this exact structure:
 {

@@ -19,6 +19,7 @@ import {
   AlignLeft,
   AlignCenter,
   AlignRight,
+  Move,
 } from "lucide-react";
 import {
   Select,
@@ -241,7 +242,7 @@ Heading.Editor = function HeadingEditor({ data, onUpdate }) {
       <Popover>
         <PopoverTrigger asChild>
           <Button variant="outline" size="icon" className="h-9 w-9">
-            <Type className="w-4 h-4" />
+            <Move className="w-4 h-4" />
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-[220px] p-4 space-y-4">

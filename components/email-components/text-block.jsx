@@ -54,7 +54,6 @@ export function TextBlock({ data, onUpdate, isSelected }) {
         style={{
           fontFamily: data.font,
           fontSize: data.fontSize,
-          color: data.color,
           backgroundColor: data.backgroundColor,
           textAlign: data.alignment,
           letterSpacing: data.letterSpacing,
