@@ -43,7 +43,7 @@ async function searchPexelsImage(query, orientation = "landscape") {
 
 export async function POST(request) {
   try {
-    const { prompt } = await request.json();
+    const { prompt, image } = await request.json();
 
     if (!prompt) {
       return Response.json({ error: "Prompt is required" }, { status: 400 });
@@ -58,7 +58,7 @@ export async function POST(request) {
 
     // Create the model
     const model = genAI.getGenerativeModel({
-      model: "gemini-2.5-flash-lite-preview-06-17",
+      model: "gemini-2.0-flash",
     });
 
     // Create the system prompt
@@ -114,11 +114,27 @@ Return ONLY a valid JSON object with this exact structure:
 
 Make the email professional, engaging, and well-structured. Use appropriate colors, fonts, and spacing.`;
 
+    // Build Gemini input
+    const parts = [
+      { text: systemPrompt },
+      {
+        text: `User request: ${
+          prompt || "Generate based on the uploaded image"
+        }`,
+      },
+    ];
+
+    if (image) {
+      parts.push({
+        inlineData: {
+          mimeType: "image/png", // adjust if jpeg
+          data: image, // base64 string
+        },
+      });
+    }
+
     // Generate content
-    const result = await model.generateContent([
-      systemPrompt,
-      `User request: ${prompt}`,
-    ]);
+    const result = await model.generateContent(parts);
     const response = await result.response;
     const text = response.text();
 

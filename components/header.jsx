@@ -6,6 +6,7 @@ import { Download, Save } from "lucide-react";
 import AIEmailGenerator from "./ai-email-generator";
 import { generateHtml } from "@/lib/export-html";
 import { DialogClose } from "@/components/ui/dialog";
+import html2canvas from "html2canvas";
 import {
   Dialog,
   DialogContent,
@@ -13,6 +14,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { PopoverClose } from "@radix-ui/react-popover";
 import { toast } from "sonner";
@@ -36,11 +38,12 @@ export function Header({
   onGenerateEmail,
   onUpdateComponents,
   headerVariant,
+  canvasRef,
+  setLoading,
 }) {
   const router = useRouter();
   const [formattedTime, setFormattedTime] = useState("");
   const [templates, setTemplates] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [templateName, setTemplateName] = useState("");
 
   useEffect(() => {
@@ -66,8 +69,6 @@ export function Header({
         setTemplates(templates);
       } catch (error) {
         console.log("error fetching templates", error);
-      } finally {
-        setLoading(false);
       }
     };
     getTemplates();
@@ -83,14 +84,28 @@ export function Header({
     URL.revokeObjectURL(url);
   };
 
-  const handleTempleteClick = (template) => {
-    onUpdateComponents(template.component);
+  const handleTempleteClick = async (id) => {
+    try {
+      setLoading(true);
+      const res = await fetch(`https://api.salesmonk.ca/api/templates/${id}/`);
+      const template = await res.json();
+      onUpdateComponents(template.component);
+    } catch (error) {
+      console.log("error fetching templates", error);
+      toast.success("error fetching template");
+    } finally {
+      setLoading(false);
+    }
   };
   const handleSaveTemplate = async () => {
     if (!templateName.trim())
       return toast.error("Please enter a template name");
     if (!components || components.length === 0)
       return toast.error("Cannot save empty template");
+
+    if (!canvasRef.current) return;
+    const snapshotCanvas = await html2canvas(canvasRef.current);
+    const previewImage = snapshotCanvas.toDataURL("image/png");
 
     try {
       const url = template?.id
@@ -102,7 +117,10 @@ export function Header({
       const res = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: templateName, component: components }),
+        body: JSON.stringify({
+          name: templateName,
+          component: components,
+        }),
       });
 
       if (!res.ok) throw new Error("Failed to save template");
@@ -177,8 +195,9 @@ export function Header({
                         <PopoverClose asChild>
                           <div
                             className="p-2 rounded-md cursor-pointer min-h-[120px] flex flex-col justify-center border  border-gray-300 hover:border-gray-950 transition-colors duration-200"
-                            onClick={() => handleTempleteClick(template)}
+                            onClick={() => handleTempleteClick(template.id)}
                           >
+                            <div>{template.thumbnail}</div>
                             <p className="font-medium mb-1 text-center">
                               {template.name}
                             </p>
@@ -214,10 +233,10 @@ export function Header({
                                 <DialogTitle>Are you sure?</DialogTitle>
                               </DialogHeader>
 
-                              <p className="mt-2 mb-4 text-sm">
+                              <DialogDescription>
                                 This will permanently delete template. This
                                 action cannot be undone.
-                              </p>
+                              </DialogDescription>
 
                               <DialogFooter className="flex justify-end gap-2">
                                 <DialogClose asChild>

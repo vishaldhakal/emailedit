@@ -15,10 +15,15 @@ export function ImageComponent({ data, onUpdate, isSelected }) {
 
   if (!src) {
     return (
-      <div className="border-2 border-dashed border-gray-300 rounded-lg text-center text-gray-500 p-8">
-        <div className="text-4xl mb-2">📷</div>
-        <div>Click to add image</div>
-      </div>
+      <>
+        <div className="border-2 border-dashed border-gray-300 rounded-lg text-center text-gray-500 p-8">
+          <div className="text-4xl mb-2">📷</div>
+          <div>Click to add image</div>
+        </div>
+        {isSelected && (
+          <ImageComponent.Editor data={data} onUpdate={onUpdate} />
+        )}
+      </>
     );
   }
 
@@ -37,7 +42,6 @@ export function ImageComponent({ data, onUpdate, isSelected }) {
           className="rounded"
         />
       </div>
-      {isSelected && <ImageComponent.Editor data={data} onUpdate={onUpdate} />}
     </>
   );
 }
@@ -63,6 +67,7 @@ ImageComponent.Editor = function ImageEditor({ data, onUpdate }) {
       <div className="flex items-center gap-1">
         <Label htmlFor="src">Image URL</Label>
         <Input
+          className="w-72"
           id="src"
           value={formData.src}
           onChange={(e) =>
@@ -75,6 +80,7 @@ ImageComponent.Editor = function ImageEditor({ data, onUpdate }) {
       <div className="flex items-center gap-1">
         <Label htmlFor="alt">Alt Text</Label>
         <Input
+          className="w-52"
           id="alt"
           value={formData.alt}
           onChange={(e) =>

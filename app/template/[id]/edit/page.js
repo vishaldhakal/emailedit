@@ -23,9 +23,8 @@ export default function Home() {
           template={template} // pass template here
         />
       ) : (
-        <div className="flex flex-col items-center gap-2 mt-52">
-          <div className="w-10 h-10 border-4 border-gray-300 border-t-blue-500 rounded-full animate-spin"></div>
-          <p className="text-gray-500 text-sm mt-2">Loading template...</p>
+        <div className="flex items-center justify-center h-full w-full">
+          <div className="w-12 h-12 border-4 border-t-blue-500 border-gray-200 rounded-full animate-spin"></div>
         </div>
       )}
     </div>
