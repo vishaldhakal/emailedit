@@ -3,17 +3,17 @@
 import { useState, useCallback } from "react";
 import { Header } from "./header";
 import { EmailCanvas } from "./email-canvas";
-
+import { useRef } from "react";
 import { nanoid } from "nanoid";
 import { useEffect } from "react";
 
 export function EmailEditor({ template, headerVariant, storageKey }) {
   const MAX_HISTORY_LENGTH = 20;
-
+  const canvasRef = useRef(null);
   // History array and current pointer
   const [history, setHistory] = useState([[]]); // initial empty components array in history
   const [historyIndex, setHistoryIndex] = useState(0);
-
+  const [loading, setLoading] = useState(false);
   const [lastSaved, setLastSaved] = useState(Date.now());
   const [selectedComponentId, setSelectedComponentId] = useState(null);
 
@@ -178,6 +178,8 @@ export function EmailEditor({ template, headerVariant, storageKey }) {
   return (
     <div className="h-screen flex flex-col bg-background">
       <Header
+        setLoading={setLoading}
+        canvasRef={canvasRef}
         template={template}
         headerVariant={headerVariant}
         components={components}
@@ -188,6 +190,8 @@ export function EmailEditor({ template, headerVariant, storageKey }) {
       />
 
       <EmailCanvas
+        loading={loading}
+        ref={canvasRef}
         setLastSaved={setLastSaved}
         storageKey={storageKey}
         components={components}

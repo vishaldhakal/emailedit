@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Sparkles, Loader2 } from "lucide-react";
+import { Sparkles, Loader2, ImageIcon } from "lucide-react";
 import { toast } from "sonner";
 
 const examplePrompts = [
@@ -45,8 +45,21 @@ const examplePrompts = [
 
 export default function AIEmailGenerator({ onEmailGenerated }) {
   const [prompt, setPrompt] = useState("");
+  const [image, setImage] = useState(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const base64Data = reader.result.split(",")[1];
+      setImage(base64Data);
+    };
+    reader.readAsDataURL(file);
+  };
 
   const handleGenerate = async () => {
     if (!prompt.trim()) {
@@ -62,7 +75,7 @@ export default function AIEmailGenerator({ onEmailGenerated }) {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ prompt: prompt.trim() }),
+        body: JSON.stringify({ prompt: prompt.trim(), image }),
       });
 
       if (!response.ok) {
@@ -78,6 +91,7 @@ export default function AIEmailGenerator({ onEmailGenerated }) {
         toast.success("Email generated successfully!");
         setIsOpen(false);
         setPrompt("");
+        setImage(null);
       } else {
         throw new Error("Invalid response format");
       }
@@ -103,7 +117,7 @@ export default function AIEmailGenerator({ onEmailGenerated }) {
           AI Generate Email
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[600px] h-full overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Sparkles className="h-5 w-5" />
@@ -129,7 +143,28 @@ export default function AIEmailGenerator({ onEmailGenerated }) {
               className="min-h-[100px] mt-2"
             />
           </div>
-
+          {/* Image Upload */}
+          <div>
+            <Label
+              htmlFor="image"
+              className="text-sm font-medium flex items-center gap-2"
+            >
+              <ImageIcon className="w-4 h-4" />
+              Upload Image (optional)
+            </Label>
+            <input
+              type="file"
+              id="image"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="mt-2"
+            />
+            {image && (
+              <p className="text-xs text-green-600 mt-1">
+                ✅ Image ready to send
+              </p>
+            )}
+          </div>
           <div>
             <Label className="text-sm font-medium">Quick Examples</Label>
             <div className="grid grid-cols-1 gap-2 mt-2">

@@ -64,6 +64,7 @@ ButtonComponent.Editor = function ButtonEditor({ data, onUpdate }) {
         <Label htmlFor="text">Button Text</Label>
         <Input
           id="text"
+          className="w-28"
           value={formData.text}
           onChange={(e) =>
             setFormData((prev) => ({ ...prev, text: e.target.value }))
@@ -75,6 +76,7 @@ ButtonComponent.Editor = function ButtonEditor({ data, onUpdate }) {
       <div className="flex items-center gap-2">
         <Label htmlFor="url">Button URL</Label>
         <Input
+          className="w-52"
           id="url"
           value={formData.url}
           onChange={(e) =>
