@@ -6,15 +6,7 @@ import { Button } from "./ui/button";
 import { Trash2 } from "lucide-react";
 import React from "react";
 import { forwardRef } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogDescription,
-} from "@/components/ui/dialog";
+
 import { ChevronUp, ChevronDown } from "lucide-react";
 import AddComponent from "./addComponent";
 import { nanoid } from "nanoid";
@@ -91,10 +83,6 @@ export const EmailCanvas = forwardRef(
       onUpdateComponents(newComponents);
     };
 
-    const handleClearAll = () => {
-      onUpdateComponents([]);
-    };
-
     if (loading) {
       return (
         <div className="flex items-center justify-center h-full w-full">
@@ -105,46 +93,22 @@ export const EmailCanvas = forwardRef(
 
     if (components?.length == 0) {
       return (
-        <div className=" w-full p-6 max-w-[600px] mx-auto">
+        <div className=" w-full p-6 max-w-[600px] bg-white rounded-lg mx-auto mt-16">
           <AddComponent handleComponentClick={handleComponentClick} />
         </div>
       );
     }
     return (
-      <div className="flex-1 h-full bg-background border-l border-border overflow-y-auto ">
-        <div className="flex justify-end pr-32 pt-5">
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button className="flex items-center gap-2 bg-red-100 text-red-700 hover:bg-red-200 hover:shadow-sm transform hover:scale-105 transition-all duration-150 rounded-md px-3 py-1 self-end">
-                <Trash2 className="w-4 h-4" />
-                Clear All
-              </Button>
-            </DialogTrigger>
-
-            <DialogContent className="sm:max-w-[400px]">
-              <DialogHeader>
-                <DialogTitle>Are you sure?</DialogTitle>
-              </DialogHeader>
-
-              <DialogDescription>
-                This will remove all components. This action cannot be undone.
-              </DialogDescription>
-
-              <DialogFooter className="flex justify-end gap-2">
-                <Button variant="outline">Cancel</Button>
-                <Button variant="destructive" onClick={handleClearAll}>
-                  Yes
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        </div>
-        <div ref={ref} className=" p-6 max-w-[600px] mx-auto">
+      <div className="flex-1 h-full mt-16 overflow-y-auto pb-40">
+        <div
+          ref={ref}
+          className="p-16 max-w-[700px] bg-white rounded-lg mx-auto"
+        >
           {components?.map((component, index) => (
             <div
               key={component.id}
               data-component-index={index}
-              className="relative group/outer  mb-4 border-2 border-transparent hover:border-primary rounded-lg transition-colors  transition-padding
+              className="relative group/outer mb-4 border-2 border-transparent hover:border-primary rounded-lg transition-colors  transition-padding
    "
               onClick={(e) => {
                 e.stopPropagation();

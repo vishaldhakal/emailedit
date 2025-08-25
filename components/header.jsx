@@ -25,6 +25,7 @@ import {
   PopoverContent,
 } from "@/components/ui/popover";
 import Link from "next/link";
+import TemplateModal from "./template-modal";
 
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
@@ -142,126 +143,30 @@ export function Header({
       setTemplates((prev) => prev.filter((t) => t.id !== id));
       toast.success("Template deleted successfully!");
     } catch (error) {
-      toast.error(err.message || "Error deleting template");
+      toast.error(error.message || "Error deleting template");
     }
   };
 
   return (
-    <header className="bg-card border-b border-border px-6 py-2">
-      <div className="flex items-center justify-between">
-        <div className="flex flex-col justify-center gap-1">
+    <header className="bg-white px-4 lg:px-6 py-1">
+      <div className="flex h-14 items-center justify-between">
+        <div className="flex flex-col justify-center">
           <Link href="/">
-            <h1 className="m-0 text-xl font-semibold text-gray-900">
-              Email Editor
+            <h1 className="m-0 text-base sm:text-lg font-semibold tracking-tight text-foreground">
+              Campaign Builder
             </h1>
           </Link>
-          <p className="text-sm text-gray-500">Build beautiful emails</p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           {lastSaved && formattedTime && (
-            <div className="text-sm text-gray-500">
+            <div className="hidden sm:block text-xs sm:text-sm text-muted-foreground">
               Last saved: {formattedTime}
             </div>
           )}
 
           {headerVariant == "default" && (
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button className="flex items-center gap-2 bg-blue-500 text-white hover:bg-blue-400">
-                  <LayoutTemplate className="w-4 h-4" />
-                  Templates
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-[32rem] max-h-96 overflow-y-auto flex flex-col gap-5">
-                <Link href="/template/create">
-                  <Button className="w-full" variant="default">
-                    Create Template
-                  </Button>
-                </Link>
-
-                {templates.length === 0 || !templates ? (
-                  <div className="flex flex-1 items-center justify-center min-h-[200px]">
-                    <p className="text-gray-500">No templates</p>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-2 gap-3">
-                    {templates?.map((template, i) => (
-                      <div
-                        key={i}
-                        className="relative group/temp  hover:border-gray-300 transition-colors duration-200 "
-                      >
-                        {/* Wrap only the clickable area that selects the template */}
-                        <PopoverClose asChild>
-                          <div
-                            className="p-2 rounded-md cursor-pointer min-h-[120px] flex flex-col justify-center border  border-gray-300 hover:border-gray-950 transition-colors duration-200"
-                            onClick={() => handleTempleteClick(template.id)}
-                          >
-                            <div>{template.thumbnail}</div>
-                            <p className="font-medium mb-1 text-center">
-                              {template.name}
-                            </p>
-                          </div>
-                        </PopoverClose>
-
-                        {/* Top-right icons (edit/delete) */}
-                        <div className="absolute opacity-0 top-2 right-2 flex gap-1 group-hover/temp:opacity-100">
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              router.push(`/template/${template.id}/edit`);
-                            }}
-                          >
-                            <Edit className="w-4 h-4" />
-                          </Button>
-
-                          <Dialog>
-                            <DialogTrigger asChild>
-                              <Button
-                                size="icon"
-                                variant="ghost"
-                                onClick={(e) => e.stopPropagation()}
-                              >
-                                <Trash2 className="w-4 h-4 text-red-500" />
-                              </Button>
-                            </DialogTrigger>
-
-                            <DialogContent className="sm:max-w-[400px]">
-                              <DialogHeader>
-                                <DialogTitle>Are you sure?</DialogTitle>
-                              </DialogHeader>
-
-                              <DialogDescription>
-                                This will permanently delete template. This
-                                action cannot be undone.
-                              </DialogDescription>
-
-                              <DialogFooter className="flex justify-end gap-2">
-                                <DialogClose asChild>
-                                  <Button variant="outline">Cancel</Button>
-                                </DialogClose>
-                                <DialogClose asChild>
-                                  <Button
-                                    variant="destructive"
-                                    onClick={() =>
-                                      handleDeleteTemplate(template.id)
-                                    }
-                                  >
-                                    Yes
-                                  </Button>
-                                </DialogClose>
-                              </DialogFooter>
-                            </DialogContent>
-                          </Dialog>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </PopoverContent>
-            </Popover>
+            <TemplateModal onSelect={(id) => handleTempleteClick(id)} />
           )}
 
           {headerVariant == "template" ? (
@@ -272,7 +177,7 @@ export function Header({
                   {template?.id ? "Update Template" : "Save as Template"}
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-96 max-h-96 overflow-y-auto flex flex-col gap-5 ">
+              <PopoverContent className="w-96 max-h-96 overflow-y-auto flex flex-col gap-4 p-4">
                 <div>
                   <Label>Template Name</Label>
                   <Input
@@ -285,7 +190,7 @@ export function Header({
                 <PopoverClose asChild>
                   <Button
                     className="self-end"
-                    varient="danger"
+                    variant="default"
                     onClick={handleSaveTemplate}
                   >
                     Save

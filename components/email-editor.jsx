@@ -176,7 +176,7 @@ export function EmailEditor({ template, headerVariant, storageKey }) {
   }, [components]);
 
   return (
-    <div className="h-screen flex flex-col bg-background">
+    <div className="h-screen flex flex-col">
       <Header
         setLoading={setLoading}
         canvasRef={canvasRef}

@@ -15,7 +15,7 @@ export default function Home() {
     fetchTemplate();
   }, [id]);
   return (
-    <div className="h-screen flex flex-col bg-gray-50">
+    <div className="h-screen flex flex-col bg-gray-200">
       {template ? (
         <EmailEditor
           headerVariant="template"

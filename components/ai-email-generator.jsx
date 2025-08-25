@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -12,42 +12,15 @@ import {
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Sparkles, Loader2, ImageIcon } from "lucide-react";
+import { Sparkles, Loader2, ImageIcon, X } from "lucide-react";
 import { toast } from "sonner";
-
-const examplePrompts = [
-  {
-    title: "Newsletter",
-    prompt:
-      "Create a monthly newsletter for a tech company with latest product updates, team highlights, and upcoming events. Include a call-to-action button for subscribing to updates.",
-  },
-  {
-    title: "Promotional Sale",
-    prompt:
-      "Design a summer sale promotional email with product showcase, discount codes, and a prominent 'Shop Now' button. Include images of summer products.",
-  },
-  {
-    title: "Event Invitation",
-    prompt:
-      "Generate an event invitation for a product launch with venue details, RSVP button, and social media links. Include an image of the event venue.",
-  },
-  {
-    title: "Welcome Email",
-    prompt:
-      "Create a welcome email for new customers with product recommendations, getting started guide, and customer support information. Include product images.",
-  },
-  {
-    title: "Restaurant Menu",
-    prompt:
-      "Design a restaurant menu email with featured dishes, special offers, and online booking button. Include appetizing food images.",
-  },
-];
 
 export default function AIEmailGenerator({ onEmailGenerated }) {
   const [prompt, setPrompt] = useState("");
   const [image, setImage] = useState(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const fileInputRef = useRef(null);
 
   const handleFileChange = (e) => {
     const file = e.target.files?.[0];
@@ -60,6 +33,25 @@ export default function AIEmailGenerator({ onEmailGenerated }) {
     };
     reader.readAsDataURL(file);
   };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    const file = e.dataTransfer.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const base64Data = reader.result.split(",")[1];
+      setImage(base64Data);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+  };
+
+  const clearImage = () => setImage(null);
 
   const handleGenerate = async () => {
     if (!prompt.trim()) {
@@ -105,89 +97,89 @@ export default function AIEmailGenerator({ onEmailGenerated }) {
     }
   };
 
-  const handleExampleClick = (examplePrompt) => {
-    setPrompt(examplePrompt);
-  };
-
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <Button variant="secondary" className="gap-2">
           <Sparkles className="h-4 w-4" />
-          AI Generate Email
+          AI Campaign Builder
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[600px] h-full overflow-y-auto">
+      <DialogContent className="sm:max-w-[520px] max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Sparkles className="h-5 w-5" />
-            AI Email Generator
+            AI Campaign Builder
           </DialogTitle>
-          <DialogDescription>
-            Describe the email you want to create. The AI will generate a
-            complete email structure with appropriate components and real
-            images.
-          </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4">
+        <div className="space-y-5">
           <div>
             <Label htmlFor="prompt" className="text-sm font-medium">
-              Describe your email
+              Describe your template
             </Label>
             <Textarea
               id="prompt"
-              placeholder="e.g., Create a promotional email for a summer sale with product images and discount codes..."
+              placeholder="e.g., Describe your template or what type of template you need (newsletter, promo sale, event invite)…"
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
-              className="min-h-[100px] mt-2"
+              className="min-h-[120px] mt-2"
             />
           </div>
-          {/* Image Upload */}
-          <div>
-            <Label
-              htmlFor="image"
-              className="text-sm font-medium flex items-center gap-2"
-            >
+
+          <div className="space-y-2">
+            <Label className="text-sm font-medium flex items-center gap-2">
               <ImageIcon className="w-4 h-4" />
-              Upload Image (optional)
+              Add sample template example (if any)
             </Label>
-            <input
-              type="file"
-              id="image"
-              accept="image/*"
-              onChange={handleFileChange}
-              className="mt-2"
-            />
-            {image && (
-              <p className="text-xs text-green-600 mt-1">
-                ✅ Image ready to send
-              </p>
-            )}
-          </div>
-          <div>
-            <Label className="text-sm font-medium">Quick Examples</Label>
-            <div className="grid grid-cols-1 gap-2 mt-2">
-              {examplePrompts.map((example, index) => (
-                <Button
-                  key={index}
-                  variant="outline"
-                  size="sm"
-                  className="justify-start text-left h-auto p-3"
-                  onClick={() => handleExampleClick(example.prompt)}
-                >
-                  <div>
-                    <div className="font-medium text-sm">{example.title}</div>
-                    <div className="text-xs text-muted-foreground mt-1">
-                      {example.prompt.substring(0, 80)}...
-                    </div>
-                  </div>
-                </Button>
-              ))}
+            <div
+              onDrop={handleDrop}
+              onDragOver={handleDragOver}
+              className="group relative flex flex-col items-center justify-center gap-2 rounded-md border border-dashed p-6 text-center transition-colors hover:border-muted-foreground/40"
+            >
+              {!image ? (
+                <>
+                  <p className="text-sm text-muted-foreground">
+                    Drag & drop an image here, or
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="ml-1 underline underline-offset-2 hover:text-foreground"
+                    >
+                      browse
+                    </button>
+                  </p>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    id="image"
+                    accept="image/*"
+                    onChange={handleFileChange}
+                    className="hidden"
+                  />
+                </>
+              ) : (
+                <div className="relative w-full max-w-[360px]">
+                  <img
+                    src={`data:image/*;base64,${image}`}
+                    alt="Selected"
+                    className="w-full rounded-md border object-contain"
+                  />
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    onClick={clearImage}
+                    className="absolute -top-2 -right-2 h-7 w-7 p-0"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
 
-          <div className="flex justify-end gap-2 pt-4">
+          <div className="flex justify-end gap-2 pt-2">
             <Button
               variant="secondary"
               onClick={() => setIsOpen(false)}

@@ -56,33 +56,33 @@ ButtonComponent.Editor = function ButtonEditor({ data, onUpdate }) {
 
   return (
     <div
-      className="flex items-center gap-3 bg-white px-3 py-2 h-12 
+      className="flex items-center gap-4 bg-white px-3 py-2 h-12 
   shadow-lg rounded-md fixed top-[74px] left-1/2 -translate-x-1/2 
   z-50 border"
     >
       <div className="flex items-center gap-2">
-        <Label htmlFor="text">Button Text</Label>
+        <Label htmlFor="text">Label</Label>
         <Input
           id="text"
-          className="w-28"
+          className="w-36"
           value={formData.text}
           onChange={(e) =>
             setFormData((prev) => ({ ...prev, text: e.target.value }))
           }
-          placeholder="Click Here"
+          placeholder="Button"
         />
       </div>
 
       <div className="flex items-center gap-2">
-        <Label htmlFor="url">Button URL</Label>
+        <Label htmlFor="url">Link</Label>
         <Input
-          className="w-52"
+          className="w-72"
           id="url"
           value={formData.url}
           onChange={(e) =>
             setFormData((prev) => ({ ...prev, url: e.target.value }))
           }
-          placeholder="https://example.com"
+          placeholder="https://example.com/link"
         />
       </div>
 
@@ -144,7 +144,7 @@ ButtonComponent.Editor = function ButtonEditor({ data, onUpdate }) {
             setFormData((prev) => ({ ...prev, padding: value }))
           }
         >
-          <SelectTrigger className="w-[80px] h-8">
+          <SelectTrigger className="w-[100px] h-8">
             <SelectValue placeholder="padding" />
           </SelectTrigger>
           <SelectContent>
@@ -164,7 +164,7 @@ ButtonComponent.Editor = function ButtonEditor({ data, onUpdate }) {
             setFormData((prev) => ({ ...prev, borderRadius: value }))
           }
         >
-          <SelectTrigger className="w-[80px] h-8">
+          <SelectTrigger className="w-[100px] h-8">
             <SelectValue placeholder="border radius" />
           </SelectTrigger>
           <SelectContent>

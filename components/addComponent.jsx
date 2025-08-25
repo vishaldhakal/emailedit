@@ -112,7 +112,7 @@ const components = [
     defaultData: {
       text: "Click Here",
       url: "https://",
-      backgroundColor: "#007bff",
+      backgroundColor: "#000000",
       color: "#ffffff",
       padding: "12px 24px",
       borderRadius: "4px",
@@ -174,7 +174,7 @@ function AddComponent({ handleComponentClick, columnId, inbetween, index }) {
     <Popover>
       <PopoverTrigger asChild>
         {inbetween ? (
-          <CirclePlus className="w-4 h-4 text-slate-500" />
+          <CirclePlus className="w-6 h-6 text-black" strokeWidth={1.5} />
         ) : (
           <div className="w-full  border rounded-md pl-3 py-1 cursor-pointer border-slate-600 flex  items-center gap-2">
             <Plus size={18} />

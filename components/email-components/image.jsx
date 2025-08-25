@@ -42,6 +42,7 @@ export function ImageComponent({ data, onUpdate, isSelected }) {
           className="rounded"
         />
       </div>
+      {isSelected && <ImageComponent.Editor data={data} onUpdate={onUpdate} />}
     </>
   );
 }
@@ -60,14 +61,14 @@ ImageComponent.Editor = function ImageEditor({ data, onUpdate }) {
 
   return (
     <div
-      className="flex items-center gap-3 bg-white px-3 py-2 h-12 
+      className="flex items-center gap-4 bg-white px-3 py-2 h-12 
   shadow-lg rounded-md fixed top-[74px] left-1/2 -translate-x-1/2 
   z-50 border"
     >
       <div className="flex items-center gap-1">
-        <Label htmlFor="src">Image URL</Label>
+        <Label htmlFor="src">Image</Label>
         <Input
-          className="w-72"
+          className="w-80"
           id="src"
           value={formData.src}
           onChange={(e) =>
@@ -78,9 +79,9 @@ ImageComponent.Editor = function ImageEditor({ data, onUpdate }) {
       </div>
 
       <div className="flex items-center gap-1">
-        <Label htmlFor="alt">Alt Text</Label>
+        <Label htmlFor="alt">Alt</Label>
         <Input
-          className="w-52"
+          className="w-64"
           id="alt"
           value={formData.alt}
           onChange={(e) =>
@@ -98,7 +99,7 @@ ImageComponent.Editor = function ImageEditor({ data, onUpdate }) {
             setFormData((prev) => ({ ...prev, width: value }))
           }
         >
-          <SelectTrigger className="w-[80px] h-8">
+          <SelectTrigger className="w-[100px] h-8">
             <SelectValue placeholder="width" />
           </SelectTrigger>
           <SelectContent>
@@ -121,7 +122,7 @@ ImageComponent.Editor = function ImageEditor({ data, onUpdate }) {
             setFormData((prev) => ({ ...prev, height: value }))
           }
         >
-          <SelectTrigger className="w-[80px] h-8">
+          <SelectTrigger className="w-[100px] h-8">
             <SelectValue placeholder="width" />
           </SelectTrigger>
           <SelectContent>
