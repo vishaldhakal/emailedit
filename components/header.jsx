@@ -5,20 +5,11 @@ import { Button } from "./ui/button";
 import { Download, Save } from "lucide-react";
 import AIEmailGenerator from "./ai-email-generator";
 import { generateHtml } from "@/lib/export-html";
-import { DialogClose } from "@/components/ui/dialog";
+
 import html2canvas from "html2canvas";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogDescription,
-} from "@/components/ui/dialog";
+
 import { PopoverClose } from "@radix-ui/react-popover";
 import { toast } from "sonner";
-import { Edit, Trash2, LayoutTemplate } from "lucide-react";
 import {
   Popover,
   PopoverTrigger,
@@ -62,18 +53,7 @@ export function Header({
   const handleSave = () => {
     onSave();
   };
-  useEffect(() => {
-    const getTemplates = async () => {
-      try {
-        const res = await fetch("https://api.salesmonk.ca/api/templates/");
-        const templates = await res.json();
-        setTemplates(templates);
-      } catch (error) {
-        console.log("error fetching templates", error);
-      }
-    };
-    getTemplates();
-  }, []);
+
   const handleExport = () => {
     const html = generateHtml(components);
     const blob = new Blob([html], { type: "text/html" });
@@ -105,9 +85,21 @@ export function Header({
       return toast.error("Cannot save empty template");
 
     if (!canvasRef.current) return;
-    const snapshotCanvas = await html2canvas(canvasRef.current);
-    const previewImage = snapshotCanvas.toDataURL("image/png");
 
+    // Create snapshot
+    const snapshotCanvas = await html2canvas(canvasRef.current, {
+      useCORS: true,
+      allowTaint: false,
+    });
+    // Convert to binary Blob
+    const blob = await new Promise((resolve) =>
+      snapshotCanvas.toBlob(resolve, "image/png")
+    );
+
+    const formData = new FormData();
+    formData.append("name", templateName);
+    formData.append("component", JSON.stringify(components));
+    formData.append("thumbnail", blob);
     try {
       const url = template?.id
         ? `https://api.salesmonk.ca/api/templates/${template.id}/`
@@ -117,11 +109,8 @@ export function Header({
 
       const res = await fetch(url, {
         method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: templateName,
-          component: components,
-        }),
+        // headers: { "Content-Type": "application/json" },
+        body: formData,
       });
 
       if (!res.ok) throw new Error("Failed to save template");
@@ -131,19 +120,6 @@ export function Header({
       router.push("/");
     } catch (err) {
       toast.error(err.message || "Error saving template");
-    }
-  };
-
-  const handleDeleteTemplate = async (id) => {
-    try {
-      const res = await fetch(`https://api.salesmonk.ca/api/templates/${id}/`, {
-        method: "DELETE",
-      });
-      if (!res.ok) throw new Error("Failed to delete template");
-      setTemplates((prev) => prev.filter((t) => t.id !== id));
-      toast.success("Template deleted successfully!");
-    } catch (error) {
-      toast.error(error.message || "Error deleting template");
     }
   };
 
