@@ -120,8 +120,11 @@ export default function TemplateModal({ onSelect }) {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {filtered.map((t) => (
-                <Card key={t.id} className="group relative">
-                  <CardHeader className="p-0">
+                <Card
+                  key={t.id}
+                  className="group relative flex flex-col h-full"
+                >
+                  <CardHeader className="p-0 flex-1">
                     <div
                       className="relative w-full bg-muted/40 cursor-pointer"
                       onClick={() => {
@@ -129,12 +132,12 @@ export default function TemplateModal({ onSelect }) {
                         setOpen(false);
                       }}
                     >
-                      {t.thumbnail ? (
-                        // If API provides a remote thumbnail URL, use next/image with fill via known dimensions or fallback to img tag
+                      {t.thumbnail_url ? (
                         <img
-                          src={t.thumbnail}
+                          fill
+                          src={t.thumbnail_url}
                           alt={t.name ?? "Template"}
-                          className="w-full h-40 object-cover"
+                          className="w-full h-full object-cover"
                         />
                       ) : (
                         <div className="w-full h-40 flex items-center justify-center text-sm text-muted-foreground">
@@ -143,7 +146,7 @@ export default function TemplateModal({ onSelect }) {
                       )}
                     </div>
                   </CardHeader>
-                  <CardContent className="pt-3 pb-2 px-3">
+                  <CardContent className="pt-3 pb-2 px-3 ">
                     <CardTitle className="text-sm font-medium truncate">
                       {t.name}
                     </CardTitle>
