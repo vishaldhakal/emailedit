@@ -1,11 +1,6 @@
+"use client";
+
 import React from "react";
-import { Move, Plus } from "lucide-react";
-import { CirclePlus } from "lucide-react";
-import {
-  Popover,
-  PopoverTrigger,
-  PopoverContent,
-} from "@/components/ui/popover";
 import {
   Heading,
   Link,
@@ -18,13 +13,6 @@ import {
   Share2,
   Square,
 } from "lucide-react";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-} from "@/components/ui/accordion";
-import { PopoverClose } from "@radix-ui/react-popover";
 
 const components = [
   {
@@ -42,7 +30,6 @@ const components = [
       columnsData: [],
     },
   },
-
   {
     type: "text-block",
     name: "Text Block",
@@ -168,75 +155,29 @@ const components = [
   },
 ];
 
-function AddComponent({ handleComponentClick, columnId, inbetween, index }) {
-  // Priority ordering: column first, then commonly used
-  const priorityOrder = {
-    column: 0,
-    "text-block": 1,
-    heading: 2,
-    image: 3,
-    button: 4,
-    divider: 5,
-    spacer: 6,
-    list: 7,
-    link: 8,
-    "social-media": 9,
+export function ComponentSidebar() {
+  const handleDragStart = (e, component) => {
+    e.dataTransfer.setData("application/json", JSON.stringify(component));
+    e.dataTransfer.effectAllowed = "copy";
   };
 
-  const sortedComponents = [...components].sort((a, b) => {
-    const aRank = priorityOrder[a.type] ?? 999;
-    const bRank = priorityOrder[b.type] ?? 999;
-    return aRank - bRank;
-  });
-
-  const columnComponent = sortedComponents.find((c) => c.type === "column");
-  const otherComponents = sortedComponents.filter((c) => c.type !== "column");
-  const displayComponents = columnComponent
-    ? [columnComponent, ...otherComponents]
-    : otherComponents;
-
   return (
-    <Popover>
-      <PopoverTrigger asChild>
-        {inbetween ? (
-          <CirclePlus className="w-6 h-6 text-black" strokeWidth={1.5} />
-        ) : (
-          <div className="w-fit border border-gray-200  text-gray-600  hover:text-black rounded-full px-3 py-2 cursor-pointer flex justify-center items-center gap-2 hover:bg-slate-50">
-            <Plus size={18} />
-            <span className="text-sm">Add component</span>
+    <div className="p-4">
+      <div className="space-y-2">
+        {components.map((component) => (
+          <div
+            key={component.type}
+            draggable
+            onDragStart={(e) => handleDragStart(e, component)}
+            className="flex items-center gap-3 p-3 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 hover:border-gray-300 cursor-grab active:cursor-grabbing transition-all duration-200 hover:shadow-sm"
+          >
+            <component.icon className="h-4 w-4 text-gray-600 flex-shrink-0" />
+            <span className="text-sm font-medium text-gray-900">
+              {component.name}
+            </span>
           </div>
-        )}
-      </PopoverTrigger>
-      <PopoverContent
-        side="bottom"
-        align="center"
-        sideOffset={8}
-        className="w-[420px] p-0 bg-white rounded-xl shadow-2xl"
-      >
-        <ScrollArea className="flex-1 h-fit hide-scrollbar">
-          <div className="p-3">
-            <div className="grid grid-cols-2 ">
-              {displayComponents.map((component) => (
-                <PopoverClose key={component.type} asChild>
-                  <div
-                    onClick={() =>
-                      handleComponentClick(component, columnId, index)
-                    }
-                    className="w-full p-3 border-b border-gray-100 cursor-pointer bg-white flex items-center gap-2 transition-all hover:border-slate-300 hover:bg-slate-50/80 hover:shadow-sm"
-                  >
-                    <component.icon className="h-5 w-5 text-slate-800" />
-                    <span className="text-[11px] font-medium text-slate-900 text-center leading-tight">
-                      Add a {component.name}
-                    </span>
-                  </div>
-                </PopoverClose>
-              ))}
-            </div>
-          </div>
-        </ScrollArea>
-      </PopoverContent>
-    </Popover>
+        ))}
+      </div>
+    </div>
   );
 }
-
-export default AddComponent;

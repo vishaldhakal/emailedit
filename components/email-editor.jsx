@@ -6,6 +6,7 @@ import { EmailCanvas } from "./email-canvas";
 import { useRef } from "react";
 import { nanoid } from "nanoid";
 import { useEffect } from "react";
+import { ComponentSidebar } from "./conponentSidebar";
 
 export function EmailEditor({ template, headerVariant, storageKey }) {
   const MAX_HISTORY_LENGTH = 20;
@@ -176,7 +177,10 @@ export function EmailEditor({ template, headerVariant, storageKey }) {
   }, [components]);
 
   return (
-    <div className="h-screen flex flex-col">
+    <div
+      className="h-screen flex flex-col bg-gradient-to-b from-gray-100 to-white"
+      onClick={() => setSelectedComponentId(null)}
+    >
       <Header
         setLoading={setLoading}
         canvasRef={canvasRef}
@@ -188,19 +192,29 @@ export function EmailEditor({ template, headerVariant, storageKey }) {
         lastSaved={lastSaved}
         onGenerateEmail={handleGenerateEmail}
       />
+      <div className="max-w-5xl h-full w-full mx-auto flex justify-center ">
+        {/* Sidebar */}
+        <div className="w-72 flex-shrink-0">
+          <div className="sticky top-24 h-[calc(100vh-96px)] overflow-y-auto ps-6 pt-4">
+            <ComponentSidebar />
+          </div>
+        </div>
 
-      <EmailCanvas
-        loading={loading}
-        ref={canvasRef}
-        setLastSaved={setLastSaved}
-        storageKey={storageKey}
-        components={components}
-        onUpdateComponents={handleUpdateComponents}
-        handleComponentUpdate={handleComponentUpdate}
-        onAddComponent={handleAddComponent}
-        selectedComponentId={selectedComponentId}
-        setSelectedComponentId={setSelectedComponentId}
-      />
+        <div className="flex-1 pb-16 overflow-y-auto scrollbar-hide">
+          <EmailCanvas
+            loading={loading}
+            ref={canvasRef}
+            setLastSaved={setLastSaved}
+            storageKey={storageKey}
+            components={components}
+            onUpdateComponents={handleUpdateComponents}
+            handleComponentUpdate={handleComponentUpdate}
+            onAddComponent={handleAddComponent}
+            selectedComponentId={selectedComponentId}
+            setSelectedComponentId={setSelectedComponentId}
+          />
+        </div>
+      </div>
     </div>
   );
 }
