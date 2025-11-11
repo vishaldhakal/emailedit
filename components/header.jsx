@@ -124,7 +124,7 @@ export function Header({
   };
 
   return (
-    <header className="bg-white px-4 lg:px-6 py-1">
+    <header className="bg-gray-200 px-4 lg:px-6 py-1">
       <div className="flex h-14 items-center justify-between">
         <div className="flex flex-col justify-center">
           <Link href="/">
