@@ -1,16 +1,18 @@
 "use client";
 
-import React from "react";
-import { TextBlock } from "./email-components/text-block";
-import { Heading } from "./email-components/heading";
-import { ImageComponent } from "./email-components/image";
-import { ButtonComponent } from "./email-components/button";
-import { Divider } from "./email-components/divider";
-import { Spacer } from "./email-components/spacer";
-import { SocialMedia } from "./email-components/social-media";
-import { Column } from "./email-components/layouts/column";
+import React, { memo } from "react";
+import { TextBlock } from "./email-components/TextBlock";
+import { Heading } from "./email-components/Heading";
+import { ImageComponent } from "./email-components/Image";
+import { ButtonComponent } from "./email-components/Button";
+import { Divider } from "./email-components/Divider";
+import { Spacer } from "./email-components/Spacer";
+import { SocialMedia } from "./email-components/SocialMedia";
+import { TwoColumn } from "./email-components/layouts/TwoColumn";
+import { ThreeColumn } from "./email-components/layouts/ThreeColumn";
 import { Link } from "./email-components/Link";
-import { List } from "./email-components/list";
+import { List } from "./email-components/List";
+
 export const componentMap = {
   "text-block": TextBlock,
   heading: Heading,
@@ -19,18 +21,20 @@ export const componentMap = {
   divider: Divider,
   spacer: Spacer,
   "social-media": SocialMedia,
-  column: Column,
+  "two-column": TwoColumn,
+  "three-column": ThreeColumn,
   link: Link,
   list: List,
 };
 
-export function EmailComponent({
+export const EmailComponent = memo(function EmailComponent({
   id,
   type,
   data,
   onUpdate,
   selectedComponentId,
   setSelectedComponentId,
+  onSettingsClick, // For footer component
 }) {
   const ComponentRenderer = componentMap[type];
 
@@ -49,6 +53,8 @@ export function EmailComponent({
       setSelectedComponentId={setSelectedComponentId}
       data={data}
       onUpdate={onUpdate}
+      useUnifiedToolbar={true} // Disable individual editing panels
+      onSettingsClick={onSettingsClick} // Pass to footer component
     />
   );
-}
+});
