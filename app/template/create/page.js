@@ -1,23 +1,18 @@
 "use client";
-import { useStat, useRef, useState } from "react";
-import Link from "next/link";
-import { toast } from "sonner";
-import { useEffect, useMemo, useCallback } from "react";
-import { Button } from "@/components/ui/button";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { ChevronLeft, Eye } from "lucide-react";
-import { ComponentSidebar } from "@/components/conponentSidebar";
+import { Button } from "@/components/ui/button";
+import { LazyEmailEditor } from "@/components/LazyEmailEditor";
+import { ComponentSidebar } from "@/components/componentSidebar";
 import { UnifiedEditingToolbar } from "@/components/UnifiedEditingToolbar";
-import { EmailEditor } from "@/components/email-editor";
+import { generateHtml } from "@/lib/export-html";
+import { Loader2, ChevronLeft, Eye, Check, AlertCircle } from "lucide-react";
+import { toast } from "sonner";
+import html2canvas from "html2canvas";
 import { InlineEditableTitle } from "@/components/InlineEditableTitle";
-import { se } from "date-fns/locale";
-export default function Home() {
-  const router = useRouter();
-  const [undoRedoState, setUndoRedoState] = useState({
-    canUndo: false,
-    canRedo: false,
-  });
 
+export default function Page() {
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [components, setComponents] = useState([]);
   const [latestComponents, setLatestComponents] = useState([]); // Track latest components from EmailEditor
@@ -25,22 +20,131 @@ export default function Home() {
     name: "",
     subject: "",
   });
-
-  const [selectedComponent, setSelectedComponent] = useState(null);
   const emailEditorRef = useRef(null);
+  const [isTemplateUploading, setIsTemplateUploading] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
-  const previewModalRef = useRef(null);
-
   const [previewHtml, setPreviewHtml] = useState("");
+  const [selectedComponent, setSelectedComponent] = useState(null);
+  const [undoRedoState, setUndoRedoState] = useState({
+    canUndo: false,
+    canRedo: false,
+  });
+
+  const previewModalRef = useRef(null);
+  // Combined save status for UI
+  // const combinedSaveStatus = useMemo(() => {
+  //   const isSaving = designSaveStatus.isSaving;
+  //   const lastSaved = Math.max(designSaveStatus.lastSaved);
+  //   const error = designSaveStatus.error;
+
+  //   return { isSaving, lastSaved, error };
+  // }, [designSaveStatus]);
+
+  // Handle ESC key to close preview
+  useEffect(() => {
+    const handleEscape = (event) => {
+      if (event.key === "Escape") {
+        if (showPreview) {
+          setShowPreview(false);
+        }
+      }
+    };
+    document.addEventListener("keydown", handleEscape);
+    return () => document.removeEventListener("keydown", handleEscape);
+  }, [showPreview]);
+
+  // Sync undo/redo state with EmailEditor
+  useEffect(() => {
+    const syncUndoRedoState = () => {
+      if (emailEditorRef.current) {
+        setUndoRedoState({
+          canUndo: emailEditorRef.current.hasUndo || false,
+          canRedo: emailEditorRef.current.hasRedo || false,
+        });
+      }
+    };
+
+    // Sync on mount and when components change
+    syncUndoRedoState();
+
+    // Also sync periodically to catch state changes
+    const interval = setInterval(syncUndoRedoState, 200);
+    return () => clearInterval(interval);
+  }, [components, latestComponents]);
+
+  const handleSaveDesign = async () => {
+    setIsLoading(true);
+    try {
+      // Use latestComponents instead of components to ensure we save the most recent state
+      // Fallback to ref if latestComponents is empty
+      let componentsToSave =
+        latestComponents.length > 0 ? latestComponents : components;
+
+      // Additional fallback: try to get components from EmailEditor ref
+      if (componentsToSave.length === 0 && emailEditorRef.current) {
+        const refComponents = emailEditorRef.current.getCurrentComponents();
+        if (refComponents && refComponents.length > 0) {
+          componentsToSave = refComponents;
+        }
+      }
+
+      const html = generateHtml(componentsToSave || [], footerSettings || null);
+
+      // Only send changed fields, ensure name/subject are not empty
+      const submitData = {};
+
+      // Only include name if it's not empty
+      if (formData.name && formData.name.trim()) {
+        submitData.name = formData.name.trim();
+      }
+
+      // Only include subject if it's not empty
+      if (formData.subject && formData.subject.trim()) {
+        submitData.subject = formData.subject.trim();
+      }
+
+      // Always include components and message
+      submitData.components = componentsToSave;
+      submitData.message = html;
+
+      // Use React Query mutation to update campaign
+      await updateCampaign({
+        id: campaignId,
+        data: submitData,
+      });
+
+      // Update local cache immediately for better UX
+      updateCampaignCache(submitData);
+
+      // Update local state to reflect the saved state
+      setComponents(componentsToSave);
+      setLatestComponents(componentsToSave);
+
+      toast.success("Design saved successfully!");
+    } catch (error) {
+      console.error("Error saving design:", error);
+      toast.error(error.message || "Failed to save design");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Auto-save design changes (components, name)
+  useEffect(() => {
+    const componentsToSave =
+      latestComponents.length > 0 ? latestComponents : components;
+    const designData = {
+      name: formData.name || "",
+      components: componentsToSave,
+    };
+  }, [latestComponents, components, formData.name]);
+
   const openPreview = () => {
     try {
       // Use latestComponents for preview as well
       const componentsToPreview =
         latestComponents.length > 0 ? latestComponents : components;
-      const html = generateHtml(
-        componentsToPreview || [],
-        footerSettings || null
-      );
+      const html = generateHtml(componentsToPreview || []);
       const fullHtml = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -75,8 +179,50 @@ export default function Home() {
       toast.error("Failed to generate preview");
     }
   };
-  console.log(selectedComponent);
 
+  const handleTemplateUpload = async () => {
+    if (!formData?.name?.trim())
+      return toast.error("Please enter a template name");
+    if (!latestComponents || latestComponents.length === 0)
+      return toast.error("Cannot save empty template");
+
+    if (!emailEditorRef.current) return;
+    const canvasEl = emailEditorRef.current.getCanvasElement();
+    if (!canvasEl) return;
+    // Create snapshot
+    const snapshotCanvas = await html2canvas(canvasEl, {
+      useCORS: true,
+      allowTaint: false,
+    });
+    // Convert to binary Blob
+    const blob = await new Promise((resolve) =>
+      snapshotCanvas.toBlob(resolve, "image/png")
+    );
+
+    const uploadData = new FormData();
+    uploadData.append("name", formData.name);
+    uploadData.append("component", JSON.stringify(latestComponents));
+    uploadData.append("thumbnail", blob);
+    try {
+      setIsTemplateUploading(true);
+      const res = await fetch("https://api.salesmonk.ca/api/templates/", {
+        method: "POST",
+        body: uploadData,
+      });
+
+      if (!res.ok) throw new Error("Failed to upload template");
+
+      toast.success("Template uploaded");
+      setLatestComponents([]);
+      setComponents([]);
+
+      router.push("/");
+    } catch (err) {
+      toast.error(err.message || "Error uploading template");
+    } finally {
+      setIsTemplateUploading(false);
+    }
+  };
   return (
     <div className="min-h-screen bg-white h-screen overflow-hidden">
       <div className="flex h-full overflow-hidden">
@@ -135,7 +281,41 @@ export default function Home() {
 
           {/* Component Library - Scrollable - Isolated */}
           <div className="flex-1 overflow-y-auto overflow-x-hidden min-h-0">
-            <ComponentSidebar />
+            <ComponentSidebar
+              onUndo={() => {
+                if (emailEditorRef.current?.undo) {
+                  emailEditorRef.current.undo();
+                  // Update state after undo with a small delay to ensure state is updated
+                  requestAnimationFrame(() => {
+                    if (emailEditorRef.current) {
+                      setUndoRedoState({
+                        canUndo: emailEditorRef.current.hasUndo || false,
+                        canRedo: emailEditorRef.current.hasRedo || false,
+                      });
+                    }
+                  });
+                }
+              }}
+              onRedo={() => {
+                if (emailEditorRef.current?.redo) {
+                  emailEditorRef.current.redo();
+                  // Update state after redo with a small delay to ensure state is updated
+                  requestAnimationFrame(() => {
+                    if (emailEditorRef.current) {
+                      setUndoRedoState({
+                        canUndo: emailEditorRef.current.hasUndo || false,
+                        canRedo: emailEditorRef.current.hasRedo || false,
+                      });
+                    }
+                  });
+                }
+              }}
+              canUndo={undoRedoState.canUndo}
+              canRedo={undoRedoState.canRedo}
+              onAction={handleTemplateUpload}
+              mode="create"
+              isTemplateUploading={isTemplateUploading}
+            />
           </div>
         </div>
 
@@ -163,11 +343,27 @@ export default function Home() {
 
           {/* Canvas Content - Scrollable - Isolated */}
           <div className="flex-1 overflow-y-auto overflow-x-hidden relative min-h-0">
-            <EmailEditor
+            <LazyEmailEditor
               ref={emailEditorRef}
-              // Force re-mount when campaign changes
+              key={`campaign`} // Force re-mount when campaign changes
               headerVariant="minimal"
               storageKey={`design_campaign_editor`}
+              onComponentsChange={(val) => {
+                setComponents(val);
+                setLatestComponents(val); // Update latest components whenever EmailEditor changes them
+                // Update undo/redo state after a brief delay to ensure EmailEditor has updated
+                setTimeout(() => {
+                  if (emailEditorRef.current) {
+                    setUndoRedoState({
+                      canUndo: emailEditorRef.current.hasUndo || false,
+                      canRedo: emailEditorRef.current.hasRedo || false,
+                    });
+                  }
+                }, 0);
+              }}
+              initialComponents={components}
+              onSave={handleSaveDesign}
+              isLoading={isLoading}
               onSelectionChange={(componentId) => {
                 // Update selected component when selection changes in EmailEditor
                 if (componentId && emailEditorRef.current) {
@@ -183,8 +379,11 @@ export default function Home() {
                   setSelectedComponent(null);
                 }
               }}
+              onFooterSettingsClick={() => {
+                console.log("Opening footer settings modal");
+                setShowFooterSettings(true);
+              }}
             />
-            <EmailEditor template headerVariant="template" storageKey="email" />
           </div>
 
           {/* Preview Button - Floating at Top Right */}
@@ -231,9 +430,28 @@ export default function Home() {
 
       {/* Footer Settings Modal */}
       {/* <FooterSettingsModal
-           isOpen={showFooterSettings}
-           onClose={() => setShowFooterSettings(false)}
-         /> */}
+        isOpen={showFooterSettings}
+        onClose={() => setShowFooterSettings(false)}
+      />
+      <AlertDialog open={showApplyConfirm} onOpenChange={setShowApplyConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Apply this template?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will replace your current design with the selected template.
+              You can undo immediately if needed.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setShowApplyConfirm(false)}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={applySelectedTemplate}>
+              Apply Template
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog> */}
     </div>
   );
 }

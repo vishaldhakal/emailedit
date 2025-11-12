@@ -2,12 +2,13 @@
 
 import { useState, useCallback, useEffect, useRef } from "react";
 import { EmailComponent } from "./email-component";
-import { Button } from "./ui/button";
+import { Button } from "@/components/ui/button";
 import { Trash2, ChevronUp, ChevronDown, ChevronRight } from "lucide-react";
 import React from "react";
 import { forwardRef } from "react";
 
 import { nanoid } from "nanoid";
+
 export const EmailCanvas = forwardRef(
   (
     {
@@ -346,21 +347,6 @@ export const EmailCanvas = forwardRef(
                   <h3 className="text-base md:text-lg font-medium text-gray-700">
                     Drag components from the sidebar
                   </h3>
-                  {/* <p className="text-xs md:text-sm text-gray-500">
-                    Or start quickly with a professionally designed template
-                  </p>
-                  <div className="pt-2">
-                    <Button
-                      onClick={() => {
-                        if (typeof window !== "undefined") {
-                          window.dispatchEvent(new Event("open-templates"));
-                        }
-                      }}
-                      className="bg-gray-900 hover:bg-gray-800 text-white h-9 px-4 rounded-full"
-                    >
-                      Start from a template
-                    </Button>
-                  </div> */}
                 </div>
               </div>
             </div>

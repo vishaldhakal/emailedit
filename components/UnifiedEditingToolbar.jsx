@@ -1117,7 +1117,7 @@ export function UnifiedEditingToolbar({ selectedComponent, onUpdate }) {
               {showImageControls && (
                 <>
                   <div className="h-6 w-px bg-gray-300 mx-1" />
-                  <Button
+                  {/* <Button
                     variant="ghost"
                     size="sm"
                     type="button"
@@ -1126,7 +1126,7 @@ export function UnifiedEditingToolbar({ selectedComponent, onUpdate }) {
                   >
                     <Upload className="h-4 w-4 mr-2" />
                     {data.src ? "Replace Image" : "Add Image"}
-                  </Button>
+                  </Button> */}
                   <Input
                     type="text"
                     placeholder="Image URL"

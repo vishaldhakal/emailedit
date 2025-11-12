@@ -70,10 +70,10 @@ const componentColors = {
     iconBg: "bg-pink-50",
     iconColor: "text-pink-600",
   },
-  footer: {
-    iconBg: "bg-teal-50",
-    iconColor: "text-teal-600",
-  },
+  // footer: {
+  //   iconBg: "bg-teal-50",
+  //   iconColor: "text-teal-600",
+  // },
 };
 
 const components = [
@@ -244,20 +244,25 @@ const components = [
       alignment: "center",
     },
   },
-  {
-    type: "footer",
-    name: "Footer",
-    icon: FileText,
-    description: "Email footer with company info",
-    category: "Layout",
-    defaultData: {
-      // Footer data comes from user settings
-      _isFooter: true,
-    },
-  },
+  // {
+  //   type: "footer",
+  //   name: "Footer",
+  //   icon: FileText,
+  //   description: "Email footer with company info",
+  //   category: "Layout",
+  //   defaultData: {
+
+  //     _isFooter: true,
+  //   },
+  // },
 ];
 
-export function ComponentSidebar({}) {
+export function ComponentSidebar({
+  onAction,
+  isTemplateUploading,
+  mode,
+  isTemplateUpdating,
+}) {
   const handleDragStart = (e, component) => {
     e.dataTransfer.setData("application/json", JSON.stringify(component));
     e.dataTransfer.effectAllowed = "copy";
@@ -304,7 +309,7 @@ export function ComponentSidebar({}) {
       </div> */}
 
       {/* Body */}
-      <div className="flex-1 overflow-y-auto px-2 py-2">
+      <div className=" overflow-y-auto px-2 py-2 mb-5">
         <div className="grid grid-cols-3 gap-3">
           {components.map((component) => {
             const colors = getComponentColors(component.type);
@@ -334,6 +339,33 @@ export function ComponentSidebar({}) {
               </div>
             );
           })}
+        </div>
+      </div>
+      {/* Action Buttons at Bottom - Same Row */}
+
+      <div className="px-2.5 pt-3 pb-4 border-t border-gray-100">
+        <div className="flex gap-2">
+          {mode && mode == "edit" ? (
+            <Button
+              onClick={onAction}
+              disabled={isTemplateUpdating}
+              variant="outline"
+              className="flex-1 flex items-center justify-center gap-2 h-9 px-4 text-sm font-medium rounded-md transition-colors border-none shadow-none bg-gray-100 hover:bg-gray-200"
+            >
+              <Rocket className="h-4 w-4 text-green-400" />
+              {isTemplateUpdating ? "Updating..." : "Update Template"}
+            </Button>
+          ) : (
+            <Button
+              onClick={onAction}
+              disabled={isTemplateUploading}
+              variant="outline"
+              className="flex-1 flex items-center justify-center gap-2 h-9 px-4 text-sm font-medium rounded-md transition-colors border-none shadow-none bg-gray-100 hover:bg-gray-200"
+            >
+              <Rocket className="h-4 w-4 text-green-400" />
+              {isTemplateUploading ? "Uploading..." : "Upload Template"}
+            </Button>
+          )}
         </div>
       </div>
     </div>

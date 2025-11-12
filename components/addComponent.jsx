@@ -16,7 +16,8 @@ import {
   MousePointer,
   Minus,
   Share2,
-  Square,
+  Columns2,
+  Columns3,
 } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
@@ -28,31 +29,44 @@ import { PopoverClose } from "@radix-ui/react-popover";
 
 const components = [
   {
-    type: "column",
-    name: "Column",
-    icon: Square,
-    description: "Full-width column layout",
+    type: "two-column",
+    name: "Two Column",
+    icon: Columns2,
+    description: "Two column layout",
     defaultData: {
       width: "100%",
-      backgroundColor: "#ffffff",
+      backgroundColor: "transparent",
       padding: "0px",
-      columns: "1",
       gap: "20px",
       columnWidths: [],
-      columnsData: [],
+      columnsData: [[], []],
     },
   },
-
+  {
+    type: "three-column",
+    name: "Three Column",
+    icon: Columns3,
+    description: "Three column layout",
+    defaultData: {
+      width: "100%",
+      backgroundColor: "transparent",
+      padding: "0px",
+      gap: "20px",
+      columnWidths: [],
+      columnsData: [[], [], []],
+    },
+  },
   {
     type: "text-block",
     name: "Text Block",
     icon: Type,
     description: "Rich text content",
     defaultData: {
-      content: "<p>Text</p>",
+      content: "<p>Write your text here</p>",
       font: "Arial",
       fontSize: "16px",
       alignment: "center",
+      color: "#000000",
       letterSpacing: 0,
       lineHeight: 1.5,
       backgroundColor: "#ffffff",
@@ -77,7 +91,7 @@ const components = [
     icon: Heading,
     description: "Section headings",
     defaultData: {
-      content: "Heading",
+      content: "This is a Heading",
       level: "h3",
       color: "#000000",
       alignment: "center",
@@ -169,18 +183,19 @@ const components = [
 ];
 
 function AddComponent({ handleComponentClick, columnId, inbetween, index }) {
-  // Priority ordering: column first, then commonly used
+  // Priority ordering: column layouts first, then commonly used
   const priorityOrder = {
-    column: 0,
-    "text-block": 1,
-    heading: 2,
-    image: 3,
-    button: 4,
-    divider: 5,
-    spacer: 6,
-    list: 7,
-    link: 8,
-    "social-media": 9,
+    "two-column": 0,
+    "three-column": 1,
+    "text-block": 2,
+    heading: 3,
+    image: 4,
+    button: 5,
+    divider: 6,
+    spacer: 7,
+    list: 8,
+    link: 9,
+    "social-media": 10,
   };
 
   const sortedComponents = [...components].sort((a, b) => {
@@ -189,11 +204,8 @@ function AddComponent({ handleComponentClick, columnId, inbetween, index }) {
     return aRank - bRank;
   });
 
-  const columnComponent = sortedComponents.find((c) => c.type === "column");
-  const otherComponents = sortedComponents.filter((c) => c.type !== "column");
-  const displayComponents = columnComponent
-    ? [columnComponent, ...otherComponents]
-    : otherComponents;
+  // Display sorted components directly
+  const displayComponents = sortedComponents;
 
   return (
     <Popover>

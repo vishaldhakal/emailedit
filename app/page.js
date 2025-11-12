@@ -26,7 +26,7 @@ import {
 import { toast } from "sonner";
 export default function Home() {
   const router = useRouter();
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
   const [templates, setTemplates] = useState([]);
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
