@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, memo } from "react";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -9,25 +9,27 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
-export function Spacer({ data, onUpdate, isSelected }) {
+
+export const Spacer = memo(function Spacer({ data, onUpdate, isSelected }) {
   const { height } = data;
 
   return (
-    <div className="relative group">
-      <div className="flex items-center justify-center py-2">
+    <div className={`relative group`}>
+      <div className="flex items-center justify-center py-1">
         <div
           style={{ height }}
           className="w-full bg-gray-100 border-2 border-dashed border-gray-200 rounded-md opacity-60 group-hover:opacity-100 transition-opacity"
         />
       </div>
-      {isSelected && (
-        <div className="absolute -top-12 left-1/2 -translate-x-1/2 z-40">
+      {/* Individual editor disabled - using unified toolbar */}
+      {false && isSelected && (
+        <div className="absolute -top-16 left-1/2 -translate-x-1/2 z-40">
           <Spacer.Editor data={data} onUpdate={onUpdate} />
         </div>
       )}
     </div>
   );
-}
+});
 
 Spacer.Editor = function SpacerEditor({ data, onUpdate }) {
   const [formData, setFormData] = useState(data);

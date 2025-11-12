@@ -1,10 +1,8 @@
 "use client";
-
-import { EmailComponent } from "@/components/email-component";
+import { EmailComponent } from "../email-component";
 import { Button } from "@/components/ui/button";
 import { Trash2, ChevronUp, ChevronDown } from "lucide-react";
 import React from "react";
-import AddComponent from "../addComponent";
 export function ColumnComponentManager({
   component,
   index,
@@ -14,7 +12,6 @@ export function ColumnComponentManager({
   onMoveDown,
   totalComponents,
   setSelectedComponentId,
-  handleInbetweenAdd,
   selectedComponentId,
 }) {
   const handleDelete = (e) => {
@@ -37,7 +34,7 @@ export function ColumnComponentManager({
 
   return (
     <div
-      className={`relative group/inner mb-4 border-2 border-transparent hover:border-primary/30 rounded-lg transition-colors`}
+      className={`relative group/inner border-2 border-transparent hover:border-primary/30 rounded-lg transition-colors`}
       onClick={(e) => {
         e.stopPropagation();
         setSelectedComponentId(component.id);
@@ -56,31 +53,15 @@ export function ColumnComponentManager({
         </Button>
       </div>
 
-      <div className="p-2">
-        <EmailComponent
-          selectedComponentId={selectedComponentId}
-          id={component.id}
-          key={component.id}
-          setSelectedComponentId={setSelectedComponentId}
-          type={component.type}
-          data={component.data}
-          onUpdate={onUpdate}
-        />
-      </div>
-
-      {/* circluar add component icon below component */}
-      <div
-        onClick={(e) => {
-          e.stopPropagation();
-        }}
-        className={`absolute -bottom-5 left-1/2 cursor-pointer w-4 h-4 rounded-full opacity-0 group-hover/inner:opacity-100`}
-      >
-        <AddComponent
-          inbetween
-          index={index}
-          handleComponentClick={handleInbetweenAdd}
-        />
-      </div>
+      <EmailComponent
+        selectedComponentId={selectedComponentId}
+        id={component.id}
+        key={component.id}
+        setSelectedComponentId={setSelectedComponentId}
+        type={component.type}
+        data={component.data}
+        onUpdate={onUpdate}
+      />
 
       {/* Move Controls */}
       <div

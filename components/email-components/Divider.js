@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, memo } from "react";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -9,12 +9,13 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
-export function Divider({ data, onUpdate, isSelected }) {
+
+export const Divider = memo(function Divider({ data, onUpdate, isSelected }) {
   const { style, color, height } = data;
 
   return (
-    <div className="relative group">
-      <div className="py-2">
+    <div className={`relative group`}>
+      <div className="py-1">
         <hr
           style={{
             border: "none",
@@ -24,14 +25,15 @@ export function Divider({ data, onUpdate, isSelected }) {
           className="opacity-60 group-hover:opacity-100 transition-opacity"
         />
       </div>
-      {isSelected && (
+      {/* Individual editor disabled - using unified toolbar */}
+      {false && isSelected && (
         <div className="absolute -top-20 left-1/2 -translate-x-1/2 z-40">
           <Divider.Editor data={data} onUpdate={onUpdate} />
         </div>
       )}
     </div>
   );
-}
+});
 
 Divider.Editor = function DividerEditor({ data, onUpdate }) {
   const [formData, setFormData] = useState(data);

@@ -9,8 +9,8 @@ import {
 } from "@/components/ui/select";
 import { FaPaintbrush } from "react-icons/fa6";
 import { nanoid } from "nanoid";
-import { ColumnComponentManager } from "@/components/email-components/column-component-manager";
-import AddComponent from "@/components/addComponent";
+import { ColumnComponentManager } from "@/components/campaign/email-components/ColumnComponentManager";
+import AddComponent from "@/components/campaign/AddComponent";
 
 export function Column({
   data,
@@ -71,20 +71,6 @@ export function Column({
       ...newColumnsData[columnIndex],
       newComponent,
     ];
-    onUpdate({ ...data, columnsData: newColumnsData });
-  };
-
-  // Insert component after a given index inside a column
-  const handleInbetweenAdd = (component, columnIndex, index) => {
-    const newComponent = {
-      id: nanoid(),
-      type: component.type,
-      data: component.defaultData,
-    };
-    const newColumnsData = [...normalizedColumnsData];
-    const columnComponents = [...newColumnsData[columnIndex]];
-    columnComponents.splice(index + 1, 0, newComponent);
-    newColumnsData[columnIndex] = columnComponents;
     onUpdate({ ...data, columnsData: newColumnsData });
   };
 
@@ -154,6 +140,28 @@ export function Column({
     };
   }, []);
 
+  // Recursively regenerate IDs for nested components
+  const regenerateIds = useCallback((comp) => {
+    const newComp = {
+      ...comp,
+      id: nanoid(),
+    };
+
+    // If this is a column with columnsData, recursively update all nested components
+    if (newComp.data && Array.isArray(newComp.data.columnsData)) {
+      newComp.data = {
+        ...newComp.data,
+        columnsData: newComp.data.columnsData.map((column) =>
+          Array.isArray(column)
+            ? column.map((nestedComp) => regenerateIds(nestedComp))
+            : column
+        ),
+      };
+    }
+
+    return newComp;
+  }, []);
+
   const handleDrop = useCallback(
     (e, columnIndex) => {
       e.preventDefault();
@@ -165,19 +173,34 @@ export function Column({
         const componentData = JSON.parse(
           e.dataTransfer.getData("application/json")
         );
-        const newComponent = {
-          id: nanoid(),
-          type: componentData.type,
-          data: componentData.defaultData,
-        };
 
-        const newColumnsData = [...normalizedColumnsData];
-        newColumnsData[columnIndex] = [
-          ...newColumnsData[columnIndex],
-          newComponent,
-        ];
+        // Check if this is a template (multiple components)
+        if (componentData.type === "template" && componentData.components) {
+          // Add all template components with new IDs (including nested ones)
+          const templateComponents = componentData.components.map((comp) =>
+            regenerateIds(comp)
+          );
+          const newColumnsData = [...normalizedColumnsData];
+          newColumnsData[columnIndex] = [
+            ...newColumnsData[columnIndex],
+            ...templateComponents,
+          ];
+          onUpdate({ ...data, columnsData: newColumnsData });
+        } else {
+          // Single component drop
+          const newComponent = {
+            id: nanoid(),
+            type: componentData.type,
+            data: componentData.defaultData,
+          };
 
-        onUpdate({ ...data, columnsData: newColumnsData });
+          const newColumnsData = [...normalizedColumnsData];
+          newColumnsData[columnIndex] = [
+            ...newColumnsData[columnIndex],
+            newComponent,
+          ];
+          onUpdate({ ...data, columnsData: newColumnsData });
+        }
 
         // Trigger global drag end to reset main canvas drag state
         setTimeout(() => {
@@ -193,7 +216,7 @@ export function Column({
         console.error("Error handling drop in column:", error);
       }
     },
-    [normalizedColumnsData, data, onUpdate]
+    [normalizedColumnsData, data, onUpdate, regenerateIds]
   );
 
   const handleDropBetween = useCallback(
@@ -207,18 +230,32 @@ export function Column({
         const componentData = JSON.parse(
           e.dataTransfer.getData("application/json")
         );
-        const newComponent = {
-          id: nanoid(),
-          type: componentData.type,
-          data: componentData.defaultData,
-        };
 
-        const newColumnsData = [...normalizedColumnsData];
-        const columnComponents = [...newColumnsData[columnIndex]];
-        columnComponents.splice(index + 1, 0, newComponent);
-        newColumnsData[columnIndex] = columnComponents;
+        // Check if this is a template (multiple components)
+        if (componentData.type === "template" && componentData.components) {
+          // Add all template components with new IDs (including nested ones)
+          const templateComponents = componentData.components.map((comp) =>
+            regenerateIds(comp)
+          );
+          const newColumnsData = [...normalizedColumnsData];
+          const columnComponents = [...newColumnsData[columnIndex]];
+          columnComponents.splice(index + 1, 0, ...templateComponents);
+          newColumnsData[columnIndex] = columnComponents;
+          onUpdate({ ...data, columnsData: newColumnsData });
+        } else {
+          // Single component drop
+          const newComponent = {
+            id: nanoid(),
+            type: componentData.type,
+            data: componentData.defaultData,
+          };
 
-        onUpdate({ ...data, columnsData: newColumnsData });
+          const newColumnsData = [...normalizedColumnsData];
+          const columnComponents = [...newColumnsData[columnIndex]];
+          columnComponents.splice(index + 1, 0, newComponent);
+          newColumnsData[columnIndex] = columnComponents;
+          onUpdate({ ...data, columnsData: newColumnsData });
+        }
 
         // Trigger global drag end to reset main canvas drag state
         setTimeout(() => {
@@ -234,7 +271,7 @@ export function Column({
         console.error("Error handling drop between components:", error);
       }
     },
-    [normalizedColumnsData, data, onUpdate]
+    [normalizedColumnsData, data, onUpdate, regenerateIds]
   );
 
   // Render nothing if no columns
@@ -250,7 +287,7 @@ export function Column({
           display: "flex",
           gap,
         }}
-        className="bg-gray-100 rounded-lg transition-colors hover:border-primary/50"
+        className="rounded-lg transition-colors"
       >
         {normalizedColumnsData.map((components, columnIndex) => (
           <div
@@ -261,10 +298,10 @@ export function Column({
               flexDirection: "column",
             }}
             data-column-id={`column-${columnIndex}`}
-            className={`bg-white  transition-all duration-200 relative ${
+            className={`transition-all duration-200 relative rounded-md ${
               dragOverColumn === columnIndex
-                ? "border-blue-400 bg-blue-50/30"
-                : "hover:border-primary/50"
+                ? "border-2 border-blue-400"
+                : ""
             }`}
             onDragOver={(e) => handleDragOver(e, columnIndex)}
             onDragLeave={(e) => handleDragLeave(e, columnIndex)}
@@ -275,7 +312,7 @@ export function Column({
             {components.length === 0 &&
               isDragging &&
               dragOverColumn === columnIndex && (
-                <div className="absolute inset-0 border-2 border-dashed border-blue-400 bg-blue-50/50 rounded-md flex items-center justify-center">
+                <div className="min-h-[100px] border-2 border-dashed border-blue-400 bg-blue-50/50 rounded-md flex items-center justify-center">
                   <div className="text-blue-600 text-sm font-medium">
                     Drop component here
                   </div>
@@ -283,12 +320,14 @@ export function Column({
               )}
 
             {components.length === 0 && !isDragging && (
-              <AddComponent
-                columnId={`column-${columnIndex}`}
-                handleComponentClick={(comp) =>
-                  handleComponentClick(comp, columnIndex)
-                }
-              />
+              <div className="min-h-[100px] flex items-center justify-center p-4">
+                <AddComponent
+                  columnId={`column-${columnIndex}`}
+                  handleComponentClick={(comp) =>
+                    handleComponentClick(comp, columnIndex)
+                  }
+                />
+              </div>
             )}
 
             {components.map((component, index) => (
@@ -299,7 +338,7 @@ export function Column({
                   className={`transition-all duration-200 rounded-lg ${
                     isDragging
                       ? "h-2 opacity-100 bg-blue-100"
-                      : "h-0 opacity-0 hover:opacity-100 hover:bg-blue-100 hover:border-2 hover:border-dashed hover:border-blue-300"
+                      : "h-0 opacity-0"
                   }`}
                   onDragOver={(e) => {
                     e.preventDefault();
@@ -320,9 +359,6 @@ export function Column({
                   index={index}
                   totalComponents={components.length}
                   setSelectedComponentId={setSelectedComponentId}
-                  handleInbetweenAdd={(comp, _, i) =>
-                    handleInbetweenAdd(comp, columnIndex, i)
-                  }
                   onUpdate={(updatedData) =>
                     handleComponentUpdate(columnIndex, index, updatedData)
                   }
@@ -338,30 +374,34 @@ export function Column({
                 />
               </div>
             ))}
+
             {/* Drop zone at bottom of column */}
-            <div
-              data-drop-zone
-              className={`transition-all duration-200 rounded-lg mt-2 ${
-                isDragging
-                  ? "h-2 opacity-100 bg-blue-100"
-                  : "h-0 opacity-0 hover:opacity-100 hover:bg-blue-100 hover:border-2 hover:border-dashed hover:border-blue-300"
-              }`}
-              onDragOver={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                e.dataTransfer.dropEffect = "copy";
-              }}
-              onDragEnd={handleDragEnd}
-              onDrop={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                handleDropBetween(e, columnIndex, components.length - 1);
-              }}
-            />
+            {components.length > 0 && (
+              <div
+                data-drop-zone
+                className={`transition-all duration-200 rounded-lg ${
+                  isDragging
+                    ? "h-2 opacity-100 bg-blue-100"
+                    : "h-0 opacity-0"
+                }`}
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  e.dataTransfer.dropEffect = "copy";
+                }}
+                onDragEnd={handleDragEnd}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleDropBetween(e, columnIndex, components.length - 1);
+                }}
+              />
+            )}
           </div>
         ))}
       </div>
-      {isSelected && (
+      {/* Individual editor disabled - using unified toolbar */}
+      {false && isSelected && (
         <div className="absolute -top-20 left-1/2 -translate-x-1/2 z-40">
           <Column.Editor data={data} onUpdate={onUpdate} />
         </div>

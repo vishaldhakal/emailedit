@@ -48,20 +48,22 @@ export function List({ data, onUpdate, isSelected }) {
     },
   });
   return (
-    <div className="relative group">
-      <div className="min-h-[2rem] hover:bg-gray-50/30 transition-colors duration-200 rounded-sm">
+    <div className={`relative group`}>
+      <div className="min-h-[1.5rem] hover:bg-gray-50/30 transition-colors duration-200 rounded-sm">
         <EditorContent
           editor={editor}
           style={{
             fontFamily: data.font,
             fontSize: data.fontSize,
-            minHeight: "2rem",
-            padding: "0.5rem 0",
+            color: data.color || "#000000",
+            minHeight: "1.5rem",
+            padding: "0.25rem 0",
           }}
           className="focus-within:bg-blue-50/20 transition-colors duration-200"
         />
       </div>
-      {isSelected && (
+      {/* Individual editor disabled - using unified toolbar */}
+      {false && isSelected && (
         <div className="absolute -top-20 left-1/2 -translate-x-1/2 z-40">
           <List.Editor data={data} onUpdate={onUpdate} editor={editor} />
         </div>
@@ -149,25 +151,25 @@ List.Editor = function ListEditor({ data, onUpdate, editor }) {
             ></span>
           </div>
         </div>
-
-        {/* Lists */}
-        <Button
-          variant={editor.isActive("bulletList") ? "default" : "ghost"}
-          size="icon"
-          className="h-8 w-8 rounded-md hover:bg-blue-50 hover:text-blue-600 transition-colors"
-          onClick={() => editor.chain().focus().toggleBulletList().run()}
-        >
-          <ListIcon className="w-3.5 h-3.5" />
-        </Button>
-        <Button
-          variant={editor.isActive("orderedList") ? "default" : "ghost"}
-          size="icon"
-          className="h-8 w-8 rounded-md hover:bg-blue-50 hover:text-blue-600 transition-colors"
-          onClick={() => editor.chain().focus().toggleOrderedList().run()}
-        >
-          <ListOrdered className="w-3.5 h-3.5" />
-        </Button>
       </div>
+
+      {/* Lists */}
+      <Button
+        variant={editor.isActive("bulletList") ? "default" : "ghost"}
+        size="icon"
+        className="h-8 w-8 rounded-md hover:bg-blue-50 hover:text-blue-600 transition-colors"
+        onClick={() => editor.chain().focus().toggleBulletList().run()}
+      >
+        <ListIcon className="w-3.5 h-3.5" />
+      </Button>
+      <Button
+        variant={editor.isActive("orderedList") ? "default" : "ghost"}
+        size="icon"
+        className="h-8 w-8 rounded-md hover:bg-blue-50 hover:text-blue-600 transition-colors"
+        onClick={() => editor.chain().focus().toggleOrderedList().run()}
+      >
+        <ListOrdered className="w-3.5 h-3.5" />
+      </Button>
     </div>
   );
 };

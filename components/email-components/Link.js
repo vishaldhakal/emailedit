@@ -1,18 +1,19 @@
 "use client";
 
-import React from "react";
+import React, { memo } from "react";
 import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Button } from "../ui/button";
+import { Button } from "@/components/ui/button";
 import { Underline, AlignLeft, AlignCenter, AlignRight } from "lucide-react";
-export function Link({ data, onUpdate, isSelected }) {
+
+export const Link = memo(function Link({ data, onUpdate, isSelected }) {
   const { text, url, color, underline, alignment } = data;
 
   return (
-    <div className="relative group">
+    <div className={`relative group`}>
       <div
-        className={`min-h-[2rem] hover:bg-gray-50/30 transition-colors duration-200 rounded-sm ${
+        className={`min-h-[1.5rem] hover:bg-gray-50/30 transition-colors duration-200 rounded-sm ${
           alignment === "center"
             ? "flex justify-center items-center"
             : alignment === "right"
@@ -30,21 +31,22 @@ export function Link({ data, onUpdate, isSelected }) {
             cursor: "pointer",
             fontWeight: "500",
             display: "inline-block",
-            padding: "0.5rem 0",
+            padding: "0.25rem 0",
           }}
           className="hover:opacity-80 transition-all duration-200 focus-within:bg-blue-50/20"
         >
           {text || "Click here"}
         </a>
       </div>
-      {isSelected && (
+      {/* Individual editor disabled - using unified toolbar */}
+      {false && isSelected && (
         <div className="absolute -top-20 left-1/2 -translate-x-1/2 z-40">
           <Link.Editor data={data} onUpdate={onUpdate} />
         </div>
       )}
     </div>
   );
-}
+});
 
 Link.Editor = function LinkEditor({ data, onUpdate }) {
   const [formData, setFormData] = useState(data);

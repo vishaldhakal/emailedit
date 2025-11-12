@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, memo } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -11,12 +11,20 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import { FaPaintbrush } from "react-icons/fa6";
-export function ButtonComponent({ data, onUpdate, isSelected }) {
-  const { text, url, backgroundColor, color, padding, borderRadius } = data;
+
+export const ButtonComponent = memo(function ButtonComponent({ data, onUpdate, isSelected }) {
+  const { text, url, backgroundColor, color, padding, borderRadius, borderWidth, borderColor, borderStyle, align } = data;
+
+  // Build border style string
+  const borderStyleString = borderWidth && borderWidth !== "0px" && borderWidth !== "0"
+    ? `${borderWidth} ${borderStyle || "solid"} ${borderColor || "#000000"}`
+    : "none";
+
+  const containerTextAlign = align === "left" ? "left" : align === "right" ? "right" : "center";
 
   return (
-    <div className="relative group">
-      <div className="text-center">
+    <div className={`relative group`}>
+      <div style={{ textAlign: containerTextAlign }}>
         <a
           target="_blank"
           href={url?.trim() || undefined}
@@ -29,22 +37,23 @@ export function ButtonComponent({ data, onUpdate, isSelected }) {
             display: "inline-block",
             fontSize: "16px",
             fontWeight: "500",
-            border: "none",
+            border: borderStyleString,
             cursor: "pointer",
           }}
-          className="hover:opacity-90 transition-opacity"
+          className="hover:opacity-90 shadow-sm hover:shadow-md transition-all duration-200"
         >
           {text}
         </a>
       </div>
-      {isSelected && (
+      {/* Individual editor disabled - using unified toolbar */}
+      {false && isSelected && (
         <div className="absolute -top-20 left-1/2 -translate-x-1/2 z-40">
           <ButtonComponent.Editor data={data} onUpdate={onUpdate} />
         </div>
       )}
     </div>
   );
-}
+});
 
 ButtonComponent.Editor = function ButtonEditor({ data, onUpdate }) {
   const [formData, setFormData] = useState(data);
@@ -95,6 +104,25 @@ ButtonComponent.Editor = function ButtonEditor({ data, onUpdate }) {
 
       {/* Second Line */}
       <div className="flex items-center gap-2">
+        {/* Align */}
+        <div className="flex items-center gap-2">
+          <Label className="text-xs font-medium text-gray-600">Align</Label>
+          <Select
+            value={formData.align || "center"}
+            onValueChange={(value) =>
+              setFormData((prev) => ({ ...prev, align: value }))
+            }
+          >
+            <SelectTrigger className="w-[84px] h-7 text-xs border-gray-200">
+              <SelectValue placeholder="Align" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="left">Left</SelectItem>
+              <SelectItem value="center">Center</SelectItem>
+              <SelectItem value="right">Right</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
         {/* Text Color */}
         <div className="relative">
           <input
