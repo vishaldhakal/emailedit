@@ -70,10 +70,10 @@ export const EmailEditor = forwardRef(
     useEffect(() => {
       if (template) {
         const templateComponents = template.component || [];
-        const withFooter = ensureFooterPresent(templateComponents);
-        setHistory([withFooter]);
+
+        setHistory([templateComponents]);
         setHistoryIndex(0);
-        onComponentsChange && onComponentsChange(withFooter);
+        onComponentsChange && onComponentsChange(templateComponents);
       } else if (initialComponents && initialComponents.length > 0) {
         // Update only if different to prevent unnecessary re-renders
         const currentComponents = history[historyIndex];
@@ -81,10 +81,9 @@ export const EmailEditor = forwardRef(
           JSON.stringify(currentComponents) !==
           JSON.stringify(initialComponents)
         ) {
-          const withFooter = ensureFooterPresent(initialComponents);
-          setHistory([withFooter]);
+          setHistory([initialComponents]);
           setHistoryIndex(0);
-          onComponentsChange && onComponentsChange(withFooter);
+          onComponentsChange && onComponentsChange(initialComponents);
         }
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -161,14 +160,14 @@ export const EmailEditor = forwardRef(
     );
 
     // Ensure a footer component exists at least once at the end
-    const ensureFooterPresent = useCallback((comps) => {
-      const list = Array.isArray(comps) ? [...comps] : [];
-      const hasFooter = list.some((c) => c && c.type === "footer");
-      if (!hasFooter) {
-        list.push({ id: nanoid(), type: "footer", data: { html: "" } });
-      }
-      return list;
-    }, []);
+    // const ensureFooterPresent = useCallback((comps) => {
+    //   const list = Array.isArray(comps) ? [...comps] : [];
+    //   const hasFooter = list.some((c) => c && c.type === "footer");
+    //   if (!hasFooter) {
+    //     list.push({ id: nanoid(), type: "footer", data: { html: "" } });
+    //   }
+    //   return list;
+    // }, []);
 
     // Update individual component
     const handleComponentUpdate = useCallback(

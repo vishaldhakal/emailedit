@@ -1,5 +1,12 @@
 "use client";
-import { useState, useEffect, useRef, useMemo, useCallback } from "react";
+import {
+  useState,
+  useEffect,
+  useRef,
+  useMemo,
+  useCallback,
+  useContext,
+} from "react";
 import { useRouter, useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { LazyEmailEditor } from "@/components/LazyEmailEditor";
@@ -10,12 +17,13 @@ import { Loader2, ChevronLeft, Eye, Check, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import html2canvas from "html2canvas";
 import { InlineEditableTitle } from "@/components/InlineEditableTitle";
-
+import { TemplateContext } from "@/lib/template-provider";
 export default function Page() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [components, setComponents] = useState([]);
-  const [latestComponents, setLatestComponents] = useState([]); // Track latest components from EmailEditor
+  const { latestComponents, setLatestComponents } = useContext(TemplateContext); // Track latest components from EmailEditor
+
   const [formData, setFormData] = useState({
     name: "",
     subject: "",
@@ -361,7 +369,7 @@ export default function Page() {
                   }
                 }, 0);
               }}
-              initialComponents={components}
+              initialComponents={latestComponents}
               onSave={handleSaveDesign}
               isLoading={isLoading}
               onSelectionChange={(componentId) => {
