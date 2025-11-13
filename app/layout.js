@@ -2,6 +2,7 @@ import localFont from "next/font/local";
 import "./globals.css";
 import { Toaster } from "sonner";
 import { TemplateProvider } from "@/lib/template-provider";
+import { Header } from "@/components/header";
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
   variable: "--font-geist-sans",
@@ -20,6 +21,7 @@ export default function RootLayout({ children }) {
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <TemplateProvider>
+          <Header />
           {children}
           <Toaster position="top-center" />
         </TemplateProvider>
