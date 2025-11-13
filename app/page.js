@@ -30,7 +30,7 @@ export default function Home() {
   const [query, setQuery] = useState("");
   const [templates, setTemplates] = useState([]);
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
-
+  const [isDeleting, setIsDeleting] = useState(false);
   useEffect(() => {
     const getTemplates = async () => {
       try {
@@ -55,6 +55,7 @@ export default function Home() {
 
   const handleDelete = async (id) => {
     try {
+      setIsDeleting(true);
       const res = await fetch(`https://api.salesmonk.ca/api/templates/${id}/`, {
         method: "DELETE",
       });
@@ -65,11 +66,12 @@ export default function Home() {
       toast.error(err.message || "Delete failed");
     } finally {
       setConfirmDeleteId(null);
+      setIsDeleting(false);
     }
   };
   return (
-    <div className="flex flex-col pt-5 gap-5  h-screen max-w-5xl w-full mx-auto ">
-      <div className="px-6 max-w-4xl w-full mx-auto pb-4">
+    <div className="flex flex-col py-10 gap-8  min-h-screen max-w-4xl w-full mx-auto  ">
+      <div className=" max-w-4xl w-full mx-auto pb-4">
         <div className="flex items-center gap-3">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -81,7 +83,7 @@ export default function Home() {
             />
           </div>
           <Link href="/template/create">
-            <Button>
+            <Button className="w-52">
               <Plus className="h-4 w-4 mr-2" /> Create Template
             </Button>
           </Link>
@@ -173,7 +175,7 @@ export default function Home() {
                           variant="destructive"
                           onClick={() => handleDelete(t.id)}
                         >
-                          Delete
+                          {isDeleting ? "Deleting..." : "Delete"}
                         </Button>
                       </DialogFooter>
                     </DialogContent>

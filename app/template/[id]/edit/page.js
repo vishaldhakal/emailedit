@@ -1,11 +1,19 @@
 "use client";
-import { useState, useEffect, useRef, useMemo, useCallback } from "react";
+import {
+  useState,
+  useEffect,
+  useRef,
+  useMemo,
+  useCallback,
+  useContext,
+} from "react";
 import { useRouter, useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { LazyEmailEditor } from "@/components/LazyEmailEditor";
 import { ComponentSidebar } from "@/components/componentSidebar";
 import { UnifiedEditingToolbar } from "@/components/UnifiedEditingToolbar";
 import { generateHtml } from "@/lib/export-html";
+import { TemplateContext } from "@/lib/template-provider";
 import { Loader2, ChevronLeft, Eye, Check, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import html2canvas from "html2canvas";
@@ -13,11 +21,11 @@ import { InlineEditableTitle } from "@/components/InlineEditableTitle";
 
 export default function Page() {
   const { id: templateId } = useParams();
-  console.log(templateId);
+
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [components, setComponents] = useState([]);
-  const [latestComponents, setLatestComponents] = useState([]); // Track latest components from EmailEditor
+  const { latestComponents, setLatestComponents } = useContext(TemplateContext); // Track latest components from EmailEditor
   const [formData, setFormData] = useState({
     name: "",
     subject: "",
@@ -369,7 +377,7 @@ export default function Page() {
               ref={emailEditorRef}
               key={`campaign`} // Force re-mount when campaign changes
               headerVariant="minimal"
-              storageKey={`design_campaign_editor`}
+              storageKey={`createTemplate`}
               onComponentsChange={(val) => {
                 setComponents(val);
                 setLatestComponents(val); // Update latest components whenever EmailEditor changes them
