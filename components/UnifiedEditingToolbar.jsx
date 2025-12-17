@@ -10,23 +10,22 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import {
-  Type,
   Bold,
   Italic,
   Underline,
   AlignLeft,
   AlignCenter,
   AlignRight,
-  AlignJustify,
   List,
   ListOrdered,
-  Indent,
-  Outdent,
-  Sparkles,
-  Star,
   Upload,
   Link as LinkIcon,
   X,
+  Square,
+  Circle,
+  Minus,
+  Type,
+  AlignJustify,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
@@ -35,15 +34,22 @@ import {
   PopoverContent,
 } from "@/components/ui/popover";
 import { Label } from "@/components/ui/label";
+import { Slider } from "@/components/ui/slider";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { campaignImagesService } from "@/services/campaignImages";
+// Removed next-auth
+import { ColorPicker } from "@/components/campaign/ColorPicker";
+import AIEmailGenerator from "./ai-email-generator";
 
-export function UnifiedEditingToolbar({ selectedComponent, onUpdate }) {
-  const [fontSize, setFontSize] = useState("12");
+export function UnifiedEditingToolbar({ selectedComponent, onUpdate, onEmailGenerated }) {
+  // Use mock session/user ID since auth is removed
+  const session = { user: { id: "demo-user" } }; 
+  const [fontSize, setFontSize] = useState("16");
   const [headingLevel, setHeadingLevel] = useState("H1");
   const [fontFamily, setFontFamily] = useState("Arial");
   const [showImagePicker, setShowImagePicker] = useState(false);
@@ -327,6 +333,7 @@ export function UnifiedEditingToolbar({ selectedComponent, onUpdate }) {
   const showLinkControls = type === "link";
   const showDividerControls = type === "divider";
   const showSpacerControls = type === "spacer";
+  const showContainerControls = type === "container";
 
   // Determine if we should show controls (always show them now)
   const showControls = true;
@@ -338,14 +345,9 @@ export function UnifiedEditingToolbar({ selectedComponent, onUpdate }) {
           <>
             <div className="flex items-center justify-center gap-2 flex-1 animate-in fade-in slide-in-from-top-2 duration-300">
               {/* Magic Write / AI Tools */}
-              {/* <Button
-                variant="ghost"
-                size="sm"
-                className="text-white hover:text-white hover:bg-gray-700 h-8 px-3 transition-all duration-200 hover:scale-105 active:scale-95"
-              >
-                <Star className="h-5 w-5" />
-                <span>Magic Write</span>
-              </Button> */}
+              <div className="mr-2">
+                 <AIEmailGenerator onEmailGenerated={onEmailGenerated} />
+              </div>
 
               {/* Link Button - Available for all components */}
               <div className="relative">
@@ -1457,6 +1459,95 @@ export function UnifiedEditingToolbar({ selectedComponent, onUpdate }) {
                     }}
                     className="h-8 w-24 bg-white border-gray-300 text-gray-900 text-sm px-2 transition-all duration-200 hover:border-gray-400 focus:border-blue-500"
                   />
+                </>
+              )}
+
+              {/* Container Controls */}
+              {showContainerControls && (
+                <>
+                  <div className="h-6 w-px bg-gray-300 mx-1" />
+                  
+                  {/* Background Color */}
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-gray-700 hover:text-gray-900 hover:bg-gray-100 h-8 px-2 transition-all duration-200"
+                        title="Background Color"
+                      >
+                        <div
+                          className="h-4 w-4 rounded border border-gray-300"
+                          style={{ backgroundColor: data.backgroundColor || "transparent" }}
+                        />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-64">
+                      <div className="space-y-2">
+                        <Label>Background Color</Label>
+                        <Input
+                          type="color"
+                          value={data.backgroundColor === "transparent" ? "#ffffff" : data.backgroundColor || "#ffffff"}
+                          onChange={(e) =>
+                            onUpdate({ ...data, backgroundColor: e.target.value })
+                          }
+                          className="h-10 w-full"
+                        />
+                         <Button
+                          variant="outline"
+                          size="sm"
+                          className="w-full mt-2"
+                          onClick={() => onUpdate({ ...data, backgroundColor: "transparent" })}
+                        >
+                          Clear (Transparent)
+                        </Button>
+                      </div>
+                    </PopoverContent>
+                  </Popover>
+
+                  {/* Padding */}
+                  <div className="flex items-center gap-1">
+                    <Label className="text-xs text-gray-500">Pad:</Label>
+                    <Select
+                      value={data.padding || "20px"}
+                      onValueChange={(value) =>
+                        onUpdate({ ...data, padding: value })
+                      }
+                    >
+                      <SelectTrigger className="h-8 w-20 bg-white border-gray-300 text-gray-900 hover:bg-gray-50 hover:text-gray-900 text-xs">
+                        <SelectValue placeholder="Padding" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="0px">0px</SelectItem>
+                        <SelectItem value="10px">10px</SelectItem>
+                        <SelectItem value="20px">20px</SelectItem>
+                        <SelectItem value="30px">30px</SelectItem>
+                        <SelectItem value="40px">40px</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Border Radius */}
+                  <div className="flex items-center gap-1">
+                    <Label className="text-xs text-gray-500">Radius:</Label>
+                    <Select
+                      value={data.borderRadius || "0px"}
+                      onValueChange={(value) =>
+                        onUpdate({ ...data, borderRadius: value })
+                      }
+                    >
+                      <SelectTrigger className="h-8 w-20 bg-white border-gray-300 text-gray-900 hover:bg-gray-50 hover:text-gray-900 text-xs">
+                        <SelectValue placeholder="Radius" />
+                      </SelectTrigger>
+                      <SelectContent>
+                         <SelectItem value="0px">None</SelectItem>
+                         <SelectItem value="4px">Small</SelectItem>
+                         <SelectItem value="8px">Medium</SelectItem>
+                         <SelectItem value="16px">Large</SelectItem>
+                         <SelectItem value="24px">X-Large</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </>
               )}
             </div>

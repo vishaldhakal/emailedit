@@ -58,7 +58,7 @@ export async function POST(request) {
 
     // Create the model
     const model = genAI.getGenerativeModel({
-      model: "gemini-2.0-flash",
+      model: "gemini-2.5-flash",
     });
 
     // Create the system prompt
@@ -73,34 +73,40 @@ AVAILABLE COMPONENTS:
 6. spacer - For vertical spacing
 7. social-media - For social media links
 8. link - for block level link text
-9. column - can be split upto 3 columns and can contain other components
-10.list - can list ordered or unordered items 
+9. two-column - 2 columns side-by-side layout
+10. three-column - 3 columns side-by-side layout
+11. list - can list ordered or unordered items
+12. container - wrapper for grouping components with specific background/padding (like cards, badges, sections)
 
 COMPONENT DATA STRUCTURES:
 - heading: { content: string, level: "h1"|"h2"|"h3"|"h4"|"h5"|"h6", color: string, alignment: "left"|"center"|"right",font:"Arial"|"Georgia"|"Times New Roman" |"Verdana",bold:boolean,italic:boolean,underline:boolean ,backgroundColor:string}
 - text-block: { content: string, fontSize: "12px" |"14px"|"16px" |"18px"|"24px" ,font:"Arial"|"Georgia"|"Times New Roman" |"Verdana", alignment: "left"|"center"|"right",backgoundColor:string}
-- image: { src: string, alt: string, width: "100%"|"75%"|"50%"|"25%"|"200px"|"300px"|"400px", height: "auto"|"100px"| "200px"|"300px"|"400px", pexelsQuery: string }
-- button: { text: string, url: string, backgroundColor: string, color: string, padding: "8px 16px"|"12px 24px"| |"16px 32px"|"20px 40px", borderRadius: "0px"|"4px"|"8px"|"16px"|"24px" }
+- image: { src: string, alt: string, width: "100%"|"75%"|"50%"|"25%"|"200px"|"300px"|"400px", height: "auto"|"100px"| "200px"|"300px"|"400px", pexelsQuery: string, alignment: "left"|"center"|"right" }
+- button: { text: string, url: string, backgroundColor: string, textColor: string, padding: "10px 20px" | "18px 40px", borderRadius: "4px"|"8px"|"999px", alignment: "center"|"left"|"right", font: "Helvetica Neue" }
 - divider: { style: "solid"|"dashed"|"dotted", color: string, height: "1px"|"2px"|"3px"|"4px"|}
 - spacer: { height: "10px"|"20px"|"30px"|"40px"|"50px"|"60px"| }
 - social-media: { platforms: [{ name: "facebbok"|"twitter"|"instagram"|"linkedin"|"youtube"|"tiktok", url: string }], iconSize:"20px"|"24px"|"32px"|"40px", color: string, alignment: "left"|"center"|"right" }
--link:{text:string,url:string, color:string,underline:boolean ,alignment: "left" || "right" || "center"}
-- column: { width: "100%"|"90%"|"80%"|"70%" , backgroundColor: string, padding: "0px"|"10px"|"20px"|"30px",gap:"0px"|"10px"|"20px"|"30px",columns:number //number of columns ,columnsData = [], // Array of arrays: components per column}
--list :{content:html,font:"Arial"|"Georgia"|"Times New Roman" |"Verdana", fontSize:"12px" |"14px"|"16px" |"18px"|"24px"  } //cpntent can have bullet or numbered list
+- link: {text:string,url:string, color:string,underline:boolean ,alignment: "left" || "right" || "center"}
+- two-column: { width: "100%", backgroundColor: string, padding: "0px"|"10px"|"20px"|"30px", gap:"0px"|"10px"|"20px"|"30px", columnsData: [] } // Array of 2 arrays: components per column
+- three-column: { width: "100%", backgroundColor: string, padding: "0px"|"10px"|"20px"|"30px", gap:"0px"|"10px"|"20px"|"30px", columnsData: [] } // Array of 3 arrays: components per column
+- list :{content:html,font:"Arial"|"Georgia"|"Times New Roman" |"Verdana", fontSize:"12px" |"14px"|"16px" |"18px"|"24px"  } //cpntent can have bullet or numbered list
+- container: { padding: "10px"|"20px"|"30px", backgroundColor: string, borderRadius: "0px"|"8px"|"16px", components: [] }
 
 INSTRUCTIONS:
 1.  Analyze the user's request carefully to understand the email's purpose and tone.
-2.  Create a logical and visually appealing email structure by nesting components within layout components (e.g., single-column, two-columns).
-3.  Use professional and harmonious color palettes. For corporate emails, prefer blues, grays, and whites. For promotional emails, use brighter, more vibrant colors that match the brand's identity.
-4.  Choose appropriate font sizes and styles for headings and body text to ensure readability and visual hierarchy.
-5.  Incorporate engaging and well-written copy that matches the email's purpose.
-6.  Use spacers and dividers effectively to create a clean and well-organized layout.
-7.  For every image component, whether nested inside columns or standalone, provide a direct src URL of a relevant image from Pexels and include a meaningful pexelsQuery. Do not leave src empty or omit it inside columns.
-8.  Include clear and compelling call-to-action buttons for promotional content.
-9.  Add social media links to enhance brand presence.
-10. Do NOT generate any HTML. Only use the provided component data structures.
-11.keep the alignment for possible components to center
-12.consider the whole canvas to be 600px max width
+2.  Use 'container' component generously to create distinct sections, cards, or badges (e.g., 'New Arrival' badge, 'Featured' section card).
+3.  Nest headings, text-blocks, buttons, etc., inside containers to group them visually.
+4.  Use professional and harmonious color palettes. For corporate emails, prefer blues, grays, and whites. For promotional emails, use brighter, more vibrant colors.
+5.  Choose appropriate font sizes and styles for headings and body text to ensure readability and visual hierarchy.
+6.  Incorporate engaging and well-written copy.
+7.  Use spacers and dividers effectively to create a clean and well-organized layout.
+8.  For every image component, provide a direct src URL of a relevant image from Pexels and include a meaningful pexelsQuery.
+9.  Include clear and compelling call-to-action buttons.
+10. Add social media links to enhance brand presence.
+11. Do NOT generate any HTML (except for list content). Only use the provided component data structures.
+12. Keep the alignment for components to center where appropriate.
+13. Consider the whole canvas to be 600px max width.
+
 RESPONSE FORMAT:
 Return ONLY a valid JSON object with this exact structure:
 {
@@ -112,7 +118,7 @@ Return ONLY a valid JSON object with this exact structure:
   ]
 }
 
-Make the email professional, engaging, and well-structured. Use appropriate colors, fonts, and spacing.`;
+Make the email professional, engaging, and well-structured with nested containers where applicable.`;
 
     // Build Gemini input
     const parts = [

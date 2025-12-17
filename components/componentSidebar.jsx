@@ -19,6 +19,7 @@ import {
   FileText,
   Rocket,
   Save,
+  Box,
 } from "lucide-react";
 import { ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -70,6 +71,10 @@ const componentColors = {
     iconBg: "bg-pink-50",
     iconColor: "text-pink-600",
   },
+  container: {
+    iconBg: "bg-orange-50",
+    iconColor: "text-orange-600",
+  },
   // footer: {
   //   iconBg: "bg-teal-50",
   //   iconColor: "text-teal-600",
@@ -90,6 +95,19 @@ const components = [
       gap: "20px",
       columnWidths: [],
       columnsData: [[], []],
+    },
+  },
+  {
+    type: "container",
+    name: "Container",
+    icon: Box,
+    description: "Wrapper for grouping components",
+    category: "Layout",
+    defaultData: {
+      padding: "20px",
+      backgroundColor: "#ffffff",
+      borderRadius: "0px",
+      components: [],
     },
   },
   {

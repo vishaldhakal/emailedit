@@ -1,13 +1,19 @@
 "use client";
 
 import { useState, useCallback, useEffect, useRef } from "react";
+// FIX: Changed import path from "@/components/campaign/EmailComponent" to "./email-component"
 import { EmailComponent } from "./email-component";
 import { Button } from "@/components/ui/button";
-import { Trash2, ChevronUp, ChevronDown, ChevronRight } from "lucide-react";
+import { Trash2, ChevronUp, ChevronDown, ChevronRight, Copy, Plus } from "lucide-react";
 import React from "react";
 import { forwardRef } from "react";
-
 import { nanoid } from "nanoid";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export const EmailCanvas = forwardRef(
   (
@@ -202,6 +208,14 @@ export const EmailCanvas = forwardRef(
               : column
           ),
         };
+      }
+
+      // If this is a container with components, recursively update them
+      if (newComp.type === "container" && Array.isArray(newComp.data?.components)) {
+         newComp.data = {
+            ...newComp.data,
+            components: newComp.data.components.map((nestedComp) => regenerateIds(nestedComp))
+         }
       }
 
       return newComp;

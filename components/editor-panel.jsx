@@ -36,12 +36,14 @@ export function EditorPanel({
   handleComponentUpdate,
   components,
 }) {
+  // Logic mostly moved to UnifiedEditingToolbar
+  // This component now acts as a placeholder or secondary inspector if needed
+  
   const selectedComponent = findComponentById(components, selectedComponentId);
   if (!selectedComponent) {
     return null;
   }
 
-  const Editor = componentMap[selectedComponent.type]?.Editor;
 
   if (!Editor) {
     return (

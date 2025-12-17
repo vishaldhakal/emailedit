@@ -12,6 +12,11 @@ import { TwoColumn } from "./email-components/layouts/TwoColumn";
 import { ThreeColumn } from "./email-components/layouts/ThreeColumn";
 import { Link } from "./email-components/Link";
 import { List } from "./email-components/List";
+import dynamic from "next/dynamic";
+
+const Container = dynamic(() =>
+  import("./email-components/Container").then((mod) => mod.Container)
+);
 
 export const componentMap = {
   "text-block": TextBlock,
@@ -25,6 +30,7 @@ export const componentMap = {
   "three-column": ThreeColumn,
   link: Link,
   list: List,
+  container: Container,
 };
 
 export const EmailComponent = memo(function EmailComponent({

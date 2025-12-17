@@ -139,6 +139,12 @@ export default function Page() {
     };
   }, [latestComponents, components, formData.name]);
 
+  const handleEmailGenerated = (newComponents) => {
+    setComponents(newComponents);
+    setLatestComponents(newComponents);
+    toast.success("Design updated with AI generated content");
+  };
+
   const openPreview = () => {
     try {
       // Use latestComponents for preview as well
@@ -338,6 +344,7 @@ export default function Page() {
                   }, 0);
                 }
               }}
+              onEmailGenerated={handleEmailGenerated}
             />
           </div>
 
@@ -427,31 +434,6 @@ export default function Page() {
           </div>
         </div>
       )}
-
-      {/* Footer Settings Modal */}
-      {/* <FooterSettingsModal
-        isOpen={showFooterSettings}
-        onClose={() => setShowFooterSettings(false)}
-      />
-      <AlertDialog open={showApplyConfirm} onOpenChange={setShowApplyConfirm}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Apply this template?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This will replace your current design with the selected template.
-              You can undo immediately if needed.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setShowApplyConfirm(false)}>
-              Cancel
-            </AlertDialogCancel>
-            <AlertDialogAction onClick={applySelectedTemplate}>
-              Apply Template
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog> */}
     </div>
   );
 }
