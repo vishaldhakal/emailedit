@@ -3,17 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import {
-  Search,
-  Edit,
-  Trash2,
-  Plus,
-  Gift,
-  Handshake,
-  Percent,
-  Newspaper,
-  Folder,
-} from "lucide-react";
+import { Search, Edit, Trash2, Plus } from "lucide-react";
 
 import {
   Dialog,
@@ -36,62 +26,34 @@ import {
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
-const iconMap = {
-  gift: Gift,
-  "heart-handshake": Handshake,
-  percent: Percent,
-  newspaper: Newspaper,
-  folder: Folder,
-};
-
 function CategoryCard({ category, onClick, isSelected }) {
-  const Icon = iconMap[category.icon] || Folder;
-
   return (
     <div
       onClick={() => onClick(category)}
       className={cn(
-        "cursor-pointer group relative overflow-hidden rounded-xl border transition-all duration-200 ease-out",
-        "h-28 flex flex-col justify-between p-4",
+        "cursor-pointer rounded-xl border text-sm transition-colors",
+        "flex flex-col justify-center px-4 py-3",
         isSelected
-          ? "bg-gray-900 border-gray-900 shadow-md"
-          : "bg-white border-gray-200 hover:border-gray-300 hover:shadow-sm hover:scale-[1.01]"
+          ? "bg-gray-900 text-white border-gray-900"
+          : "bg-white text-gray-900 border-gray-200 hover:border-gray-300"
       )}
     >
-      <div className="flex items-start justify-between">
-        <div
-          className={cn(
-            "p-2 rounded-lg transition-colors",
-            isSelected
-              ? "bg-white/10 text-white"
-              : "bg-gray-50 text-gray-900 group-hover:bg-gray-100"
-          )}
-        >
-          <Icon className="h-5 w-5" />
-        </div>
-        {isSelected && (
-           <div className="h-2 w-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]" />
+      <h3
+        className={cn(
+          "text-[13px] font-medium leading-none truncate",
+          isSelected ? "text-white" : "text-gray-900"
         )}
-      </div>
-
-      <div>
-        <h3
-          className={cn(
-            "font-semibold text-base tracking-tight leading-none",
-            isSelected ? "text-white" : "text-gray-900"
-          )}
-        >
-          {category.name}
-        </h3>
-        <p
-          className={cn(
-            "text-xs mt-1.5 font-medium",
-            isSelected ? "text-gray-400" : "text-muted-foreground"
-          )}
-        >
-          {category.template_count} Templates
-        </p>
-      </div>
+      >
+        {category.name}
+      </h3>
+      <p
+        className={cn(
+          "mt-1 text-[11px] font-medium",
+          isSelected ? "text-gray-300" : "text-muted-foreground"
+        )}
+      >
+        {category.template_count} templates
+      </p>
     </div>
   );
 }
@@ -133,22 +95,24 @@ export default function Home() {
 
     // Filter by Category
     if (selectedCategory) {
-       // Since the API for templates hasn't been confirmed to have category_id, 
-       // but the prompt implies a relationship, we will check if logic allows.
-       // However, often sample templates might be miscategorized or missing it.
-       // For now, I will NOT strictly filter if the property is missing to avoid showing nothing,
-       // unless I can verify the template structure.
-       // Assuming standard practice:
-       if (selectedCategory.slug !== 'all') {
-           // Basic filter attempt
-           // filteredTemplates = filteredTemplates.filter(t => t.category_id === selectedCategory.id);
-           // Commented out to avoid breaking if data is missing, will just highlight for now.
-       }
+      // Since the API for templates hasn't been confirmed to have category_id,
+      // but the prompt implies a relationship, we will check if logic allows.
+      // However, often sample templates might be miscategorized or missing it.
+      // For now, I will NOT strictly filter if the property is missing to avoid showing nothing,
+      // unless I can verify the template structure.
+      // Assuming standard practice:
+      if (selectedCategory.slug !== "all") {
+        // Basic filter attempt
+        // filteredTemplates = filteredTemplates.filter(t => t.category_id === selectedCategory.id);
+        // Commented out to avoid breaking if data is missing, will just highlight for now.
+      }
     }
 
     const q = query.trim().toLowerCase();
     if (!q) return filteredTemplates;
-    return filteredTemplates.filter((t) => `${t.name ?? ""}`.toLowerCase().includes(q));
+    return filteredTemplates.filter((t) =>
+      `${t.name ?? ""}`.toLowerCase().includes(q)
+    );
   }, [templates, query, selectedCategory]);
 
   const handleDelete = async (id) => {
@@ -167,155 +131,174 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50/30">
-        <div className="max-w-[1400px] w-full mx-auto px-6 py-12 flex flex-col gap-10">
-      
-      {/* Header Section */}
-      <div className="flex flex-col gap-8 w-full mx-auto">
-        <div className="flex justify-between items-end">
-             <div className="space-y-1">
-                <h1 className="text-3xl font-bold tracking-tight text-gray-900">Email Templates</h1>
-                <p className="text-muted-foreground text-lg">Manage and organize your email marketing templates</p>
-             </div>
-             <Link href="/template/create">
-                <Button size="lg" className="shadow-sm h-11 px-6 bg-gray-900 hover:bg-gray-800 text-white">
-                <Plus className="h-4 w-4 mr-2" /> Create Template
-                </Button>
+    <div className="min-h-screen bg-white">
+      <div className="max-w-5xl w-full mx-auto px-4 sm:px-6 py-10 flex flex-col gap-8">
+        {/* Header Section */}
+        <div className="flex flex-col gap-6 w-full mx-auto">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <div className="space-y-2">
+              <h1 className="text-3xl font-semibold tracking-tight text-gray-900">
+                Email Templates
+              </h1>
+              <p className="text-muted-foreground text-sm sm:text-base">
+                Manage and organize your email marketing templates
+              </p>
+            </div>
+            <Link href="/template/create">
+              <Button
+                size="lg"
+                className="h-10 px-5 bg-gray-900 hover:bg-gray-800 text-white font-medium rounded-lg"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Create template
+              </Button>
             </Link>
-        </div>
-
-        {/* Categories Grid */}
-        {!loading && categories.length > 0 && (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-            {categories.map((cat) => (
-              <CategoryCard
-                key={cat.id}
-                category={cat}
-                isSelected={selectedCategory?.id === cat.id}
-                onClick={(c) => setSelectedCategory(selectedCategory?.id === c.id ? null : c)}
-              />
-            ))}
           </div>
-        )}
 
-        <div className="relative max-w-xl">
+          {/* Categories Grid */}
+          {!loading && categories.length > 0 && (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+              {categories.map((cat) => (
+                <CategoryCard
+                  key={cat.id}
+                  category={cat}
+                  isSelected={selectedCategory?.id === cat.id}
+                  onClick={(c) =>
+                    setSelectedCategory(
+                      selectedCategory?.id === c.id ? null : c
+                    )
+                  }
+                />
+              ))}
+            </div>
+          )}
+
+          <div className="relative max-w-xl">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search templates..."
-              className="pl-10 h-12 text-base border-gray-200 bg-white shadow-sm focus:ring-2 focus:ring-gray-900/10 focus:border-gray-900 transition-all rounded-xl"
+              className="pl-10 h-11 text-sm border-gray-200 bg-white focus:ring-1 focus:ring-gray-900/20 focus:border-gray-900/50 rounded-lg"
             />
+          </div>
         </div>
-      </div>
 
-      {/* Content Area */}
-      <div className="min-h-[400px]">
-        {loading ? (
+        {/* Content Area */}
+        <div className="min-h-[400px]">
+          {loading ? (
             <div className="flex items-center justify-center h-64">
-            <div className="w-8 h-8 border-4 border-t-gray-900 border-gray-200 rounded-full animate-spin"></div>
+              <div className="w-7 h-7 border-4 border-t-gray-900 border-gray-200 rounded-full animate-spin" />
             </div>
-        ) : filtered.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-20 text-center border-2 border-dashed border-gray-200 rounded-2xl bg-gray-50/50">
-                <div className="bg-white p-4 rounded-full mb-4 shadow-sm ring-1 ring-gray-100">
-                    <Search className="h-8 w-8 text-gray-400" />
-                </div>
-                <h3 className="text-lg font-semibold text-gray-900">No templates found</h3>
-                <p className="text-muted-foreground max-w-sm mt-2">
-                    We couldn't find any templates appearing to match your search.
-                </p>
+          ) : filtered.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-16 text-center border border-dashed border-gray-200 rounded-2xl bg-gray-50/60">
+              <h3 className="text-base font-semibold text-gray-900">
+                No templates found
+              </h3>
+              <p className="text-muted-foreground max-w-sm mt-2">
+                Try adjusting your search or clear the filter to see all
+                templates.
+              </p>
             </div>
-        ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-8">
-            {filtered.map((t) => (
-                <Card key={t.id} className="group relative flex flex-col h-full overflow-hidden border-0 bg-transparent shadow-none hover:shadow-none transition-none">
-                 {/* Card Wrapper for Hover Effect */}
-                 <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden transition-all duration-300 group-hover:shadow-xl group-hover:border-gray-300/50 group-hover:-translate-y-1">
-                    <div className="relative w-full aspect-[16/10] bg-gray-100 cursor-pointer overflow-hidden border-b border-gray-100">
-                    {t.thumbnail_url ? (
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filtered.map((t) => (
+                <Card
+                  key={t.id}
+                  className="group relative flex flex-col h-full overflow-hidden border-0 bg-transparent shadow-none"
+                >
+                  {/* Card Wrapper for Hover Effect */}
+                  <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden transition-all duration-200 group-hover:border-gray-300">
+                    <div className="relative w-full aspect-[4/3] bg-gray-100 cursor-pointer overflow-hidden border-b border-gray-100">
+                      {t.thumbnail_url ? (
                         <img
-                        src={t.thumbnail_url}
-                        alt={t.name ?? "Template"}
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                          src={t.thumbnail_url}
+                          alt={t.name ?? "Template"}
+                          className="w-full h-full object-cover object-top"
                         />
-                    ) : (
-                        <div className="w-full h-full flex flex-col items-center justify-center text-muted-foreground/50 bg-gray-50">
-                             <div className="w-12 h-12 rounded-full bg-white shadow-sm flex items-center justify-center mb-2">
-                                <Folder className="h-6 w-6 opacity-30" />
-                             </div>
-                             <span className="text-xs font-medium uppercase tracking-wider opacity-60">No Preview</span>
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-xs text-muted-foreground/70 bg-gray-50">
+                          No preview available
                         </div>
-                    )}
-                    {/* Overlay Actions */}
-                    <div className="absolute inset-0 bg-white/0 group-hover:bg-black/20 transition-all duration-300 flex items-center justify-center gap-3 opacity-0 group-hover:opacity-100 backdrop-blur-[0px] group-hover:backdrop-blur-[2px]">
+                      )}
+                      {/* Overlay Actions */}
+                      <div className="absolute inset-x-0 bottom-0 flex justify-end gap-2 p-3 bg-gradient-to-t from-black/40 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                         <Button
-                            variant="secondary"
-                            className="h-9 px-4 bg-white/90 hover:bg-white text-gray-900 font-medium shadow-sm transform translate-y-2 group-hover:translate-y-0 transition-all duration-300 delay-[50ms]"
-                            onClick={() => router.push(`/template/${t.id}/edit`)}
+                          variant="secondary"
+                          className="h-8 px-3 bg-white/95 hover:bg-white text-xs text-gray-900 font-medium rounded-md"
+                          onClick={() => router.push(`/template/${t.id}/edit`)}
                         >
-                            <Edit className="h-3.5 w-3.5 mr-2" /> Edit
+                          Edit
                         </Button>
                         <Dialog
-                            open={confirmDeleteId === t.id}
-                            onOpenChange={(v) => !v && setConfirmDeleteId(null)}
+                          open={confirmDeleteId === t.id}
+                          onOpenChange={(v) => !v && setConfirmDeleteId(null)}
                         >
-                            <DialogTrigger asChild>
+                          <DialogTrigger asChild>
                             <Button
-                                variant="destructive"
-                                size="icon"
-                                className="h-9 w-9 shadow-sm transform translate-y-2 group-hover:translate-y-0 transition-all duration-300 delay-[100ms] bg-red-500 hover:bg-red-600 border-0"
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    setConfirmDeleteId(t.id);
-                                }}
+                              variant="destructive"
+                              className="h-8 px-3 text-xs rounded-md"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setConfirmDeleteId(t.id);
+                              }}
                             >
-                                <Trash2 className="h-3.5 w-3.5 text-white" />
+                              Delete
                             </Button>
-                            </DialogTrigger>
-                            <DialogContent className="sm:max-w-[420px]">
+                          </DialogTrigger>
+                          <DialogContent className="sm:max-w-[420px]">
                             <DialogHeader>
-                                <DialogTitle>Delete template?</DialogTitle>
+                              <DialogTitle>Delete template?</DialogTitle>
                             </DialogHeader>
                             <DialogDescription>
-                                Are you sure you want to delete <strong>{t.name}</strong>? This action cannot be undone.
+                              Are you sure you want to delete{" "}
+                              <strong>{t.name}</strong>? This action cannot be
+                              undone.
                             </DialogDescription>
                             <DialogFooter>
-                                <Button
+                              <Button
                                 variant="outline"
                                 onClick={() => setConfirmDeleteId(null)}
-                                >
+                              >
                                 Cancel
-                                </Button>
-                                <Button
+                              </Button>
+                              <Button
                                 variant="destructive"
                                 onClick={() => handleDelete(t.id)}
-                                >
+                              >
                                 Delete
-                                </Button>
+                              </Button>
                             </DialogFooter>
-                            </DialogContent>
+                          </DialogContent>
                         </Dialog>
+                      </div>
                     </div>
-                    </div>
-                    
+
                     <div className="p-5">
-                       <div className="flex items-start justify-between gap-4">
-                            <h3 className="font-semibold text-lg text-gray-900 truncate" title={t.name}>
-                                {t.name}
-                            </h3>
-                       </div>
-                       <div className="mt-2 flex items-center justify-between">
-                            <span className="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded-md">
-                                Updated {new Date().toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
-                            </span>
-                       </div>
+                      <div className="flex items-start justify-between gap-4">
+                        <h3
+                          className="font-medium text-base text-gray-900 truncate"
+                          title={t.name}
+                        >
+                          {t.name}
+                        </h3>
+                      </div>
+                      <div className="mt-2 flex items-center justify-between">
+                        <span className="text-[11px] font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded-md">
+                          Updated{" "}
+                          {new Date().toLocaleDateString(undefined, {
+                            month: "short",
+                            day: "numeric",
+                          })}
+                        </span>
+                      </div>
                     </div>
-                 </div>
+                  </div>
                 </Card>
-            ))}
+              ))}
             </div>
-        )}
-      </div>
+          )}
+        </div>
       </div>
     </div>
   );

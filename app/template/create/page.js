@@ -1,12 +1,13 @@
 "use client";
-import { useState, useEffect, useRef, useMemo, useCallback } from "react";
-import { useRouter, useParams } from "next/navigation";
+import { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 import { LazyEmailEditor } from "@/components/LazyEmailEditor";
 import { ComponentSidebar } from "@/components/componentSidebar";
 import { UnifiedEditingToolbar } from "@/components/UnifiedEditingToolbar";
 import { generateHtml } from "@/lib/export-html";
-import { Loader2, ChevronLeft, Eye, Check, AlertCircle } from "lucide-react";
+import { ChevronLeft, Eye } from "lucide-react";
 import { toast } from "sonner";
 import html2canvas from "html2canvas";
 import { InlineEditableTitle } from "@/components/InlineEditableTitle";
@@ -18,7 +19,6 @@ export default function Page() {
   const [latestComponents, setLatestComponents] = useState([]); // Track latest components from EmailEditor
   const [formData, setFormData] = useState({
     name: "",
-    subject: "",
   });
   const emailEditorRef = useRef(null);
   const [isTemplateUploading, setIsTemplateUploading] = useState(false);
@@ -29,6 +29,10 @@ export default function Page() {
     canUndo: false,
     canRedo: false,
   });
+  const [footerSettings, setFooterSettings] = useState(null);
+  const [showFooterSettings, setShowFooterSettings] = useState(false);
+  const [thumbnailFile, setThumbnailFile] = useState(null);
+  const [thumbnailPreview, setThumbnailPreview] = useState(null);
 
   const previewModalRef = useRef(null);
   // Combined save status for UI
@@ -53,6 +57,15 @@ export default function Page() {
     return () => document.removeEventListener("keydown", handleEscape);
   }, [showPreview]);
 
+  // Cleanup thumbnail preview object URL
+  useEffect(() => {
+    return () => {
+      if (thumbnailPreview) {
+        URL.revokeObjectURL(thumbnailPreview);
+      }
+    };
+  }, [thumbnailPreview]);
+
   // Sync undo/redo state with EmailEditor
   useEffect(() => {
     const syncUndoRedoState = () => {
@@ -71,6 +84,46 @@ export default function Page() {
     const interval = setInterval(syncUndoRedoState, 200);
     return () => clearInterval(interval);
   }, [components, latestComponents]);
+
+  const handleThumbnailChange = (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please select an image file");
+      return;
+    }
+
+    setThumbnailFile(file);
+
+    if (thumbnailPreview) {
+      URL.revokeObjectURL(thumbnailPreview);
+    }
+
+    const objectUrl = URL.createObjectURL(file);
+    setThumbnailPreview(objectUrl);
+  };
+
+  const getThumbnailForUpload = async () => {
+    if (thumbnailFile) {
+      return thumbnailFile;
+    }
+
+    if (!emailEditorRef.current) return null;
+    const canvasEl = emailEditorRef.current.getCanvasElement();
+    if (!canvasEl) return null;
+
+    const snapshotCanvas = await html2canvas(canvasEl, {
+      useCORS: true,
+      allowTaint: false,
+    });
+
+    const blob = await new Promise((resolve) =>
+      snapshotCanvas.toBlob(resolve, "image/png")
+    );
+
+    return blob;
+  };
 
   const handleSaveDesign = async () => {
     setIsLoading(true);
@@ -129,16 +182,6 @@ export default function Page() {
     }
   };
 
-  // Auto-save design changes (components, name)
-  useEffect(() => {
-    const componentsToSave =
-      latestComponents.length > 0 ? latestComponents : components;
-    const designData = {
-      name: formData.name || "",
-      components: componentsToSave,
-    };
-  }, [latestComponents, components, formData.name]);
-
   const handleEmailGenerated = (newComponents) => {
     setComponents(newComponents);
     setLatestComponents(newComponents);
@@ -192,23 +235,13 @@ export default function Page() {
     if (!latestComponents || latestComponents.length === 0)
       return toast.error("Cannot save empty template");
 
-    if (!emailEditorRef.current) return;
-    const canvasEl = emailEditorRef.current.getCanvasElement();
-    if (!canvasEl) return;
-    // Create snapshot
-    const snapshotCanvas = await html2canvas(canvasEl, {
-      useCORS: true,
-      allowTaint: false,
-    });
-    // Convert to binary Blob
-    const blob = await new Promise((resolve) =>
-      snapshotCanvas.toBlob(resolve, "image/png")
-    );
-
     const uploadData = new FormData();
     uploadData.append("name", formData.name);
     uploadData.append("component", JSON.stringify(latestComponents));
-    uploadData.append("thumbnail", blob);
+    const thumbnail = await getThumbnailForUpload();
+    if (thumbnail) {
+      uploadData.append("thumbnail", thumbnail);
+    }
     try {
       setIsTemplateUploading(true);
       const res = await fetch("https://api.salesmonk.ca/api/templates/", {
@@ -321,14 +354,18 @@ export default function Page() {
               onAction={handleTemplateUpload}
               mode="create"
               isTemplateUploading={isTemplateUploading}
+              thumbnailPreview={thumbnailPreview}
+              existingThumbnailUrl={null}
+              onThumbnailChange={handleThumbnailChange}
+              onPreview={openPreview}
             />
           </div>
         </div>
 
         {/* Right Canvas Area - Dark Background */}
         <div className="flex-1 relative bg-gray-100 flex flex-col h-full overflow-hidden min-w-0">
-          {/* Unified Editing Toolbar - Always visible, sticky at top */}
-          <div className="sticky top-0 z-30 flex-shrink-0">
+          {/* Unified Editing Toolbar */}
+          <div className="sticky top-0 z-30 flex-shrink-0 border-b border-gray-200 bg-gray-50/80 backdrop-blur">
             <UnifiedEditingToolbar
               selectedComponent={selectedComponent}
               onUpdate={(updatedData) => {
@@ -393,16 +430,6 @@ export default function Page() {
             />
           </div>
 
-          {/* Preview Button - Floating at Top Right */}
-          <div className="absolute top-16 right-4 z-40 pointer-events-none">
-            <Button
-              onClick={openPreview}
-              className="bg-white hover:bg-gray-50 shadow-md border border-gray-200 rounded-full text-gray-700 flex items-center gap-2 h-9 px-4 text-sm font-medium transition-all hover:shadow-lg pointer-events-auto"
-            >
-              <Eye className="h-4 w-4" />
-              Preview
-            </Button>
-          </div>
         </div>
       </div>
 

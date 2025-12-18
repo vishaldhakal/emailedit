@@ -20,6 +20,7 @@ import {
   Rocket,
   Save,
   Box,
+  Eye,
 } from "lucide-react";
 import { ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -280,6 +281,10 @@ export function ComponentSidebar({
   isTemplateUploading,
   mode,
   isTemplateUpdating,
+  thumbnailPreview,
+  existingThumbnailUrl,
+  onThumbnailChange,
+  onPreview,
 }) {
   const handleDragStart = (e, component) => {
     e.dataTransfer.setData("application/json", JSON.stringify(component));
@@ -361,27 +366,52 @@ export function ComponentSidebar({
       </div>
       {/* Action Buttons at Bottom - Same Row */}
 
-      <div className="px-2.5 pt-3 pb-4 border-t border-gray-100">
+      <div className="px-2.5 pt-2 pb-4 border-t border-gray-100 space-y-2">
+        {(thumbnailPreview || existingThumbnailUrl) && (
+          <img
+            src={thumbnailPreview || existingThumbnailUrl}
+            alt="Template thumbnail"
+            className="w-full rounded-md border border-gray-200 object-cover bg-white max-h-24"
+          />
+        )}
         <div className="flex gap-2">
-          {mode && mode == "edit" ? (
+          <label className="flex-1 inline-flex items-center justify-center rounded-md border border-gray-200 bg-white px-2 py-1.5 text-xs font-medium text-gray-700 shadow-sm hover:bg-gray-50 cursor-pointer transition-colors">
+            <span>Upload thumbnail</span>
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={onThumbnailChange}
+            />
+          </label>
+        </div>
+        <div className="flex gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            className="flex-1 flex items-center justify-center gap-1.5 h-9 px-3 text-xs font-medium rounded-md"
+            onClick={onPreview}
+          >
+            <Eye className="h-3.5 w-3.5" />
+            Preview
+          </Button>
+          {mode && mode === "edit" ? (
             <Button
               onClick={onAction}
               disabled={isTemplateUpdating}
-              variant="outline"
-              className="flex-1 flex items-center justify-center gap-2 h-9 px-4 text-sm font-medium rounded-md transition-colors border-none shadow-none bg-gray-100 hover:bg-gray-200"
+              className="flex-1 flex items-center justify-center gap-1.5 h-9 px-3 text-xs font-medium rounded-md"
             >
-              <Rocket className="h-4 w-4 text-green-400" />
-              {isTemplateUpdating ? "Updating..." : "Update Template"}
+              <Rocket className="h-4 w-4" />
+              {isTemplateUpdating ? "Updating..." : "Update"}
             </Button>
           ) : (
             <Button
               onClick={onAction}
               disabled={isTemplateUploading}
-              variant="outline"
-              className="flex-1 flex items-center justify-center gap-2 h-9 px-4 text-sm font-medium rounded-md transition-colors border-none shadow-none bg-gray-100 hover:bg-gray-200"
+              className="flex-1 flex items-center justify-center gap-1.5 h-9 px-3 text-xs font-medium rounded-md"
             >
-              <Rocket className="h-4 w-4 text-green-400" />
-              {isTemplateUploading ? "Uploading..." : "Upload Template"}
+              <Rocket className="h-4 w-4" />
+              {isTemplateUploading ? "Saving..." : "Save"}
             </Button>
           )}
         </div>
