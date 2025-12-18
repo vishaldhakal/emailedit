@@ -80,15 +80,32 @@ export const EmailCanvas = forwardRef(
 
           const clamp = (n) => Math.max(0, Math.min(96, Math.round(n)));
 
+          // SYMMETRIC PADDING: Both sides move together
+          // Left/Right handles: Dragging inward increases BOTH left and right
+          // Top/Bottom handles: Dragging inward increases BOTH top and bottom
+
           let nextPadding = { ...state.startPadding };
-          if (state.edge === "left")
-            nextPadding.left = clamp(state.startPadding.left - dx);
-          if (state.edge === "right")
-            nextPadding.right = clamp(state.startPadding.right + dx);
-          if (state.edge === "top")
-            nextPadding.top = clamp(state.startPadding.top - dy);
-          if (state.edge === "bottom")
-            nextPadding.bottom = clamp(state.startPadding.bottom + dy);
+          
+          if (state.edge === "left") {
+            const change = clamp(state.startPadding.left + dx);
+            nextPadding.left = change;
+            nextPadding.right = change;
+          }
+          if (state.edge === "right") {
+            const change = clamp(state.startPadding.right - dx);
+            nextPadding.left = change;
+            nextPadding.right = change;
+          }
+          if (state.edge === "top") {
+            const change = clamp(state.startPadding.top + dy);
+            nextPadding.top = change;
+            nextPadding.bottom = change;
+          }
+          if (state.edge === "bottom") {
+            const change = clamp(state.startPadding.bottom - dy);
+            nextPadding.top = change;
+            nextPadding.bottom = change;
+          }
 
           const comp = components.find((c) => c.id === state.componentId);
           if (!comp) return;
@@ -496,77 +513,117 @@ export const EmailCanvas = forwardRef(
                 {(() => {
                   const pad = getContainerPadding(component);
                   const isSelected = selectedComponentId === component.id;
+                  const isDraggingThis = dragStateRef.current.isActive && dragStateRef.current.componentId === component.id;
+                  
                   return (
-                    <div
-                      className={`relative group ${isSelected ? "z-30" : ""}`}
-                      style={{
-                        paddingTop: pad.top,
-                        paddingRight: pad.right,
-                        paddingBottom: pad.bottom,
-                        paddingLeft: pad.left,
-                        minHeight: 28,
-                        transition: "padding 80ms ease-out",
-                        borderRadius: 0,
-                      }}
-                    >
-                      {!isSelected && (
-                        <div className="pointer-events-none absolute inset-0 border-2 border-purple-300/60 opacity-0 group-hover:opacity-100 transition-opacity z-10" />
-                      )}
-                      {isSelected && (
-                        <div className="pointer-events-none absolute inset-0 border-2 border-purple-400/70 z-20" />
-                      )}
-                      <EmailComponent
-                        id={component.id}
-                        key={component.id}
-                        selectedComponentId={selectedComponentId}
-                        setSelectedComponentId={setSelectedComponentId}
-                        type={component.type}
-                        data={component.data}
-                        onUpdate={(updatedData) =>
-                          handleComponentUpdate(component.id, updatedData)
-                        }
-                        onSettingsClick={
-                          component.type === "footer" && onFooterSettingsClick
-                            ? () => {
-                                if (onFooterSettingsClick) {
-                                  onFooterSettingsClick();
+                    <div className={`relative ${isSelected ? "z-30" : ""}`}>
+                      {/* Padding wrapper */}
+                      <div
+                        className="relative group"
+                        style={{
+                          paddingTop: pad.top,
+                          paddingRight: pad.right,
+                          paddingBottom: pad.bottom,
+                          paddingLeft: pad.left,
+                          minHeight: 28,
+                          transition: isDraggingThis ? "none" : "padding 100ms ease-out",
+                          borderRadius: 0,
+                        }}
+                      >
+                        {/* Hover border */}
+                        {!isSelected && (
+                          <div className="pointer-events-none absolute inset-0 border-2 border-purple-300/60 opacity-0 group-hover:opacity-100 transition-opacity z-10" />
+                        )}
+                        
+                        {/* Selected border */}
+                        {isSelected && (
+                          <div className="pointer-events-none absolute inset-0 border-2 border-purple-400/70 z-20" />
+                        )}
+                        
+                        {/* Actual component */}
+                        <EmailComponent
+                          id={component.id}
+                          key={component.id}
+                          selectedComponentId={selectedComponentId}
+                          setSelectedComponentId={setSelectedComponentId}
+                          type={component.type}
+                          data={component.data}
+                          onUpdate={(updatedData) =>
+                            handleComponentUpdate(component.id, updatedData)
+                          }
+                          onSettingsClick={
+                            component.type === "footer" && onFooterSettingsClick
+                              ? () => {
+                                  if (onFooterSettingsClick) {
+                                    onFooterSettingsClick();
+                                  }
                                 }
-                              }
-                            : undefined
-                        }
-                      />
+                              : undefined
+                          }
+                        />
+                      </div>
 
+                      {/* Drag handles - outside padding wrapper, positioned absolutely to parent */}
                       {isSelected && (
                         <>
-                          {/* Side handles */}
+                          {/* Live padding indicator */}
+                          {isDraggingThis && (
+                            <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-50">
+                              <div className="bg-slate-900/95 text-white px-4 py-2 rounded-lg shadow-xl text-sm font-semibold backdrop-blur-sm border border-slate-600">
+                                {(dragStateRef.current.edge === 'left' || dragStateRef.current.edge === 'right') && 
+                                  `↔ ${pad.left}px`}
+                                {(dragStateRef.current.edge === 'top' || dragStateRef.current.edge === 'bottom') && 
+                                  `↕ ${pad.top}px`}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Left handle */}
                           <div
-                            title="Adjust left padding"
-                            onMouseDown={(e) =>
-                              startPaddingDrag(e, component, "left")
-                            }
-                            className="absolute left-[1px] top-1/2 -translate-x-1/2 -translate-y-1/2 w-2.5 h-8 rounded-full bg-purple-500/90 shadow cursor-ew-resize z-30"
+                            onMouseDown={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              startPaddingDrag(e, component, "left");
+                            }}
+                            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 w-3 h-10 bg-purple-500 hover:bg-purple-600 rounded-full shadow-md hover:shadow-lg hover:scale-125 transition-all cursor-ew-resize z-50"
+                            style={{ touchAction: 'none' }}
+                            title="Drag right to increase padding"
                           />
+                          
+                          {/* Right handle */}
                           <div
-                            title="Adjust right padding"
-                            onMouseDown={(e) =>
-                              startPaddingDrag(e, component, "right")
-                            }
-                            className="absolute right-[1px] top-1/2 translate-x-1/2 -translate-y-1/2 w-2.5 h-8 rounded-full bg-purple-500/90 shadow cursor-ew-resize z-30"
+                            onMouseDown={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              startPaddingDrag(e, component, "right");
+                            }}
+                            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 w-3 h-10 bg-purple-500 hover:bg-purple-600 rounded-full shadow-md hover:shadow-lg hover:scale-125 transition-all cursor-ew-resize z-50"
+                            style={{ touchAction: 'none' }}
+                            title="Drag left to increase padding"
                           />
-                          {/* Top/Bottom bars */}
+                          
+                          {/* Top handle */}
                           <div
-                            title="Adjust top padding"
-                            onMouseDown={(e) =>
-                              startPaddingDrag(e, component, "top")
-                            }
-                            className="absolute -top-1 left-1/2 -translate-x-1/2 w-24 h-2 rounded-full bg-purple-500/90 shadow cursor-ns-resize z-30"
+                            onMouseDown={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              startPaddingDrag(e, component, "top");
+                            }}
+                            className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-3 bg-purple-500 hover:bg-purple-600 rounded-full shadow-md hover:shadow-lg hover:scale-125 transition-all cursor-ns-resize z-50"
+                            style={{ touchAction: 'none' }}
+                            title="Drag down to increase padding"
                           />
+                          
+                          {/* Bottom handle */}
                           <div
-                            title="Adjust bottom padding"
-                            onMouseDown={(e) =>
-                              startPaddingDrag(e, component, "bottom")
-                            }
-                            className="absolute -bottom-[2px] left-1/2 -translate-x-1/2 w-24 h-2 rounded-full bg-purple-500/90 shadow cursor-ns-resize z-30"
+                            onMouseDown={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              startPaddingDrag(e, component, "bottom");
+                            }}
+                            className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 w-10 h-3 bg-purple-500 hover:bg-purple-600 rounded-full shadow-md hover:shadow-lg hover:scale-125 transition-all cursor-ns-resize z-50"
+                            style={{ touchAction: 'none' }}
+                            title="Drag up to increase padding"
                           />
                         </>
                       )}
