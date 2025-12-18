@@ -51,35 +51,46 @@ function CategoryCard({ category, onClick, isSelected }) {
     <div
       onClick={() => onClick(category)}
       className={cn(
-        "cursor-pointer group relative overflow-hidden rounded-2xl h-32 transition-all duration-300 ease-out hover:scale-[1.02]",
-        isSelected 
-          ? "ring-4 ring-offset-2 ring-blue-500 shadow-xl" 
-          : "hover:shadow-lg hover:ring-2 hover:ring-offset-2 hover:ring-gray-200",
-        `bg-gradient-to-br ${category.gradient}`
+        "cursor-pointer group relative overflow-hidden rounded-xl border transition-all duration-200 ease-out",
+        "h-28 flex flex-col justify-between p-4",
+        isSelected
+          ? "bg-gray-900 border-gray-900 shadow-md"
+          : "bg-white border-gray-200 hover:border-gray-300 hover:shadow-sm hover:scale-[1.01]"
       )}
     >
-      {/* Glassmorphism Background Elements */}
-      <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-10 -mt-10 blur-2xl transition-transform duration-500 group-hover:scale-150" />
-      <div className="absolute bottom-0 left-0 w-24 h-24 bg-black/5 rounded-full -ml-8 -mb-8 blur-xl" />
+      <div className="flex items-start justify-between">
+        <div
+          className={cn(
+            "p-2 rounded-lg transition-colors",
+            isSelected
+              ? "bg-white/10 text-white"
+              : "bg-gray-50 text-gray-900 group-hover:bg-gray-100"
+          )}
+        >
+          <Icon className="h-5 w-5" />
+        </div>
+        {isSelected && (
+           <div className="h-2 w-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]" />
+        )}
+      </div>
 
-      <div className="relative h-full flex flex-col justify-between p-5 z-10">
-        <div className="flex items-start justify-between">
-           <div className="bg-white/25 text-white p-2.5 rounded-xl backdrop-blur-md shadow-sm group-hover:bg-white/30 transition-colors">
-              <Icon className="h-6 w-6" />
-           </div>
-           {/* Optional: Add an arrow icon or badge here */}
-        </div>
-        
-        <div>
-          <h3 className="font-bold text-xl text-white tracking-tight leading-none drop-shadow-sm">
-            {category.name}
-          </h3>
-          <div className="flex items-center gap-2 mt-2">
-            <span className="text-xs font-medium text-white/90 bg-black/10 px-2 py-0.5 rounded-full backdrop-blur-sm">
-              {category.template_count} Templates
-            </span>
-          </div>
-        </div>
+      <div>
+        <h3
+          className={cn(
+            "font-semibold text-base tracking-tight leading-none",
+            isSelected ? "text-white" : "text-gray-900"
+          )}
+        >
+          {category.name}
+        </h3>
+        <p
+          className={cn(
+            "text-xs mt-1.5 font-medium",
+            isSelected ? "text-gray-400" : "text-muted-foreground"
+          )}
+        >
+          {category.template_count} Templates
+        </p>
       </div>
     </div>
   );
@@ -156,25 +167,26 @@ export default function Home() {
   };
 
   return (
-    <div className="flex flex-col pt-8 gap-8 h-screen max-w-[1400px] w-full mx-auto px-6 overflow-hidden">
+    <div className="min-h-screen bg-gray-50/30">
+        <div className="max-w-[1400px] w-full mx-auto px-6 py-12 flex flex-col gap-10">
       
       {/* Header Section */}
-      <div className="flex flex-col gap-6 w-full mx-auto pb-2 shrink-0">
-        <div className="flex justify-between items-center">
-             <div>
+      <div className="flex flex-col gap-8 w-full mx-auto">
+        <div className="flex justify-between items-end">
+             <div className="space-y-1">
                 <h1 className="text-3xl font-bold tracking-tight text-gray-900">Email Templates</h1>
-                <p className="text-muted-foreground mt-1">Manage and organize your email marketing templates</p>
+                <p className="text-muted-foreground text-lg">Manage and organize your email marketing templates</p>
              </div>
              <Link href="/template/create">
-                <Button size="lg" className="shadow-sm">
-                <Plus className="h-5 w-5 mr-2" /> Create Template
+                <Button size="lg" className="shadow-sm h-11 px-6 bg-gray-900 hover:bg-gray-800 text-white">
+                <Plus className="h-4 w-4 mr-2" /> Create Template
                 </Button>
             </Link>
         </div>
 
         {/* Categories Grid */}
         {!loading && categories.length > 0 && (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
             {categories.map((cat) => (
               <CategoryCard
                 key={cat.id}
@@ -186,61 +198,62 @@ export default function Home() {
           </div>
         )}
 
-        <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <div className="relative max-w-xl">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search across all templates..."
-              className="pl-10 h-11 border-gray-200 bg-gray-50/50 focus:bg-white transition-all"
+              placeholder="Search templates..."
+              className="pl-10 h-12 text-base border-gray-200 bg-white shadow-sm focus:ring-2 focus:ring-gray-900/10 focus:border-gray-900 transition-all rounded-xl"
             />
         </div>
       </div>
 
       {/* Content Area */}
-      <div className="flex-1 overflow-y-auto pb-10 pr-2 min-h-0">
+      <div className="min-h-[400px]">
         {loading ? (
             <div className="flex items-center justify-center h-64">
-            <div className="w-10 h-10 border-4 border-t-blue-500 border-gray-200 rounded-full animate-spin"></div>
+            <div className="w-8 h-8 border-4 border-t-gray-900 border-gray-200 rounded-full animate-spin"></div>
             </div>
         ) : filtered.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-64 text-center">
-                <div className="bg-gray-100 p-4 rounded-full mb-4">
+            <div className="flex flex-col items-center justify-center py-20 text-center border-2 border-dashed border-gray-200 rounded-2xl bg-gray-50/50">
+                <div className="bg-white p-4 rounded-full mb-4 shadow-sm ring-1 ring-gray-100">
                     <Search className="h-8 w-8 text-gray-400" />
                 </div>
-                <h3 className="text-lg font-medium text-gray-900">No templates found</h3>
-                <p className="text-muted-foreground max-w-sm mt-1">
-                    Try adjusting your search or create a new template to get started.
+                <h3 className="text-lg font-semibold text-gray-900">No templates found</h3>
+                <p className="text-muted-foreground max-w-sm mt-2">
+                    We couldn't find any templates appearing to match your search.
                 </p>
             </div>
         ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-8">
             {filtered.map((t) => (
-                <Card key={t.id} className="group relative flex flex-col h-full overflow-hidden border-gray-200 transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
-                <CardHeader className="p-0">
+                <Card key={t.id} className="group relative flex flex-col h-full overflow-hidden border-0 bg-transparent shadow-none hover:shadow-none transition-none">
+                 {/* Card Wrapper for Hover Effect */}
+                 <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden transition-all duration-300 group-hover:shadow-xl group-hover:border-gray-300/50 group-hover:-translate-y-1">
                     <div className="relative w-full aspect-[16/10] bg-gray-100 cursor-pointer overflow-hidden border-b border-gray-100">
                     {t.thumbnail_url ? (
                         <img
                         src={t.thumbnail_url}
                         alt={t.name ?? "Template"}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                         />
                     ) : (
                         <div className="w-full h-full flex flex-col items-center justify-center text-muted-foreground/50 bg-gray-50">
-                             <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mb-2">
-                                <Folder className="h-6 w-6 opacity-40" />
+                             <div className="w-12 h-12 rounded-full bg-white shadow-sm flex items-center justify-center mb-2">
+                                <Folder className="h-6 w-6 opacity-30" />
                              </div>
-                             <span className="text-xs font-medium">No Preview</span>
+                             <span className="text-xs font-medium uppercase tracking-wider opacity-60">No Preview</span>
                         </div>
                     )}
                     {/* Overlay Actions */}
-                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-2 backdrop-blur-[1px]">
+                    <div className="absolute inset-0 bg-white/0 group-hover:bg-black/20 transition-all duration-300 flex items-center justify-center gap-3 opacity-0 group-hover:opacity-100 backdrop-blur-[0px] group-hover:backdrop-blur-[2px]">
                         <Button
                             variant="secondary"
-                            className="h-10 px-4 bg-white hover:bg-white/90 text-gray-900 font-medium shadow-lg transform translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 delay-75"
+                            className="h-9 px-4 bg-white/90 hover:bg-white text-gray-900 font-medium shadow-sm transform translate-y-2 group-hover:translate-y-0 transition-all duration-300 delay-[50ms]"
                             onClick={() => router.push(`/template/${t.id}/edit`)}
                         >
-                            <Edit className="h-4 w-4 mr-2" /> Edit
+                            <Edit className="h-3.5 w-3.5 mr-2" /> Edit
                         </Button>
                         <Dialog
                             open={confirmDeleteId === t.id}
@@ -250,13 +263,13 @@ export default function Home() {
                             <Button
                                 variant="destructive"
                                 size="icon"
-                                className="h-10 w-10 shadow-lg transform translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 delay-150"
+                                className="h-9 w-9 shadow-sm transform translate-y-2 group-hover:translate-y-0 transition-all duration-300 delay-[100ms] bg-red-500 hover:bg-red-600 border-0"
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     setConfirmDeleteId(t.id);
                                 }}
                             >
-                                <Trash2 className="h-4 w-4" />
+                                <Trash2 className="h-3.5 w-3.5 text-white" />
                             </Button>
                             </DialogTrigger>
                             <DialogContent className="sm:max-w-[420px]">
@@ -284,24 +297,25 @@ export default function Home() {
                         </Dialog>
                     </div>
                     </div>
-                </CardHeader>
-                <CardContent className="p-4 flex-1 flex flex-col justify-between">
-                    <div>
-                        <CardTitle className="text-base font-semibold truncate leading-tight text-gray-900" title={t.name}>
-                        {t.name}
-                        </CardTitle>
-                        {/* If we had description */}
-                        {/* <p className="text-sm text-gray-500 mt-1 line-clamp-2">Template description here...</p> */}
+                    
+                    <div className="p-5">
+                       <div className="flex items-start justify-between gap-4">
+                            <h3 className="font-semibold text-lg text-gray-900 truncate" title={t.name}>
+                                {t.name}
+                            </h3>
+                       </div>
+                       <div className="mt-2 flex items-center justify-between">
+                            <span className="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded-md">
+                                Updated {new Date().toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                            </span>
+                       </div>
                     </div>
-                    <div className="mt-4 flex items-center justify-between text-xs text-muted-foreground pt-3 border-t border-gray-100">
-                        <span>Edited {new Date().toLocaleDateString()}</span>
-                        {/* Optional: Add badge if category available */}
-                    </div>
-                </CardContent>
+                 </div>
                 </Card>
             ))}
             </div>
         )}
+      </div>
       </div>
     </div>
   );
