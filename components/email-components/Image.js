@@ -16,6 +16,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { service_message, hookEvent } from "@/lib/serviceMessage";
+import { campaignImagesService } from "@/services/campaignImages";
 
 export const ImageComponent = memo(function ImageComponent({
   data,
@@ -31,7 +33,7 @@ export const ImageComponent = memo(function ImageComponent({
     width: 0,
     height: 0,
   });
-  // const [showImagePicker, setShowImagePicker] = useState(false);
+  const [showImagePicker, setShowImagePicker] = useState(false);
   const imageRef = useRef(null);
   const containerRef = useRef(null);
 
@@ -149,7 +151,7 @@ export const ImageComponent = memo(function ImageComponent({
           style={{ padding: isSelected ? "2px" : "0" }}
         >
           <div
-            // onClick={() => setShowImagePicker(true)}
+            onClick={() => setShowImagePicker(true)}
             className="border-2 border-dashed border-gray-300 rounded-md text-center text-gray-500 py-12 px-6 bg-gray-50/50 hover:bg-gray-100 hover:border-gray-400 hover:text-gray-600 transition-all cursor-pointer active:scale-[0.98]"
           >
             <div className="text-3xl mb-2 opacity-70">🖼️</div>
@@ -163,7 +165,7 @@ export const ImageComponent = memo(function ImageComponent({
         </div>
 
         {/* Image Picker Dialog */}
-        {/* {showImagePicker && (
+        {showImagePicker && (
           <Dialog open={showImagePicker} onOpenChange={setShowImagePicker}>
             <DialogContent className="max-w-3xl">
               <DialogHeader>
@@ -174,11 +176,10 @@ export const ImageComponent = memo(function ImageComponent({
                   onUpdate({ ...data, src: url });
                   setShowImagePicker(false);
                 }}
-                session={session}
               />
             </DialogContent>
           </Dialog>
-        )} */}
+        )}
       </>
     );
   }
@@ -265,7 +266,8 @@ export const ImageComponent = memo(function ImageComponent({
 });
 
 ImageComponent.Editor = function ImageEditor({ data, onUpdate }) {
-  const { data: session } = useSession();
+  // const { data: session } = useSession(); // Session removed
+  const session = null; // Mock session or null since we use local storage fallback
   const [formData, setFormData] = useState(data);
   const [showPicker, setShowPicker] = useState(!data?.src);
 
