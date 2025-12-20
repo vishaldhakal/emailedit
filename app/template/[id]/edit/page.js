@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -11,6 +11,8 @@ import { ChevronLeft, Eye } from "lucide-react";
 import { toast } from "sonner";
 import html2canvas from "html2canvas";
 import { InlineEditableTitle } from "@/components/InlineEditableTitle";
+
+const getDraftStorageKey = (templateId) => `template_edit_draft_${templateId}`;
 
 export default function Page() {
   const { id: templateId } = useParams();
@@ -35,16 +37,157 @@ export default function Page() {
   const [thumbnailFile, setThumbnailFile] = useState(null);
   const [thumbnailPreview, setThumbnailPreview] = useState(null);
   const [existingThumbnailUrl, setExistingThumbnailUrl] = useState("");
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
+  const [isDataLoaded, setIsDataLoaded] = useState(false);
+  const [draftRestored, setDraftRestored] = useState(false); // Track if draft was restored
+  const isNavigatingAwayRef = useRef(false);
+  const lastSavedDataRef = useRef(null); // Track last saved state to detect changes
 
   const previewModalRef = useRef(null);
-  // Combined save status for UI
-  // const combinedSaveStatus = useMemo(() => {
-  //   const isSaving = designSaveStatus.isSaving;
-  //   const lastSaved = Math.max(designSaveStatus.lastSaved);
-  //   const error = designSaveStatus.error;
 
-  //   return { isSaving, lastSaved, error };
-  // }, [designSaveStatus]);
+  // Save draft to localStorage
+  const saveDraft = useCallback(() => {
+    if (!templateId) return;
+    try {
+      const draft = {
+        components: latestComponents.length > 0 ? latestComponents : components,
+        formData,
+        footerSettings,
+        timestamp: Date.now(),
+      };
+      localStorage.setItem(getDraftStorageKey(templateId), JSON.stringify(draft));
+      setHasUnsavedChanges(true);
+    } catch (error) {
+      console.error("Failed to save draft:", error);
+    }
+  }, [templateId, latestComponents, components, formData, footerSettings]);
+
+  // Load draft from localStorage
+  const loadDraft = useCallback(() => {
+    if (!templateId) return false;
+    try {
+      const draftJson = localStorage.getItem(getDraftStorageKey(templateId));
+      if (draftJson) {
+        const draft = JSON.parse(draftJson);
+        if (draft.components && draft.components.length > 0) {
+          setComponents(draft.components);
+          setLatestComponents(draft.components);
+        }
+        if (draft.formData) {
+          setFormData(draft.formData);
+        }
+        if (draft.footerSettings) {
+          setFooterSettings(draft.footerSettings);
+        }
+        setHasUnsavedChanges(true);
+        setDraftRestored(true); // Mark that draft was restored
+        return true;
+      }
+    } catch (error) {
+      console.error("Failed to load draft:", error);
+    }
+    return false;
+  }, [templateId]);
+
+  // Clear draft from localStorage
+  const clearDraft = useCallback(() => {
+    if (!templateId) return;
+    try {
+      localStorage.removeItem(getDraftStorageKey(templateId));
+      setHasUnsavedChanges(false);
+    } catch (error) {
+      console.error("Failed to clear draft:", error);
+    }
+  }, [templateId]);
+
+  // Get thumbnail for upload (moved before autoSaveToAPI to avoid initialization error)
+  const getThumbnailForUpload = useCallback(async () => {
+    if (thumbnailFile) {
+      return thumbnailFile;
+    }
+
+    if (!emailEditorRef.current) return null;
+    const canvasEl = emailEditorRef.current.getCanvasElement();
+    if (!canvasEl) return null;
+
+    const snapshotCanvas = await html2canvas(canvasEl, {
+      useCORS: true,
+      allowTaint: false,
+    });
+
+    const blob = await new Promise((resolve) =>
+      snapshotCanvas.toBlob(resolve, "image/png")
+    );
+
+    return blob;
+  }, [thumbnailFile]);
+
+  // Auto-save to API (silent save)
+  const autoSaveToAPI = useCallback(async () => {
+    if (!templateId || !isDataLoaded) return;
+    
+    try {
+      const componentsToSave = latestComponents.length > 0 ? latestComponents : components;
+      
+      // Don't save if there are no components or name
+      if (!componentsToSave || componentsToSave.length === 0 || !formData?.name?.trim()) {
+        return;
+      }
+
+      const uploadData = new FormData();
+      uploadData.append("name", formData.name);
+      uploadData.append("component", JSON.stringify(componentsToSave));
+      
+      // Only include thumbnail if it's a new file (not existing URL)
+      if (thumbnailFile) {
+        const thumbnail = await getThumbnailForUpload();
+        if (thumbnail) {
+          uploadData.append("thumbnail", thumbnail);
+        }
+      }
+
+      // Use fetch with keepalive for better reliability during navigation
+      await fetch(`https://api.salesmonk.ca/api/templates/${templateId}/`, {
+        method: "PUT",
+        body: uploadData,
+        keepalive: true, // Helps ensure request completes even if page unloads
+      });
+
+      // Update last saved reference
+      lastSavedDataRef.current = {
+        components: componentsToSave,
+        formData: { ...formData },
+      };
+      
+      setHasUnsavedChanges(false);
+      setDraftRestored(false); // Clear draft restored flag after successful save
+    } catch (error) {
+      console.error("Auto-save failed:", error);
+      // Don't show error toast for auto-save failures
+    }
+  }, [templateId, latestComponents, components, formData, thumbnailFile, isDataLoaded, getThumbnailForUpload]);
+
+  // Check if there are meaningful unsaved changes
+  const hasMeaningfulChanges = useCallback(() => {
+    const hasComponents = (latestComponents.length > 0 || components.length > 0);
+    const hasName = formData.name && formData.name.trim();
+    
+    // If draft was restored, always consider it as having changes that need to be saved
+    if (draftRestored) {
+      return hasComponents || hasName;
+    }
+    
+    // Compare with last saved state
+    if (lastSavedDataRef.current) {
+      const componentsChanged = JSON.stringify(latestComponents.length > 0 ? latestComponents : components) !== 
+                                JSON.stringify(lastSavedDataRef.current.components);
+      const nameChanged = formData.name !== lastSavedDataRef.current.formData.name;
+      return (hasComponents || hasName) && (componentsChanged || nameChanged);
+    }
+    
+    return hasComponents || hasName;
+  }, [latestComponents, components, formData.name, draftRestored]);
 
   useEffect(() => {
     if (!templateId) return;
@@ -54,21 +197,181 @@ export default function Page() {
           `https://api.salesmonk.ca/api/templates/${templateId}/`
         );
         const data = await res.json();
-        setComponents(data.component || []);
-        setFormData((p) => ({
-          ...p,
+        const loadedComponents = data.component || [];
+        const loadedFormData = {
           name: data.name || "",
           subject: data.subject || "",
-        }));
+        };
+        
+        setComponents(loadedComponents);
+        setLatestComponents(loadedComponents);
+        setFormData(loadedFormData);
+        
+        // Store initial state for comparison
+        lastSavedDataRef.current = {
+          components: loadedComponents,
+          formData: { ...loadedFormData },
+        };
+        
         if (data.thumbnail) {
           setExistingThumbnailUrl(data.thumbnail);
+        }
+        
+        setIsDataLoaded(true);
+        
+        // Try to load draft after initial data is loaded
+        const hasDraft = loadDraft();
+        if (hasDraft) {
+          toast.info("Draft restored", {
+            description: "Your previous unsaved changes have been restored. They will be saved to the server when you navigate away.",
+          });
         }
       } catch (error) {
         toast.error("Error fetching template");
       }
     };
     fetchTemplete();
-  }, [templateId]);
+  }, [templateId, loadDraft]);
+
+  // Auto-save draft to localStorage when components or formData changes
+  useEffect(() => {
+    if (isInitialLoad || !isDataLoaded) {
+      if (isDataLoaded) {
+        setIsInitialLoad(false);
+      }
+      return;
+    }
+
+    // Debounce auto-save
+    const timeoutId = setTimeout(() => {
+      if (hasMeaningfulChanges()) {
+        saveDraft();
+      } else {
+        // Clear draft if there's nothing meaningful
+        clearDraft();
+      }
+    }, 1000); // Save after 1 second of inactivity
+
+    return () => clearTimeout(timeoutId);
+  }, [latestComponents, components, formData, isInitialLoad, isDataLoaded, saveDraft, hasMeaningfulChanges, clearDraft]);
+
+  // Auto-save to API periodically (every 30 seconds if there are changes)
+  useEffect(() => {
+    if (!isDataLoaded || !hasMeaningfulChanges()) return;
+
+    const intervalId = setInterval(() => {
+      autoSaveToAPI();
+    }, 30000); // Auto-save to API every 30 seconds
+
+    return () => clearInterval(intervalId);
+  }, [isDataLoaded, hasMeaningfulChanges, autoSaveToAPI]);
+
+  // Auto-save restored draft to API after a short delay
+  useEffect(() => {
+    if (draftRestored && isDataLoaded) {
+      // Wait a bit for state to settle, then save to API
+      const timeoutId = setTimeout(() => {
+        autoSaveToAPI().catch(() => {
+          // Silently fail - will retry on navigation or periodic save
+        });
+      }, 2000);
+
+      return () => clearTimeout(timeoutId);
+    }
+  }, [draftRestored, isDataLoaded, autoSaveToAPI]);
+
+  // Save draft when tab becomes hidden (user switching tabs or closing)
+  useEffect(() => {
+    const handleVisibilityChange = async () => {
+      if (document.hidden && hasMeaningfulChanges() && !isNavigatingAwayRef.current && isDataLoaded) {
+        // Save draft when tab becomes hidden
+        saveDraft();
+        // Also try to save to API (don't await to avoid blocking)
+        autoSaveToAPI().catch(() => {
+          // Silently fail - draft is already saved locally
+        });
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [latestComponents, components, formData, saveDraft, hasMeaningfulChanges, autoSaveToAPI, isDataLoaded]);
+
+  // Warn user before page refresh/close if there are unsaved changes
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      if (hasMeaningfulChanges() && !isNavigatingAwayRef.current && isDataLoaded) {
+        // Save draft one more time before leaving
+        saveDraft();
+        // Try to save to API (use sendBeacon or fetch with keepalive for better reliability)
+        // Note: We can't await here, but autoSaveToAPI already uses keepalive
+        autoSaveToAPI().catch(() => {
+          // Silently fail - draft is already saved locally
+        });
+        e.preventDefault();
+        e.returnValue = ""; // Chrome requires returnValue to be set
+        return ""; // For older browsers
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [latestComponents, components, formData, saveDraft, hasMeaningfulChanges, autoSaveToAPI, isDataLoaded]);
+
+  // Handle browser back button - auto-save before navigating
+  useEffect(() => {
+    const handleRouteChange = async () => {
+      if (hasMeaningfulChanges() && !isNavigatingAwayRef.current && isDataLoaded) {
+        isNavigatingAwayRef.current = true;
+        saveDraft();
+        // Ensure API save completes
+        try {
+          await autoSaveToAPI();
+          toast.info("Changes saved automatically", {
+            description: "Your updates have been saved to the server",
+          });
+        } catch (error) {
+          toast.info("Draft saved locally", {
+            description: "Your changes have been saved as a draft",
+          });
+        }
+      }
+    };
+
+    // Listen to router events
+    const handlePopState = () => {
+      handleRouteChange();
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+    };
+  }, [latestComponents, components, formData, saveDraft, hasMeaningfulChanges, autoSaveToAPI, isDataLoaded]);
+
+  // Handle manual navigation (back button click)
+  const handleBackClick = useCallback(async () => {
+    if (hasMeaningfulChanges() && isDataLoaded) {
+      isNavigatingAwayRef.current = true;
+      saveDraft();
+      // Ensure API save completes before navigating
+      try {
+        await autoSaveToAPI();
+        toast.info("Changes saved automatically", {
+          description: "Your updates have been saved to the server",
+        });
+      } catch (error) {
+        toast.info("Draft saved locally", {
+          description: "Your changes have been saved as a draft",
+        });
+      }
+    }
+    router.push("/");
+  }, [latestComponents, components, formData, saveDraft, router, hasMeaningfulChanges, autoSaveToAPI, isDataLoaded]);
 
   // Handle ESC key to close preview
   useEffect(() => {
@@ -128,27 +431,6 @@ export default function Page() {
 
     const objectUrl = URL.createObjectURL(file);
     setThumbnailPreview(objectUrl);
-  };
-
-  const getThumbnailForUpload = async () => {
-    if (thumbnailFile) {
-      return thumbnailFile;
-    }
-
-    if (!emailEditorRef.current) return null;
-    const canvasEl = emailEditorRef.current.getCanvasElement();
-    if (!canvasEl) return null;
-
-    const snapshotCanvas = await html2canvas(canvasEl, {
-      useCORS: true,
-      allowTaint: false,
-    });
-
-    const blob = await new Promise((resolve) =>
-      snapshotCanvas.toBlob(resolve, "image/png")
-    );
-
-    return blob;
   };
 
   const handleSaveDesign = async () => {
@@ -274,6 +556,17 @@ export default function Page() {
 
       if (!res.ok) throw new Error("Failed to update template");
 
+      // Update last saved reference
+      const componentsToSave = latestComponents;
+      lastSavedDataRef.current = {
+        components: componentsToSave,
+        formData: { ...formData },
+      };
+
+      // Clear draft after successful save
+      clearDraft();
+      setDraftRestored(false); // Clear draft restored flag
+      
       toast.success("Template updated");
       // Keep user on the same page after update
       setLatestComponents(componentsToSave);
@@ -296,7 +589,7 @@ export default function Page() {
               <div className="flex items-center gap-3">
                 <Button
                   variant="ghost"
-                  onClick={() => router.push(`/`)}
+                  onClick={handleBackClick}
                   className="p-2 hover:bg-gray-50 rounded-full transition-colors"
                 >
                   <ChevronLeft className="h-5 w-5 text-gray-700" />

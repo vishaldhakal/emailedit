@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -11,6 +11,8 @@ import { ChevronLeft, Eye } from "lucide-react";
 import { toast } from "sonner";
 import html2canvas from "html2canvas";
 import { InlineEditableTitle } from "@/components/InlineEditableTitle";
+
+const DRAFT_STORAGE_KEY = "template_create_draft";
 
 export default function Page() {
   const router = useRouter();
@@ -33,16 +35,167 @@ export default function Page() {
   const [showFooterSettings, setShowFooterSettings] = useState(false);
   const [thumbnailFile, setThumbnailFile] = useState(null);
   const [thumbnailPreview, setThumbnailPreview] = useState(null);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
+  const isNavigatingAwayRef = useRef(false);
 
   const previewModalRef = useRef(null);
-  // Combined save status for UI
-  // const combinedSaveStatus = useMemo(() => {
-  //   const isSaving = designSaveStatus.isSaving;
-  //   const lastSaved = Math.max(designSaveStatus.lastSaved);
-  //   const error = designSaveStatus.error;
 
-  //   return { isSaving, lastSaved, error };
-  // }, [designSaveStatus]);
+  // Save draft to localStorage
+  const saveDraft = useCallback(() => {
+    try {
+      const draft = {
+        components: latestComponents.length > 0 ? latestComponents : components,
+        formData,
+        footerSettings,
+        timestamp: Date.now(),
+      };
+      localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draft));
+      setHasUnsavedChanges(true);
+    } catch (error) {
+      console.error("Failed to save draft:", error);
+    }
+  }, [latestComponents, components, formData, footerSettings]);
+
+  // Load draft from localStorage
+  const loadDraft = useCallback(() => {
+    try {
+      const draftJson = localStorage.getItem(DRAFT_STORAGE_KEY);
+      if (draftJson) {
+        const draft = JSON.parse(draftJson);
+        if (draft.components && draft.components.length > 0) {
+          setComponents(draft.components);
+          setLatestComponents(draft.components);
+        }
+        if (draft.formData) {
+          setFormData(draft.formData);
+        }
+        if (draft.footerSettings) {
+          setFooterSettings(draft.footerSettings);
+        }
+        setHasUnsavedChanges(true);
+        return true;
+      }
+    } catch (error) {
+      console.error("Failed to load draft:", error);
+    }
+    return false;
+  }, []);
+
+  // Clear draft from localStorage
+  const clearDraft = useCallback(() => {
+    try {
+      localStorage.removeItem(DRAFT_STORAGE_KEY);
+      setHasUnsavedChanges(false);
+    } catch (error) {
+      console.error("Failed to clear draft:", error);
+    }
+  }, []);
+
+  // Check if there are meaningful unsaved changes
+  const hasMeaningfulChanges = useCallback(() => {
+    const hasComponents = (latestComponents.length > 0 || components.length > 0);
+    const hasName = formData.name && formData.name.trim();
+    return hasComponents || hasName;
+  }, [latestComponents, components, formData.name]);
+
+  // Auto-save draft when components or formData changes
+  useEffect(() => {
+    if (isInitialLoad) {
+      setIsInitialLoad(false);
+      return;
+    }
+
+    // Debounce auto-save
+    const timeoutId = setTimeout(() => {
+      if (hasMeaningfulChanges()) {
+        saveDraft();
+      } else {
+        // Clear draft if there's nothing meaningful
+        clearDraft();
+      }
+    }, 1000); // Save after 1 second of inactivity
+
+    return () => clearTimeout(timeoutId);
+  }, [latestComponents, components, formData, isInitialLoad, saveDraft, hasMeaningfulChanges, clearDraft]);
+
+  // Load draft on mount
+  useEffect(() => {
+    const hasDraft = loadDraft();
+    if (hasDraft) {
+      toast.info("Draft restored", {
+        description: "Your previous work has been restored",
+      });
+    }
+  }, [loadDraft]);
+
+  // Save draft when tab becomes hidden (user switching tabs or closing)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.hidden && hasMeaningfulChanges() && !isNavigatingAwayRef.current) {
+        // Save draft when tab becomes hidden
+        saveDraft();
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [latestComponents, components, formData, saveDraft, hasMeaningfulChanges]);
+
+  // Warn user before page refresh/close if there are unsaved changes
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      if (hasMeaningfulChanges() && !isNavigatingAwayRef.current) {
+        // Save draft one more time before leaving
+        saveDraft();
+        e.preventDefault();
+        e.returnValue = ""; // Chrome requires returnValue to be set
+        return ""; // For older browsers
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [latestComponents, components, formData, saveDraft, hasMeaningfulChanges]);
+
+  // Handle browser back button - auto-save before navigating
+  useEffect(() => {
+    const handleRouteChange = () => {
+      if (hasMeaningfulChanges() && !isNavigatingAwayRef.current) {
+        isNavigatingAwayRef.current = true;
+        saveDraft();
+        toast.info("Draft saved automatically", {
+          description: "Your work has been saved as a draft",
+        });
+      }
+    };
+
+    // Listen to router events
+    const handlePopState = () => {
+      handleRouteChange();
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+    };
+  }, [latestComponents, components, formData, saveDraft, hasMeaningfulChanges]);
+
+  // Handle manual navigation (back button click)
+  const handleBackClick = useCallback(() => {
+    if (hasMeaningfulChanges()) {
+      isNavigatingAwayRef.current = true;
+      saveDraft();
+      toast.info("Draft saved automatically", {
+        description: "Your work has been saved as a draft",
+      });
+    }
+    router.push("/");
+  }, [latestComponents, components, formData, saveDraft, router, hasMeaningfulChanges]);
 
   // Handle ESC key to close preview
   useEffect(() => {
@@ -251,6 +404,10 @@ export default function Page() {
 
       if (!res.ok) throw new Error("Failed to upload template");
 
+      // Clear draft after successful save
+      clearDraft();
+      isNavigatingAwayRef.current = true;
+      
       toast.success("Template uploaded");
       setLatestComponents([]);
       setComponents([]);
@@ -273,7 +430,7 @@ export default function Page() {
               <div className="flex items-center gap-3">
                 <Button
                   variant="ghost"
-                  onClick={() => router.push(`/`)}
+                  onClick={handleBackClick}
                   className="p-2 hover:bg-gray-50 rounded-full transition-colors"
                 >
                   <ChevronLeft className="h-5 w-5 text-gray-700" />
